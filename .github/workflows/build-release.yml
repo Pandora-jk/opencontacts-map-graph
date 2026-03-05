@@ -31,7 +31,11 @@ jobs:
       - name: Get version from build.gradle.kts
         id: version
         run: |
-          VERSION=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts || echo "0.0.1")
+          VERSION=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts || echo "0.1.0")
+          if ! [[ "$VERSION" =~ ^0\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Version '$VERSION' is invalid. Expected semantic version in 0.x.y format."
+            exit 1
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Found version: $VERSION"
 
@@ -49,15 +53,24 @@ jobs:
           fi
 
       - name: Build Debug APK
-        run: gradle assembleDebug --no-daemon
-        continue-on-error: true
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Find APK file
         id: apk
         run: |
-          APK=$(find app/build/outputs/apk -name "*.apk" -type f | head -1)
+          EXPECTED_APK="app/build/outputs/apk/debug/app-debug.apk"
+
+          if [ -f "$EXPECTED_APK" ]; then
+            APK="$EXPECTED_APK"
+          else
+            APK=$(find app/build -name "*.apk" -type f | head -1 || true)
+          fi
+
           if [ -z "$APK" ]; then
-            echo "No APK found"
+            echo "No APK found. Dumping build output for diagnostics:"
+            ls -la app/build/outputs || true
+            ls -la app/build/outputs/apk || true
+            find app/build -type f | head -100 || true
             exit 1
           fi
           echo "apk_path=$APK" >> $GITHUB_OUTPUT
