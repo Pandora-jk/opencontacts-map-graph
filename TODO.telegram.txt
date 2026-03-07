@@ -1,0 +1,14 @@
+📋 *TODO Items - Auto-Synced*
+
+_Generated: 2026-03-04 03:00:21 AEDT_
+
+
+
+✅ *Action Items for Jim*
+  ❌ Review TODO/FIXME comments in scripts
+
+✅ *Script Improvements*
+  - Replace hardcoded paths with $HOME or environment variables
+  - Add error handling to scripts without try/except or set -e
+
+_🔮 Auto-synced by Pandora's self-improvement system_

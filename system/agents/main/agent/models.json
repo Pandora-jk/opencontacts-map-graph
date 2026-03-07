@@ -1,0 +1,485 @@
+{
+  "providers": {
+    "groq": {
+      "baseUrl": "https://api.groq.com/openai/v1",
+      "apiKey": "${OPENCLAW_GROQ_API_KEY}",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "llama-3.3-70b-versatile",
+          "name": "Llama 3.3 70B Versatile",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        }
+      ]
+    },
+    "nvidia": {
+      "baseUrl": "https://integrate.api.nvidia.com/v1",
+      "apiKey": "${OPENCLAW_NVIDIA_API_KEY}",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "moonshotai/kimi-k2-thinking",
+          "name": "Kimi K2 Thinking",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 256000,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        },
+        {
+          "id": "moonshotai/kimi-k2-instruct",
+          "name": "Kimi K2 Instruct",
+          "reasoning": false,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 256000,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        },
+        {
+          "id": "qwen/qwen3.5-397b-a17b",
+          "name": "Qwen3.5 397B",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        },
+        {
+          "id": "qwen/qwen3-235b-a22b",
+          "name": "Qwen3 235B A22B",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        },
+        {
+          "id": "z-ai/glm5",
+          "name": "GLM-5",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        },
+        {
+          "id": "openai/gpt-oss-120b",
+          "name": "GPT OSS 120B",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        },
+        {
+          "id": "nvidia/llama-3.1-nemotron-ultra-253b-v1",
+          "name": "Nemotron Ultra 253B",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 128000,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        },
+        {
+          "id": "nvidia/llama-3.3-nemotron-super-49b-v1.5",
+          "name": "Nemotron Super 49B",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 128000,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        },
+        {
+          "id": "moonshotai/kimi-k2.5",
+          "name": "Kimi K2.5",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 256000,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        },
+        {
+          "id": "meta/llama-3.3-70b-instruct",
+          "name": "Llama 3.3 70B Instruct",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 128000,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        },
+        {
+          "id": "mistralai/devstral-2-123b-instruct-2512",
+          "name": "Devstral 2 123B",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 256000,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        }
+      ]
+    },
+    "gemini": {
+      "baseUrl": "https://generativelanguage.googleapis.com/v1beta/models",
+      "apiKey": "${OPENCLAW_GEMINI_API_KEY}",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "gemini-2.0-flash",
+          "name": "Gemini 2.0 Flash",
+          "reasoning": false,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 1048576,
+          "maxTokens": 8192,
+          "api": "openai-completions"
+        },
+        {
+          "id": "gemini-1.5-flash",
+          "name": "Gemini 1.5 Flash",
+          "reasoning": false,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 1048576,
+          "maxTokens": 8192,
+          "api": "openai-completions"
+        }
+      ]
+    },
+    "cerebras": {
+      "baseUrl": "https://api.cerebras.ai/v1",
+      "apiKey": "${OPENCLAW_CEREBRAS_API_KEY}",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "qwen-3-235b-a22b-instruct-2507",
+          "name": "Qwen3 235B A22B",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 131072,
+          "maxTokens": 16384,
+          "api": "openai-completions"
+        },
+        {
+          "id": "gpt-oss-120b",
+          "name": "GPT OSS 120B",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 131072,
+          "maxTokens": 8192,
+          "api": "openai-completions"
+        }
+      ]
+    },
+    "openrouter": {
+      "baseUrl": "https://openrouter.ai/api/v1",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "auto",
+          "name": "OpenRouter Auto",
+          "reasoning": false,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 200000,
+          "maxTokens": 8192
+        }
+      ],
+      "apiKey": "${OPENCLAW_OPENROUTER_API_KEY}"
+    },
+    "zai": {
+      "baseUrl": "https://api.z.ai/api/paas/v4",
+      "apiKey": "${OPENCLAW_ZAI_API_KEY}",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "glm-4.7-Flash",
+          "name": "GLM-4.7 Flash",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 200000,
+          "maxTokens": 131072,
+          "api": "openai-completions"
+        },
+        {
+          "id": "glm-4.5-flash",
+          "name": "GLM-4.5 Flash",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 131072,
+          "maxTokens": 131072,
+          "api": "openai-completions"
+        },
+        {
+          "id": "glm-4.6v-flash",
+          "name": "GLM-4.6V Flash",
+          "reasoning": false,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 131072,
+          "maxTokens": 131072,
+          "api": "openai-completions"
+        },
+        {
+          "id": "glm-5",
+          "name": "GLM-5",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 200000,
+          "maxTokens": 131072,
+          "api": "openai-completions"
+        }
+      ]
+    },
+    "chutes": {
+      "baseUrl": "https://api.chutes.ai/v1",
+      "apiKey": "${OPENCLAW_CHUTES_API_KEY}",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "deepseek-ai/DeepSeek-R1-0528-TEE",
+          "name": "DeepSeek R1 0528",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        },
+        {
+          "id": "NousResearch/Hermes-4-405B-FP8-TEE",
+          "name": "Hermes 4 405B",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        },
+        {
+          "id": "Qwen/Qwen3-235B-A22B-Instruct-2507-TEE",
+          "name": "Qwen3 235B A22B",
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        },
+        {
+          "id": "deepseek-ai/DeepSeek-V3.1-Terminus-TEE",
+          "name": "DeepSeek V3.1 Terminus",
+          "reasoning": false,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "api": "openai-completions"
+        }
+      ]
+    }
+  }
+}
