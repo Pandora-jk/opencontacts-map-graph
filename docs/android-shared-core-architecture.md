@@ -17,8 +17,8 @@ This document defines the shared-core API layer for the map ecosystem and the ru
   - Responsibility: media metadata indexing contract only
   - Forbidden dependencies: Android APIs, `:app`, `:core-db`, `:core-map`, `:core-sync`
 - `:core-sync`
-  - Public API: `SyncDirection`, `SyncTask`, `SharedSyncScheduler`, `SharedSyncSchedulers.inMemory()`
-  - Responsibility: background sync scheduling contract only
+  - Public API: `SyncDirection`, `SyncNetworkPolicy`, `SyncConstraints`, `SyncRetryPolicy`, `SyncRuntimeState`, `SyncTask`, `SyncScheduleOutcome`, `SyncScheduleResult`, `SharedSyncScheduler`, `SharedSyncSchedulers.inMemory()`
+  - Responsibility: background sync scheduling contract, duplicate prevention, and retry policy semantics
   - Forbidden dependencies: Android APIs, `:app`, `:core-db`, `:core-map`, `:core-media`
 
 ## Enforcement Rules
@@ -40,6 +40,7 @@ This document defines the shared-core API layer for the map ecosystem and the ru
 - `SharedCoreRegistry` receives only interfaces from `SharedGeoStores`, `SharedTileCaches`, `SharedMediaIndexes`, and `SharedSyncSchedulers`.
 - `SharedCoreRegistry.tileCache` now composes the shared manager instance so contacts and gallery flows can reuse one LRU cache and avoid duplicate downloads for the same tile key.
 - Future Room, disk-cache, media-index, and WorkManager adapters replace the internal in-memory implementations without changing the API surface.
+- WorkManager-specific adapters in `:app` must translate Android constraints/backoff settings into the shared `SyncConstraints` and `SyncRetryPolicy` contract rather than inventing a second scheduler surface.
 
 ## Shared Tile Cache Manager Rules
 
@@ -47,6 +48,14 @@ This document defines the shared-core API layer for the map ecosystem and the ru
 - `SharedTileCacheManager.readOffline(...)` never invokes network code, so offline map screens can deterministically reuse cached tiles.
 - `SharedTileCaches.manager(maxEntries)` uses LRU eviction so the least recently used tile is dropped first when the budget is exceeded.
 - Cache stats (`hits`, `misses`, `evictions`) are part of the contract so both apps can report duplicate-download avoidance consistently.
+
+## Shared Sync Scheduler Rules
+
+- `SyncTask.uniqueName` is the cross-app dedupe key; scheduling the same unique name replaces pending work and keeps the currently running task.
+- `SharedSyncScheduler.dueTasks(...)` filters on `SyncRuntimeState` so battery, charging, and network gating are decided consistently before app-specific workers run.
+- `markRunning(...)` is the duplicate-execution guard; once claimed, a task does not appear in `dueTasks(...)` again until it succeeds or is rescheduled.
+- `markFailure(...)` applies the shared retry/backoff policy and drops tasks only after `SyncRetryPolicy.maxAttempts` is exhausted.
+- WorkManager jobs in contacts/gallery should use `SyncTask.uniqueName` as the unique work name so Android and shared-core dedupe stay aligned.
 
 ## Contract Test Coverage
 

@@ -12,19 +12,114 @@ import java.nio.file.Paths
 
 class CoreSyncContractsTest {
     @Test
-    fun `scheduler returns due tasks and supports cancellation`() {
+    fun `scheduler deduplicates by unique name and prevents duplicate claims`() {
         val scheduler = SharedSyncSchedulers.inMemory()
-        val due = SyncTask("1", "geojson", "room", SyncDirection.IMPORT, 100L)
-        val later = SyncTask("2", "room", "kml", SyncDirection.EXPORT, 300L)
+        val first = SyncTask(
+            taskId = "1",
+            uniqueName = "contacts-import",
+            source = "geojson",
+            target = "room",
+            direction = SyncDirection.IMPORT,
+            scheduledAtEpochMs = 100L,
+        )
+        val replacement = SyncTask(
+            taskId = "2",
+            uniqueName = "contacts-import",
+            source = "geojson",
+            target = "room",
+            direction = SyncDirection.IMPORT,
+            scheduledAtEpochMs = 150L,
+        )
 
-        scheduler.schedule(due)
-        scheduler.schedule(later)
+        assertEquals(SyncScheduleOutcome.ADDED, scheduler.schedule(first).outcome)
+        assertEquals(SyncScheduleOutcome.REPLACED, scheduler.schedule(replacement).outcome)
+        assertEquals(listOf(replacement), scheduler.dueTasks(nowEpochMs = 150L))
 
-        assertEquals(listOf(due), scheduler.dueTasks(nowEpochMs = 150L))
-
-        scheduler.cancel("1")
-
+        assertEquals(true, scheduler.markRunning("2"))
+        assertEquals(false, scheduler.markRunning("2"))
         assertEquals(emptyList<SyncTask>(), scheduler.dueTasks(nowEpochMs = 150L))
+
+        scheduler.markSuccess("2")
+        assertEquals(emptyList<SyncTask>(), scheduler.dueTasks(nowEpochMs = 150L))
+    }
+
+    @Test
+    fun `scheduler applies retry backoff and drops exhausted work`() {
+        val scheduler = SharedSyncSchedulers.inMemory()
+        val task = SyncTask(
+            taskId = "1",
+            uniqueName = "gallery-export",
+            source = "room",
+            target = "kml",
+            direction = SyncDirection.EXPORT,
+            scheduledAtEpochMs = 100L,
+            retryPolicy = SyncRetryPolicy(
+                maxAttempts = 3,
+                initialBackoffMs = 50L,
+                backoffMultiplier = 2,
+            ),
+        )
+
+        scheduler.schedule(task)
+        assertEquals(true, scheduler.markRunning("1"))
+
+        val retryOne = scheduler.markFailure(taskId = "1", failedAtEpochMs = 200L)
+        assertEquals(250L, retryOne!!.scheduledAtEpochMs)
+        assertEquals(1, retryOne.attemptCount)
+        assertEquals(emptyList<SyncTask>(), scheduler.dueTasks(nowEpochMs = 249L))
+        assertEquals(listOf(retryOne), scheduler.dueTasks(nowEpochMs = 250L))
+
+        assertEquals(true, scheduler.markRunning("1"))
+        val retryTwo = scheduler.markFailure(taskId = "1", failedAtEpochMs = 300L)
+        assertEquals(400L, retryTwo!!.scheduledAtEpochMs)
+        assertEquals(2, retryTwo.attemptCount)
+
+        assertEquals(true, scheduler.markRunning("1"))
+        assertEquals(null, scheduler.markFailure(taskId = "1", failedAtEpochMs = 500L))
+        assertEquals(emptyList<SyncTask>(), scheduler.dueTasks(nowEpochMs = 1_000L))
+    }
+
+    @Test
+    fun `scheduler honors runtime constraints`() {
+        val scheduler = SharedSyncSchedulers.inMemory()
+        val constrained = SyncTask(
+            taskId = "1",
+            uniqueName = "shared-sync",
+            source = "geojson",
+            target = "room",
+            direction = SyncDirection.IMPORT,
+            scheduledAtEpochMs = 100L,
+            constraints = SyncConstraints(
+                requiresCharging = true,
+                requiresBatteryNotLow = true,
+                requiredNetwork = SyncNetworkPolicy.UNMETERED,
+            ),
+        )
+
+        scheduler.schedule(constrained)
+
+        assertEquals(
+            emptyList<SyncTask>(),
+            scheduler.dueTasks(
+                nowEpochMs = 100L,
+                runtimeState = SyncRuntimeState(
+                    isCharging = false,
+                    isBatteryNotLow = true,
+                    availableNetwork = SyncNetworkPolicy.UNMETERED,
+                ),
+            ),
+        )
+        assertEquals(
+            listOf(constrained),
+            scheduler.dueTasks(
+                nowEpochMs = 100L,
+                runtimeState = SyncRuntimeState(
+                    isCharging = true,
+                    isBatteryNotLow = true,
+                    availableNetwork = SyncNetworkPolicy.UNMETERED,
+                ),
+            ),
+        )
     }
 
     @Test
@@ -32,12 +127,40 @@ class CoreSyncContractsTest {
         assertEquals(
             listOf(
                 "taskId:java.lang.String",
+                "uniqueName:java.lang.String",
                 "source:java.lang.String",
                 "target:java.lang.String",
                 "direction:com.opencontacts.shared.coresync.SyncDirection",
                 "scheduledAtEpochMs:long",
+                "constraints:com.opencontacts.shared.coresync.SyncConstraints",
+                "retryPolicy:com.opencontacts.shared.coresync.SyncRetryPolicy",
+                "attemptCount:int",
             ),
             constructorSignature(SyncTask::class),
+        )
+        assertEquals(
+            listOf(
+                "requiresCharging:boolean",
+                "requiresBatteryNotLow:boolean",
+                "requiredNetwork:com.opencontacts.shared.coresync.SyncNetworkPolicy",
+            ),
+            constructorSignature(SyncConstraints::class),
+        )
+        assertEquals(
+            listOf(
+                "maxAttempts:int",
+                "initialBackoffMs:long",
+                "backoffMultiplier:int",
+            ),
+            constructorSignature(SyncRetryPolicy::class),
+        )
+        assertEquals(
+            listOf(
+                "isCharging:boolean",
+                "isBatteryNotLow:boolean",
+                "availableNetwork:com.opencontacts.shared.coresync.SyncNetworkPolicy",
+            ),
+            constructorSignature(SyncRuntimeState::class),
         )
     }
 
