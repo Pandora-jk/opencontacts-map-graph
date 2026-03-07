@@ -9,8 +9,8 @@ This document defines the shared-core API layer for the map ecosystem and the ru
   - Responsibility: canonical geo storage DTOs and repository contract
   - Forbidden dependencies: Android APIs, `:app`, `:core-map`, `:core-media`, `:core-sync`
 - `:core-map`
-  - Public API: `MapTileKey`, `MapTilePayload`, `SharedTileCache`, `SharedTileCaches.inMemory()`
-  - Responsibility: map tile caching contract only
+  - Public API: `MapTileKey`, `MapTilePayload`, `MapTileCacheStats`, `MapTileLoadResult`, `MapTileSource`, `SharedTileCache`, `SharedTileCacheManager`, `SharedTileCaches.inMemory()`, `SharedTileCaches.manager()`
+  - Responsibility: shared map tile cache contract, offline reads, and cache-manager orchestration
   - Forbidden dependencies: Android APIs, `:app`, `:core-db`, `:core-media`, `:core-sync`
 - `:core-media`
   - Public API: `MediaGeoPoint`, `MediaAsset`, `SharedMediaIndex`, `SharedMediaIndexes.inMemory()`
@@ -38,7 +38,15 @@ This document defines the shared-core API layer for the map ecosystem and the ru
 
 - `:app` depends on all four core modules and builds a `SharedCoreRegistry`.
 - `SharedCoreRegistry` receives only interfaces from `SharedGeoStores`, `SharedTileCaches`, `SharedMediaIndexes`, and `SharedSyncSchedulers`.
+- `SharedCoreRegistry.tileCache` now composes the shared manager instance so contacts and gallery flows can reuse one LRU cache and avoid duplicate downloads for the same tile key.
 - Future Room, disk-cache, media-index, and WorkManager adapters replace the internal in-memory implementations without changing the API surface.
+
+## Shared Tile Cache Manager Rules
+
+- `SharedTileCacheManager.load(...)` checks the cache first and only hits the remote fetcher on a miss.
+- `SharedTileCacheManager.readOffline(...)` never invokes network code, so offline map screens can deterministically reuse cached tiles.
+- `SharedTileCaches.manager(maxEntries)` uses LRU eviction so the least recently used tile is dropped first when the budget is exceeded.
+- Cache stats (`hits`, `misses`, `evictions`) are part of the contract so both apps can report duplicate-download avoidance consistently.
 
 ## Contract Test Coverage
 
