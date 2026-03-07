@@ -1,6 +1,6 @@
 package com.opencontacts.shared.coredb
 
-data class GeoRecord(
+public data class GeoRecord(
     val recordId: String,
     val sourceId: String,
     val sourceType: String,
@@ -9,20 +9,24 @@ data class GeoRecord(
     val updatedAtEpochMs: Long,
 )
 
-data class GeoBounds(
+public data class GeoBounds(
     val minLatitude: Double,
     val maxLatitude: Double,
     val minLongitude: Double,
     val maxLongitude: Double,
 )
 
-interface SharedGeoStore {
-    fun upsert(records: List<GeoRecord>)
-    fun findByRecordId(recordId: String): GeoRecord?
-    fun queryByBounds(bounds: GeoBounds): List<GeoRecord>
+public interface SharedGeoStore {
+    public fun upsert(records: List<GeoRecord>)
+    public fun findByRecordId(recordId: String): GeoRecord?
+    public fun queryByBounds(bounds: GeoBounds): List<GeoRecord>
 }
 
-class InMemorySharedGeoStore : SharedGeoStore {
+public object SharedGeoStores {
+    public fun inMemory(): SharedGeoStore = InMemorySharedGeoStore()
+}
+
+internal class InMemorySharedGeoStore : SharedGeoStore {
     private val records = linkedMapOf<String, GeoRecord>()
 
     override fun upsert(records: List<GeoRecord>) {

@@ -1,13 +1,13 @@
 package com.opencontacts.mapgraph.data.repository
 
-import com.opencontacts.shared.coredb.InMemorySharedGeoStore
 import com.opencontacts.shared.coredb.SharedGeoStore
-import com.opencontacts.shared.coremap.InMemorySharedTileCache
+import com.opencontacts.shared.coredb.SharedGeoStores
 import com.opencontacts.shared.coremap.SharedTileCache
-import com.opencontacts.shared.coremedia.InMemorySharedMediaIndex
+import com.opencontacts.shared.coremap.SharedTileCaches
 import com.opencontacts.shared.coremedia.SharedMediaIndex
-import com.opencontacts.shared.coresync.InMemorySharedSyncScheduler
+import com.opencontacts.shared.coremedia.SharedMediaIndexes
 import com.opencontacts.shared.coresync.SharedSyncScheduler
+import com.opencontacts.shared.coresync.SharedSyncSchedulers
 
 /**
  * Temporary in-memory composition root for shared core contracts.
@@ -22,10 +22,10 @@ data class SharedCoreRegistry(
     companion object {
         fun inMemory(): SharedCoreRegistry {
             return SharedCoreRegistry(
-                geoStore = InMemorySharedGeoStore(),
-                tileCache = InMemorySharedTileCache(),
-                mediaIndex = InMemorySharedMediaIndex(),
-                syncScheduler = InMemorySharedSyncScheduler(),
+                geoStore = SharedGeoStores.inMemory(),
+                tileCache = SharedTileCaches.inMemory(),
+                mediaIndex = SharedMediaIndexes.inMemory(),
+                syncScheduler = SharedSyncSchedulers.inMemory(),
             )
         }
     }

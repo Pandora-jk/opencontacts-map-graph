@@ -1,11 +1,11 @@
 package com.opencontacts.shared.coresync
 
-enum class SyncDirection {
+public enum class SyncDirection {
     IMPORT,
     EXPORT,
 }
 
-data class SyncTask(
+public data class SyncTask(
     val taskId: String,
     val source: String,
     val target: String,
@@ -13,13 +13,17 @@ data class SyncTask(
     val scheduledAtEpochMs: Long,
 )
 
-interface SharedSyncScheduler {
-    fun schedule(task: SyncTask)
-    fun cancel(taskId: String)
-    fun dueTasks(nowEpochMs: Long): List<SyncTask>
+public interface SharedSyncScheduler {
+    public fun schedule(task: SyncTask)
+    public fun cancel(taskId: String)
+    public fun dueTasks(nowEpochMs: Long): List<SyncTask>
 }
 
-class InMemorySharedSyncScheduler : SharedSyncScheduler {
+public object SharedSyncSchedulers {
+    public fun inMemory(): SharedSyncScheduler = InMemorySharedSyncScheduler()
+}
+
+internal class InMemorySharedSyncScheduler : SharedSyncScheduler {
     private val tasks = linkedMapOf<String, SyncTask>()
 
     override fun schedule(task: SyncTask) {

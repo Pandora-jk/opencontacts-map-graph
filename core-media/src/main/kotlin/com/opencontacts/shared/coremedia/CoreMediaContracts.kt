@@ -1,11 +1,11 @@
 package com.opencontacts.shared.coremedia
 
-data class MediaGeoPoint(
+public data class MediaGeoPoint(
     val latitude: Double,
     val longitude: Double,
 )
 
-data class MediaAsset(
+public data class MediaAsset(
     val mediaId: String,
     val mimeType: String,
     val checksum: String,
@@ -13,13 +13,17 @@ data class MediaAsset(
     val geoPoint: MediaGeoPoint?,
 )
 
-interface SharedMediaIndex {
-    fun upsert(asset: MediaAsset)
-    fun findByMediaId(mediaId: String): MediaAsset?
-    fun findGeoTagged(): List<MediaAsset>
+public interface SharedMediaIndex {
+    public fun upsert(asset: MediaAsset)
+    public fun findByMediaId(mediaId: String): MediaAsset?
+    public fun findGeoTagged(): List<MediaAsset>
 }
 
-class InMemorySharedMediaIndex : SharedMediaIndex {
+public object SharedMediaIndexes {
+    public fun inMemory(): SharedMediaIndex = InMemorySharedMediaIndex()
+}
+
+internal class InMemorySharedMediaIndex : SharedMediaIndex {
     private val assets = linkedMapOf<String, MediaAsset>()
 
     override fun upsert(asset: MediaAsset) {

@@ -1,26 +1,30 @@
 package com.opencontacts.shared.coremap
 
-data class MapTileKey(
+public data class MapTileKey(
     val zoom: Int,
     val x: Int,
     val y: Int,
     val style: String,
 )
 
-data class MapTilePayload(
+public data class MapTilePayload(
     val bytes: ByteArray,
     val etag: String?,
     val fetchedAtEpochMs: Long,
 )
 
-interface SharedTileCache {
-    fun read(key: MapTileKey): MapTilePayload?
-    fun write(key: MapTileKey, payload: MapTilePayload)
-    fun remove(key: MapTileKey)
-    fun size(): Int
+public interface SharedTileCache {
+    public fun read(key: MapTileKey): MapTilePayload?
+    public fun write(key: MapTileKey, payload: MapTilePayload)
+    public fun remove(key: MapTileKey)
+    public fun size(): Int
 }
 
-class InMemorySharedTileCache : SharedTileCache {
+public object SharedTileCaches {
+    public fun inMemory(): SharedTileCache = InMemorySharedTileCache()
+}
+
+internal class InMemorySharedTileCache : SharedTileCache {
     private val cache = linkedMapOf<MapTileKey, MapTilePayload>()
 
     override fun read(key: MapTileKey): MapTilePayload? = cache[key]
