@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OpenContacts</string>
+    <string name="loading_contacts">Loading contacts…</string>
+    <string name="no_contacts">No contacts found</string>
+    <string name="error_loading">Error loading contacts</string>
+    <string name="contacts_with_location">Contacts with location: %d/%d</string>
+</resources>
