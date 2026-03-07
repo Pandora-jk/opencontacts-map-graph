@@ -1,8 +1,9 @@
 {
-  "runs": 1,
-  "last_primary_task": "**Daily cash task:** close one short-cycle offer (lead pack, template pack, quick script fix).",
-  "task_cursor": 1,
+  "runs": 2,
+  "last_primary_task": "**Recurring income task:** build/iterate one monthly-retainer style product offer.",
+  "task_cursor": 2,
   "task_progress": {
-    "**Daily cash task:** close one short-cycle offer (lead pack, template pack, quick script fix).": 1
+    "**Daily cash task:** close one short-cycle offer (lead pack, template pack, quick script fix).": 1,
+    "**Recurring income task:** build/iterate one monthly-retainer style product offer.": 1
   }
 }
