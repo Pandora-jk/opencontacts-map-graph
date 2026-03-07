@@ -1,0 +1,44 @@
+name: Debug APK Path
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build Debug APK
+        run: |
+          echo "=== Starting build ==="
+          ./gradlew assembleDebug
+          echo "=== Build complete ==="
+          
+      - name: List all build outputs
+        run: |
+          echo "=== Searching entire workspace for APK ==="
+          find . -name "*.apk" -type f 2>/dev/null || echo "No APK found"
+          
+          echo ""
+          echo "=== app/build/outputs directory ==="
+          ls -la app/build/outputs/ 2>/dev/null || echo "Directory doesn't exist"
+          
+          echo ""
+          echo "=== app/build/outputs/apk directory ==="
+          ls -la app/build/outputs/apk/ 2>/dev/null || echo "Directory doesn't exist"
+          
+          echo ""
+          echo "=== Full directory tree ==="
+          find app/build -type f 2>/dev/null | head -50
