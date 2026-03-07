@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "skills": {
+    "outlook-api": {
+      "version": "1.0.3",
+      "installedAt": 1772239323992
+    },
+    "gmail": {
+      "version": "1.0.6",
+      "installedAt": 1772241379453
+    }
+  }
+}
