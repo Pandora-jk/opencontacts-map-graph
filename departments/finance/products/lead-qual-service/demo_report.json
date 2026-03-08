@@ -1,0 +1,151 @@
+{
+  "generated_at": "2026-03-08T00:01:32.381751Z",
+  "report_type": "Lead Qualification Demo",
+  "total_leads_processed": 3,
+  "leads": [
+    {
+      "lead": {
+        "company_name": "CloudScale AI",
+        "website": "https://cloudscale.ai",
+        "contact_name": "Sarah Chen",
+        "email": "sarah@cloudscale.ai",
+        "company_size": "50-200",
+        "industry": "AI/ML Software",
+        "source": "demo_request",
+        "message": "Need urgent solution for lead qualification. Budget approved."
+      },
+      "score": 96,
+      "breakdown": {
+        "company_size": 25,
+        "industry_fit": 25,
+        "source_intent": 30,
+        "engagement": 16
+      },
+      "recommendation": "\ud83d\udd25 HOT LEAD - Immediate follow-up recommended",
+      "next_action": {
+        "action": "immediate_call",
+        "priority": "high",
+        "timeline": "within 1 hour",
+        "talking_points": [
+          "Reference their interest in AI/ML Software",
+          "Emphasize quick implementation",
+          "Offer demo within 24 hours"
+        ]
+      },
+      "enrichment": {
+        "employee_count": 45,
+        "annual_revenue": "$5M-$10M",
+        "tech_stack": [
+          "React",
+          "Node.js",
+          "AWS"
+        ],
+        "funding_stage": "Series A",
+        "confidence_score": 0.85
+      },
+      "email_draft": {
+        "subject": "Quick question about CloudScale AI's lead qualification",
+        "cta": "Schedule 15-min call",
+        "tone": "urgent_but_helpful"
+      }
+    },
+    {
+      "lead": {
+        "company_name": "GrowthMetrics",
+        "website": "https://growthmetrics.co",
+        "contact_name": "Mike Johnson",
+        "email": "mike@growthmetrics.co",
+        "company_size": "10-50",
+        "industry": "Marketing Analytics",
+        "source": "contact_form",
+        "message": "Interested in learning more about automated qualification."
+      },
+      "score": 57,
+      "breakdown": {
+        "company_size": 20,
+        "industry_fit": 10,
+        "source_intent": 15,
+        "engagement": 12
+      },
+      "recommendation": "\u2705 QUALIFIED - Standard follow-up sequence",
+      "next_action": {
+        "action": "email_followup",
+        "priority": "medium",
+        "timeline": "within 24 hours",
+        "talking_points": [
+          "Send case study in their industry",
+          "Offer 15-minute discovery call",
+          "Highlight ROI metrics"
+        ]
+      },
+      "enrichment": {
+        "employee_count": 20,
+        "annual_revenue": "$1M-$5M",
+        "tech_stack": [
+          "WordPress",
+          "Google Workspace"
+        ],
+        "funding_stage": "Bootstrapped",
+        "confidence_score": 0.85
+      },
+      "email_draft": {
+        "subject": "Helping GrowthMetrics qualify more leads",
+        "cta": "Schedule demo",
+        "tone": "helpful_informative"
+      }
+    },
+    {
+      "lead": {
+        "company_name": "Local Plumb Co",
+        "website": "https://localplumb.example.com",
+        "contact_name": "Bob Smith",
+        "email": "bob@localplumb.example.com",
+        "company_size": "1-10",
+        "industry": "Home Services",
+        "source": "general",
+        "message": ""
+      },
+      "score": 45,
+      "breakdown": {
+        "company_size": 15,
+        "industry_fit": 15,
+        "source_intent": 5,
+        "engagement": 10
+      },
+      "recommendation": "\u26a0\ufe0f NURTURE - Add to email nurture campaign",
+      "next_action": {
+        "action": "automated_nurture",
+        "priority": "low",
+        "timeline": "add to email sequence",
+        "talking_points": [
+          "Send educational content",
+          "Monthly newsletter",
+          "Re-engage in 30 days"
+        ]
+      },
+      "enrichment": {
+        "employee_count": 20,
+        "annual_revenue": "$1M-$5M",
+        "tech_stack": [
+          "WordPress",
+          "Google Workspace"
+        ],
+        "funding_stage": "Bootstrapped",
+        "confidence_score": 0.85
+      },
+      "email_draft": {
+        "subject": "Quick question about Local Plumb Co's sales process",
+        "cta": "Reply if interested",
+        "tone": "casual_low_pressure"
+      }
+    }
+  ],
+  "summary": {
+    "average_score": 66.0,
+    "hot_leads": 1,
+    "warm_leads": 1,
+    "cold_leads": 1,
+    "processing_time_per_lead": "< 1 second",
+    "enrichment_confidence": "85-95%"
+  }
+}
