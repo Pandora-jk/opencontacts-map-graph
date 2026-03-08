@@ -13,9 +13,12 @@ from infra_network import (
     has_external_mdns_listener,
     inspect_mdns_exposure,
     live_mdns_dropin_status,
+    mdns_listener_processes,
     managed_mdns_dropin_status,
+    mdns_listener_owners,
     staged_mdns_dropin_status,
     run_cmd,
+    unexpected_mdns_listener_owners,
 )
 
 DEFAULT_STAGE_DIR = Path('/tmp/openclaw-mdns-stage')
@@ -196,7 +199,26 @@ def main() -> int:
                 print('LIVE_VALIDATION_FAILED')
                 return 1
             if has_external_mdns_listener(port_lines):
-                print('ERROR: external udp/5353 is still exposed after live validation; investigate avahi-daemon/systemd-resolved state or block the port upstream')
+                listener_processes = mdns_listener_processes(listener_detail)
+                nonstandard_owners = unexpected_mdns_listener_owners(mdns_listener_owners(listener_detail))
+                if nonstandard_owners:
+                    owners_label = ', '.join(nonstandard_owners)
+                    print(
+                        'ERROR: external udp/5353 is still exposed after live validation; '
+                        f'non-standard listener owner(s): {owners_label}'
+                    )
+                    print(
+                        'ERROR: the systemd-resolved drop-in alone is insufficient while that '
+                        'service still binds udp/5353; inspect/reconfigure it or block the port upstream'
+                    )
+                    listener_pids = [pid for owner, pid in listener_processes if pid and owner in nonstandard_owners]
+                    if listener_pids:
+                        print(
+                            'ERROR: inspect the owning process before further /etc changes: '
+                            f"`ps -fp {' '.join(listener_pids)}`"
+                        )
+                else:
+                    print('ERROR: external udp/5353 is still exposed after live validation; investigate avahi-daemon/systemd-resolved state or block the port upstream')
                 print('LIVE_VALIDATION_FAILED')
                 return 1
             print('LIVE_VALIDATION_DONE')

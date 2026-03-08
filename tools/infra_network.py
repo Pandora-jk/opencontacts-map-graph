@@ -11,6 +11,7 @@ MDNS_RESOLVED_DROPIN = "[Resolve]\nMulticastDNS=no\nLLMNR=no\n"
 WORKSPACE_ROOT = Path('/home/ubuntu/.openclaw/workspace')
 MANAGED_MDNS_DROPIN = WORKSPACE_ROOT / 'systemd' / '99-openclaw-no-mdns.conf'
 LIVE_MDNS_DROPIN = Path('/etc/systemd/resolved.conf.d/99-openclaw-no-mdns.conf')
+STANDARD_MDNS_OWNERS = ('systemd-resolved', 'avahi-daemon')
 
 
 def run_cmd(cmd: list[str], max_chars: int = 800) -> str:
@@ -46,6 +47,60 @@ def has_external_mdns_listener(port_lines: str) -> bool:
             continue
         return True
     return False
+
+
+def mdns_listener_detail() -> str:
+    return run_cmd(['bash', '-lc', "ss -H -ulpn 'sport = :5353' 2>/dev/null | sed -n '1,10p'"], max_chars=1200)
+
+
+def _pid_command_name(pid: str) -> str | None:
+    proc_dir = Path('/proc') / pid
+    try:
+        raw = (proc_dir / 'cmdline').read_bytes()
+    except OSError:
+        raw = b''
+    if raw:
+        first = raw.split(b'\x00', 1)[0].decode('utf-8', errors='ignore').strip()
+        if first:
+            return Path(first).name
+    try:
+        name = (proc_dir / 'comm').read_text(encoding='utf-8', errors='ignore').strip()
+    except OSError:
+        return None
+    return name or None
+
+
+def mdns_listener_processes(listener_detail: str) -> list[tuple[str, str | None]]:
+    processes: list[tuple[str, str | None]] = []
+    for raw in listener_detail.splitlines():
+        match = re.search(r'users:\(\("([^"]+)",pid=(\d+)', raw)
+        if match:
+            owner, pid = match.group(1), match.group(2)
+            resolved_name = _pid_command_name(pid)
+            processes.append((resolved_name or owner, pid))
+            continue
+        match = re.search(r'users:\(\("([^"]+)"', raw)
+        if match:
+            processes.append((match.group(1), None))
+    return list(dict.fromkeys(processes))
+
+
+def mdns_listener_owners(listener_detail: str) -> list[str]:
+    return [owner for owner, _ in mdns_listener_processes(listener_detail)]
+
+
+def _is_standard_mdns_owner(owner: str) -> bool:
+    lowered = owner.lower()
+    return (
+        lowered == 'systemd-resolved'
+        or lowered.startswith('systemd-resolve')
+        or lowered == 'avahi-daemon'
+        or lowered.startswith('avahi-daem')
+    )
+
+
+def unexpected_mdns_listener_owners(listener_owners: list[str]) -> list[str]:
+    return [owner for owner in listener_owners if not _is_standard_mdns_owner(owner)]
 
 
 def _service_state(service: str) -> str | None:
@@ -172,25 +227,54 @@ def inspect_mdns_exposure(
 
     lines = ['ALERT: External mDNS listener detected on udp/5353']
 
-    listener_detail = run_cmd(['bash', '-lc', "ss -H -ulpn 'sport = :5353' 2>/dev/null | sed -n '1,10p'"], max_chars=1200)
+    listener_detail = mdns_listener_detail()
+    listener_processes: list[tuple[str, str | None]] = []
+    listener_owners: list[str] = []
     if listener_detail not in {'n/a', ''} and not listener_detail.startswith('Error:'):
         scope = _listener_scope(listener_detail)
         if scope:
             lines.append(scope)
         if 'users:((' in listener_detail:
-            owner = []
-            for raw in listener_detail.splitlines():
-                match = re.search(r'users:\(\("([^"]+)"', raw)
-                if match:
-                    owner.append(match.group(1))
-            if owner:
-                lines.append(f"Listener owner(s): {', '.join(sorted(dict.fromkeys(owner)))}")
+            listener_processes = mdns_listener_processes(listener_detail)
+            listener_owners = [owner for owner, _ in listener_processes]
+            if listener_owners:
+                lines.append(f"Listener owner(s): {', '.join(listener_owners)}")
+                listener_pids = [pid for _, pid in listener_processes if pid]
+                if listener_pids:
+                    lines.append(f"Listener PID(s): {', '.join(listener_pids)}")
             else:
                 lines.append('Listener details captured but owning process was not parsed cleanly')
         else:
             lines.append('Listener owner not visible from current permissions/capabilities')
     elif listener_detail.startswith('Error:'):
         lines.append(f'mDNS listener detail error: {listener_detail}')
+
+    nonstandard_owners = unexpected_mdns_listener_owners(listener_owners)
+    if nonstandard_owners:
+        owners_label = ', '.join(nonstandard_owners)
+        lines.append(
+            'RISK: udp/5353 listener owner is not systemd-resolved/avahi-daemon: '
+            f'{owners_label}'
+        )
+        lines.append(
+            'RISK: the managed resolved drop-in is defense-in-depth, but it may not clear '
+            'udp/5353 while that service still binds the socket'
+        )
+        listener_pids = [pid for owner, pid in listener_processes if pid and owner in nonstandard_owners]
+        if listener_pids:
+            lines.append(
+                'HARDENING: inspect the owning process before assuming the resolved drop-in '
+                f"will clear udp/5353: `ps -fp {' '.join(listener_pids)}`"
+            )
+        else:
+            lines.append(
+                'HARDENING: inspect/reconfigure the owning service before assuming the resolved '
+                f'drop-in will clear udp/5353: {owners_label}'
+            )
+        lines.append(
+            'HARDENING: if that process/service exposes Bonjour/mDNS discovery, disable it there '
+            'or bind it to loopback/internal interfaces only'
+        )
 
     for service in ('systemd-resolved', 'avahi-daemon'):
         state = _service_state(service)

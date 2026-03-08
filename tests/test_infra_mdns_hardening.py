@@ -198,6 +198,41 @@ class InfraMdnsHardeningTests(unittest.TestCase):
         self.assertIn("LIVE_VALIDATION_FAILED", output)
         self.assertIn("external udp/5353 is still exposed after live validation", output)
 
+    def test_live_validation_flags_nonstandard_listener_owner(self) -> None:
+        stdout = io.StringIO()
+        argv = [
+            "infra_mdns_hardening.py",
+            "--validate-live",
+        ]
+        detail = (
+            'UNCONN 0 0 0.0.0.0:5353 0.0.0.0:* '
+            'users:(("openclaw-gatewa",pid=123,fd=9))'
+        )
+
+        with mock.patch.object(sys, "argv", argv), mock.patch.object(
+            infra_mdns_hardening, "current_port_lines", return_value="udp 0.0.0.0:5353"
+        ), mock.patch.object(
+            infra_mdns_hardening,
+            "live_mdns_dropin_status",
+            return_value="live drop-in installed: /etc/systemd/resolved.conf.d/99-openclaw-no-mdns.conf (mode 0644)",
+        ), mock.patch.object(
+            infra_mdns_hardening,
+            "run_cmd",
+            return_value=detail,
+        ), mock.patch(
+            "infra_network._pid_command_name",
+            return_value="openclaw-gateway",
+        ), contextlib.redirect_stdout(stdout):
+            rc = infra_mdns_hardening.main()
+
+        output = stdout.getvalue()
+        self.assertEqual(rc, 1)
+        self.assertIn("Validation target: live", output)
+        self.assertIn("LIVE_VALIDATION_FAILED", output)
+        self.assertIn("non-standard listener owner(s): openclaw-gateway", output)
+        self.assertIn("systemd-resolved drop-in alone is insufficient", output)
+        self.assertIn("`ps -fp 123`", output)
+
     def test_live_validation_succeeds_when_dropin_installed_and_listener_cleared(self) -> None:
         stdout = io.StringIO()
         argv = [

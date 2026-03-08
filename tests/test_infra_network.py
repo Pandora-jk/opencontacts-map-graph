@@ -100,6 +100,32 @@ class InfraNetworkTests(unittest.TestCase):
             "No external mDNS listener detected",
         )
 
+    def test_mdns_exposure_flags_nonstandard_listener_owner(self) -> None:
+        detail = (
+            'UNCONN 0 0 0.0.0.0:5353 0.0.0.0:* '
+            'users:(("openclaw-gatewa",pid=123,fd=9))'
+        )
+
+        with mock.patch("infra_network.run_cmd", return_value=detail), mock.patch(
+            "infra_network._pid_command_name", return_value="openclaw-gateway"
+        ), mock.patch("infra_network._service_state", return_value=None):
+            result = inspect_mdns_exposure("udp 0.0.0.0:5353")
+
+        self.assertIn("Listener owner(s): openclaw-gateway", result)
+        self.assertIn("Listener PID(s): 123", result)
+        self.assertIn(
+            "RISK: udp/5353 listener owner is not systemd-resolved/avahi-daemon: openclaw-gateway",
+            result,
+        )
+        self.assertIn(
+            "RISK: the managed resolved drop-in is defense-in-depth, but it may not clear udp/5353 while that service still binds the socket",
+            result,
+        )
+        self.assertIn(
+            "HARDENING: inspect the owning process before assuming the resolved drop-in will clear udp/5353: `ps -fp 123`",
+            result,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
