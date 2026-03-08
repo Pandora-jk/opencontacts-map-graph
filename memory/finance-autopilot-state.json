@@ -1,9 +1,10 @@
 {
-  "runs": 2,
-  "last_primary_task": "**Recurring income task:** build/iterate one monthly-retainer style product offer.",
-  "task_cursor": 2,
+  "runs": 3,
+  "last_primary_task": "**Pipeline expansion:** scrape 50 new solar wholesalers for outreach expansion.",
+  "task_cursor": 3,
   "task_progress": {
     "**Daily cash task:** close one short-cycle offer (lead pack, template pack, quick script fix).": 1,
-    "**Recurring income task:** build/iterate one monthly-retainer style product offer.": 1
+    "**Recurring income task:** build/iterate one monthly-retainer style product offer.": 1,
+    "**Pipeline expansion:** scrape 50 new solar wholesalers for outreach expansion.": 1
   }
 }
