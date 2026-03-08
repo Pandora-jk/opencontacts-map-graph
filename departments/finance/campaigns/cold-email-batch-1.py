@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
 Cold Email Campaign - Batch 1
-Sends 100 personalized cold emails to B2B targets.
-Compliant with CAN-SPAM, GDPR, and Australian Spam Act.
+Generates outreach drafts for the first 20 founder-led B2B agency targets.
 """
 
 import csv
@@ -12,49 +11,52 @@ from datetime import datetime, timezone
 
 # Output file for tracking
 BATCH_FILE = Path(__file__).parent / "batch-1-sent.json"
-TARGETS_FILE = Path(__file__).parent.parent / "targets" / "b2b-targets-100.csv"
+TARGETS_FILE = Path(__file__).parent.parent / "targets" / "founder-led-b2b-agencies-first-20.csv"
 
-def generate_email_template(company_name: str, contact_name: str, industry: str = "your industry") -> dict:
-    """Generate personalized cold email."""
-    
-    subject = f"Quick question about {company_name}'s lead qualification"
-    
+def generate_email_template(
+    company_name: str,
+    contact_name: str,
+    title: str = "",
+    segment: str = "agency",
+    opening_line: str = "",
+) -> dict:
+    """Generate a founder-led agency outbound draft."""
+
+    subject = f"quick idea for {company_name}'s outbound pipeline"
+    opener = opening_line or (
+        f"Noticed {company_name} is growing in {segment}. "
+        "At that stage, outbound list building usually ends up back on the founder's plate."
+    )
+
     body = f"""Hi {contact_name},
 
-I noticed {company_name} gets inbound leads through your website.
+{opener}
 
-Curious - how many of those leads do you actually follow up with?
+I help founder-led B2B agencies build qualified outbound pipelines so they can spend more time closing and less time prospecting.
 
-Most teams we talk to only qualify 10-20% because manual review is too time-consuming.
+The usual gap for agencies in the 5-30 person range is not service quality. It is consistent list building, qualification, and outreach-ready handoff.
 
-Our AI service:
-→ Scores 100% of leads in 30 seconds
-→ Enriches with company data (size, revenue, tech stack)
-→ Drafts personalized follow-ups
-→ Integrates with your existing tools
+Our Starter offer is $300 one-time and includes:
+- 100 qualified prospects
+- enrichment
+- outreach-ready handoff
+- 3 personalized opening-line examples
 
-Result: Teams qualify 5x more leads and close 23% more deals.
-
-Worth a 15-minute demo?
+If useful, I can send a small sample built around {company_name}'s current offer.
 
 Best,
-Pandora
-Lead Qualification Specialist
+{{sender_name}}
 
-P.S. - $297/month. One closed deal = pays for itself 10x.
-
----
-Pandora Lead Qual
-123 Business St, Sydney NSW 2000, Australia
-Unsubscribe: https://pandora-leadqual.com/unsubscribe
-Privacy Policy: https://pandora-leadqual.com/privacy
+{{business_name}}
+{{business_address}}
+Unsubscribe: {{unsubscribe_url}}
 """
 
     return {
         "subject": subject,
         "body": body,
-        "tone": "direct_value_prop",
-        "cta": "Schedule 15-min demo"
+        "tone": "direct_service_offer",
+        "cta": "Reply for a sample"
     }
 
 def load_targets():
@@ -76,24 +78,29 @@ def send_batch(targets: list, limit: int = 100):
     
     for i, target in enumerate(targets[:limit]):
         company = target.get('company_name', '')
-        contact = target.get('contact_name', 'there')
-        email = target.get('email', '')
-        industry = target.get('industry', '')
-        
-        # Skip if no email
-        if not email or email == 'email':
+        contact = target.get('founder_name', '') or target.get('contact_name', 'there')
+        email = target.get('work_email', '') or target.get('email', '')
+        title = target.get('title', '')
+        segment = target.get('segment', 'agency')
+        opening_line = target.get('opening_line_1', '')
+        status = target.get('status', '')
+
+        # Skip if no verified contact method or the row is not ready.
+        if not email or status in {'to_research', 'skip'}:
             continue
-        
+
         # Generate personalized email
-        email_data = generate_email_template(company, contact, industry)
-        
+        email_data = generate_email_template(company, contact, title, segment, opening_line)
+
         # Create record
         record = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "company": company,
             "contact": contact,
+            "title": title,
             "email": email,
             "subject": email_data['subject'],
+            "body": email_data['body'],
             "status": "ready_to_send",
             "batch": 1
         }
@@ -119,14 +126,14 @@ if __name__ == '__main__':
     print("Loading targets...")
     targets = load_targets()
     print(f"Loaded {len(targets)} targets")
-    
-    print("\nSending batch 1 (100 emails)...")
-    sent = send_batch(targets, limit=100)
-    
+
+    print("\nGenerating batch 1 drafts...")
+    sent = send_batch(targets, limit=20)
+
     print(f"\n✅ Batch 1 complete:")
-    print(f"   Sent: {len(sent)} emails")
+    print(f"   Drafted: {len(sent)} emails")
     print(f"   Batch file: {BATCH_FILE}")
     print(f"\nNext steps:")
-    print(f"   - Monitor responses")
-    print(f"   - Follow up in 3 days for non-responders")
-    print(f"   - Book demos for interested replies")
+    print(f"   - Verify footer placeholders with real business details")
+    print(f"   - Run final compliance review")
+    print(f"   - Send to verified contacts only")

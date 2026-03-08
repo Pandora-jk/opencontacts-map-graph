@@ -104,9 +104,10 @@ def action_offer(now: dt.datetime, run_id: int) -> Path:
     content = (
         f"# Core Service Offer Draft (Run {run_id})\n\n"
         f"- Generated at: {now.isoformat().replace('+00:00', 'Z')}\n"
-        "- Offer: done-for-you B2B pipeline setup\n"
-        "- Promise: qualified prospects plus outreach-ready handoff\n"
-        "- Customer: founder-led B2B firms with weak outbound process\n"
+        "- Offer: done-for-you outbound pipeline build for founder-led B2B agencies\n"
+        "- Promise: We build you a qualified outbound pipeline so you can spend more time closing and less time prospecting.\n"
+        "- Starter: $300 one-time for 100 qualified prospects, enrichment, outreach-ready handoff, and 3 personalized opening-line examples\n"
+        "- Growth: $500/month for weekly refreshed target lists, qualification notes, outreach iteration, and simple weekly reporting\n"
     )
     return write_artifact(f"offers/core-service-offer-{now:%Y%m%d}-r{run_id}.md", content)
 
@@ -115,33 +116,58 @@ def action_icp(now: dt.datetime, run_id: int) -> Path:
     content = (
         f"# ICP Selection Note (Run {run_id})\n\n"
         f"- Generated at: {now.isoformat().replace('+00:00', 'Z')}\n"
-        "- Preferred ICP: founder-led B2B agencies, consultants, and niche SaaS\n"
-        "- Team size: 10-200 employees\n"
-        "- Reason: clear revenue pain and ability to pay for pipeline support\n"
+        "- Preferred ICP: founder-led B2B agencies\n"
+        "- Team size: 5-30 employees\n"
+        "- Priority segments: SEO, paid ads, web/dev, automation, RevOps\n"
+        "- Contact titles: founder, co-founder, managing director, head of growth, sales director\n"
+        "- Reason: clear revenue pain and willingness to pay for outbound support\n"
     )
     return write_artifact(f"icp/primary-icp-{now:%Y%m%d}-r{run_id}.md", content)
 
 
 def action_target_list(now: dt.datetime, run_id: int) -> Path:
-    lines = ["company,segment,team_size,website,decision_maker,email,fit_note"]
-    for i in range(1, 51):
-        lines.append(
-            f"Example B2B Company {i},agency,10-200,https://example{i}.com,Founder,founder{i}@example.com,needs outbound rigor"
-        )
+    lines = [
+        "slot,segment,company_name,website,employee_range,founder_name,title,work_email,contact_path,linkedin_url,high_ticket_service,recent_activity,outbound_maturity,fit_score,fit_notes,status"
+    ]
+    segments = [
+        "SEO",
+        "SEO",
+        "SEO",
+        "SEO",
+        "Paid Ads",
+        "Paid Ads",
+        "Paid Ads",
+        "Paid Ads",
+        "Web/Dev",
+        "Web/Dev",
+        "Web/Dev",
+        "Web/Dev",
+        "Automation",
+        "Automation",
+        "Automation",
+        "Automation",
+        "RevOps",
+        "RevOps",
+        "RevOps",
+        "RevOps",
+    ]
+    for i, segment in enumerate(segments, start=1):
+        lines.append(f"{i:02d},{segment},,,,,,,,,,,,,to_research")
     content = "\n".join(lines) + "\n"
-    return write_artifact(f"pipeline/target-list-50-{now:%Y%m%d}-r{run_id}.csv", content)
+    return write_artifact(f"pipeline/founder-led-agencies-first-20-{now:%Y%m%d}-r{run_id}.csv", content)
 
 
 def action_outreach(now: dt.datetime, run_id: int) -> Path:
     content = (
         f"# Outreach Draft (Run {run_id})\n\n"
-        "Subject: quick idea to improve outbound pipeline\n\n"
+        "Subject: quick idea for {{company}}'s outbound pipeline\n\n"
         "Hi {{name}},\n\n"
-        "I noticed {{company}} appears to fit the kind of B2B team where outbound "
-        "follow-up becomes inconsistent as founder time gets stretched.\n\n"
-        "We help teams build a cleaner qualified prospect pipeline: list building, "
-        "fit review, enrichment, and outreach-ready handoff.\n\n"
-        "If useful, I can show you a short sample with 3 scored prospects.\n"
+        "{{opening_line}}\n\n"
+        "I help founder-led B2B agencies build qualified outbound pipelines so they can "
+        "spend more time closing and less time prospecting.\n\n"
+        "Starter is $300 one-time for 100 qualified prospects, enrichment, "
+        "outreach-ready handoff, and 3 personalized opening-line examples.\n\n"
+        "If useful, I can send a small sample based on {{company}}'s current offer.\n"
     )
     return write_artifact(f"outreach/outreach-draft-{now:%Y%m%d}-r{run_id}.md", content)
 
@@ -149,10 +175,10 @@ def action_outreach(now: dt.datetime, run_id: int) -> Path:
 def action_demo(now: dt.datetime, run_id: int) -> Path:
     content = (
         f"# Demo Script (Run {run_id})\n\n"
-        "1. Show the ICP and why these prospects fit.\n"
-        "2. Walk through 3 example prospects with qualification notes.\n"
+        "1. Show the narrowed agency ICP and why these prospects fit.\n"
+        "2. Walk through 3 example agency prospects with qualification notes.\n"
         "3. Show the outreach-ready first line and CTA.\n"
-        "4. Explain weekly delivery and reporting.\n"
+        "4. Explain Starter vs Growth delivery and reporting.\n"
         "5. Close on next step and pricing.\n"
     )
     return write_artifact(f"demos/demo-script-{now:%Y%m%d}-r{run_id}.md", content)
@@ -161,10 +187,11 @@ def action_demo(now: dt.datetime, run_id: int) -> Path:
 def action_delivery(now: dt.datetime, run_id: int) -> Path:
     content = (
         f"# First Client Delivery Checklist (Run {run_id})\n\n"
-        "- Confirm ICP and target geography\n"
+        "- Confirm agency niche, geography, and exclusions\n"
         "- Confirm target titles and exclusions\n"
-        "- Deliver initial prospect batch\n"
+        "- Deliver initial 100-prospect batch\n"
         "- Deliver outreach copy and usage notes\n"
+        "- Deliver 3 personalized opening-line examples\n"
         "- Confirm follow-up cadence and reporting format\n"
     )
     return write_artifact(f"delivery/first-client-checklist-{now:%Y%m%d}-r{run_id}.md", content)
@@ -175,6 +202,7 @@ def action_compliance(now: dt.datetime, run_id: int) -> Path:
         f"# Compliance Check Note (Run {run_id})\n\n"
         "- Validate footer contains business identity and unsubscribe path\n"
         "- Confirm public B2B data sources only\n"
+        "- Confirm no personal emails are used in the first 20-account tranche\n"
         "- Confirm suppression list process before sending\n"
         "- Confirm complaint threshold and pause rule\n"
     )

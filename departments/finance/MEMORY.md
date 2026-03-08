@@ -37,3 +37,16 @@
 - Early diversification created noise, not safety.
 - A service attached to an existing budget line is more sellable than a cold-start software product.
 - Productization should come from repeated client work, not from idea generation in isolation.
+
+## 2026-03-08 07:44 UTC - Agency ICP handoff locked
+- The live finance wedge is now founder-led B2B agencies with 5-30 people.
+- Priority segments are SEO, paid ads, web/dev, automation, and RevOps agencies.
+- Live promise: build a qualified outbound pipeline so the client can spend more time closing and less time prospecting.
+- Live pricing:
+  - Starter: $300 one-time for 100 qualified prospects, enrichment, outreach-ready handoff, and 3 personalized opening-line examples
+  - Growth: $500/month for weekly refreshed target lists, qualification notes, outreach iteration, and simple weekly reporting
+- Execution assets now exist for the first motion:
+  - first-20 account tracker CSV
+  - founder-led agency outreach playbook
+  - updated draft generator that waits for real contacts and real footer fields
+- Old broad "AI lead qualification" campaign claims should not be treated as current operating truth anymore.

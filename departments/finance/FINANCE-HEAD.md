@@ -22,6 +22,14 @@ Finance runs:
 - Sell qualified prospecting, enrichment, and outreach preparation
 - Start as a service, not as a speculative SaaS product
 
+### Current Wedge (2026-03-08)
+- ICP: founder-led B2B agencies with 5-30 people
+- Priority niches: SEO, paid ads, web/dev, automation, and RevOps agencies
+- Promise: We build you a qualified outbound pipeline so you can spend more time closing and less time prospecting.
+- Starter: $300 one-time for 100 qualified prospects, enrichment, outreach-ready handoff, and 3 personalized opening-line examples
+- Growth: $500/month for weekly refreshed target lists, qualification notes, outreach iteration, and simple weekly reporting
+- First execution tranche: 20 companies that pass the hard filters in `CORE-OFFER.md`
+
 ### Secondary Lane
 - GitHub bounties
 - Purpose: side cash and proof of execution, not strategic distraction
@@ -111,6 +119,8 @@ Blockers:
 - Tighten finance around the core offer in `CORE-OFFER.md`
 - Use `TODO.md` as the only queue for autonomous finance work
 - Ensure the finance autopilot reads that queue and writes matching status output
+- Keep the first motion inside the narrowed agency ICP until one real 20-company outreach cycle proves or disproves it
+- Leave outreach assets and target tracking in a state the Revenue Service Owner can execute immediately
 
 ## 8. Escalation Triggers
 

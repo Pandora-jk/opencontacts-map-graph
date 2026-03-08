@@ -10,7 +10,7 @@
 |------|--------|--------|---------------|
 | Finance Head | ACTIVE | Revenue orchestration | Keep the department focused on one core service and one side lane |
 | Legal Expert | ACTIVE | Compliance | Review outreach, suppression, consent, and complaint handling |
-| Revenue Service Owner | ACTIVE | B2B pipeline setup service | ICP, list quality, outreach quality, demos, closes |
+| Revenue Service Owner | ACTIVE | B2B pipeline setup service | Founder-led B2B agencies (5-30 people): first 20-account build, outreach quality, demos, closes |
 | GitHub Bounties Owner | ACTIVE | Side cash | Screen and attempt narrowly matched bounties |
 | Website Upsell Lane | INCUBATING | Conversion support | Only use when it helps close or retain a pipeline client |
 | Crypto | PAUSED | Speculative capital deployment | No execution |
@@ -35,6 +35,7 @@ Jim Knopf
 - Bounties can run only if they do not slow the core service.
 - Upsells must support the core service sale or delivery.
 - Paused lanes do not consume autonomous finance cycles.
+- Do not widen beyond the founder-led agency ICP until one full 20-company outreach cycle is complete.
 
 ## Review Cadence
 

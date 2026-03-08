@@ -5,59 +5,93 @@
 
 ## What We Sell
 
-We do not sell a speculative AI product first.
+We sell a done-for-you service first, not a speculative product:
 
-We sell a done-for-you service:
-
-**Qualified B2B pipeline setup for small service businesses and niche B2B companies.**
-
-## Customer
-
-- Founder-led or sales-led B2B business
-- 10-200 employees
-- Already sells a high-ticket service, software, or consulting outcome
-- Has weak outbound follow-up or inconsistent prospecting
+**Qualified outbound pipeline setup for founder-led B2B agencies.**
 
 ## Core Promise
 
-We identify, qualify, and prepare outbound prospects so the client can spend more time closing and less time list-building.
+**We build you a qualified outbound pipeline so you can spend more time closing and less time prospecting.**
+
+## Chosen First ICP
+
+- Founder-led B2B agencies with 5-30 people
+- Priority segments:
+  SEO agencies
+  paid ads agencies
+  web/dev agencies
+  automation agencies
+  RevOps agencies
+- English-speaking markets only for the first motion
+- Clear high-ticket service offer
+- Founder visible on the website or LinkedIn
+- Weak, inconsistent, or non-obvious outbound machine
+
+## Exclusions
+
+- Ecommerce businesses
+- Solo freelancers
+- Giant agencies
+- Low-ticket generalist shops with weak service packaging
+- Companies with an obvious mature outbound engine already in place
 
 ## Initial Delivery
 
 - Define one ICP and one buying trigger
-- Build a prospect list
-- Enrich key fields
-- Draft personalized outreach
-- Hand off a clean outreach workflow or operate it with the client
-
-## Why They Pay
-
-Clients already spend money on pipeline, booked calls, and outbound help.
-This offer is attached to an existing budget line, unlike a vague AI product.
+- Build a 100-prospect list for that ICP
+- Enrich key fields for outreach handoff
+- Add qualification notes and disqualifiers
+- Prepare outreach-ready copy
+- Include 3 personalized opening-line examples
+- Hand off a clean outbound workflow the client can run immediately
 
 ## Packaging
 
 ### Starter
-- One ICP
-- Up to 100 prospects
-- Qualification + enrichment + outreach copy
-- Manual handoff
+- Price: $300 one-time
+- Deliverable: 100 qualified prospects
+- Includes: enrichment, outreach-ready handoff, and 3 personalized opening-line examples
 
 ### Growth
-- Weekly refresh
-- Prospect qualification
-- Outreach iterations
-- Basic reporting
+- Price: $500/month
+- Deliverable: weekly refreshed target list
+- Includes: qualification notes, outreach iteration, and simple weekly reporting
+
+## First 20-Company Criteria
+
+- B2B service business, not ecommerce
+- 5-30 employees
+- Founder visible on the website or LinkedIn
+- Clear high-ticket service
+- Website has a contact form or book-a-call CTA
+- No obvious mature outbound machine
+- Not a solo freelancer
+- Not a giant agency
+- English-speaking market
+- Ideally recent activity, hiring, case studies, or founder posting
+
+## Good Contact Titles
+
+- founder
+- co-founder
+- managing director
+- head of growth
+- sales director
+
+## Why They Pay
+
+These buyers already spend money on lead generation, outbound help, list building, and booked meetings.
+This service plugs into an existing budget line instead of asking them to fund a new category.
 
 ## Pricing Rule
 
 Start service-led and keep pricing simple.
-Do not optimize for margin first. Optimize for fast proof that someone will pay.
+Optimize for the first paid proof, then tighten delivery only after real demand shows up.
 
 ## Upsells
 
 - Website cleanup only when it directly improves conversion for the same client
-- CRM cleanup or workflow fixes only when attached to the same sales motion
+- CRM cleanup or workflow fixes only when attached to the same outbound motion
 
 ## Explicit Non-Core Streams
 
@@ -68,7 +102,8 @@ Do not optimize for margin first. Optimize for fast proof that someone will pay.
 
 ## Validation Gates
 
-- First gate: first paying client
-- Second gate: repeatable prospecting workflow
-- Third gate: second and third client in the same niche
+- First gate: first 20 researched accounts that fit the ICP cleanly
+- Second gate: first paid Starter or Growth customer
+- Third gate: repeatable prospecting workflow in one agency sub-segment
+- Fourth gate: second and third customers in the same niche
 - Only after that: productize repeated pieces
