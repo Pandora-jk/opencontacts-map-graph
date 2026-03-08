@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-08T11:48:04Z
-- Run count: 41
-- Primary task: Verify email footer includes address + unsubscribe link
+- Last run (UTC): 2026-03-08T12:16:50Z
+- Run count: 42
+- Primary task: Test unsubscribe flow end-to-end
 - Primary task progress count: 2
-- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260308-r41.md
+- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260308-r42.md
 - Blocking items: 0
 - Autonomous queue items: 15
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Verify email footer includes address + unsubscribe link
+Test unsubscribe flow end-to-end
 
 ## Blocking
 - None
