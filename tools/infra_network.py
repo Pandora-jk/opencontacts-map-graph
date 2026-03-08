@@ -41,10 +41,12 @@ def _service_state(service: str) -> str | None:
     return None
 
 
-def _resolved_settings() -> tuple[str | None, str | None]:
+def _resolved_settings(
+    resolved_conf: Path = Path('/etc/systemd/resolved.conf'),
+    dropins_dir: Path = Path('/etc/systemd/resolved.conf.d'),
+) -> tuple[str | None, str | None]:
     parser = configparser.ConfigParser(strict=False)
-    paths = [Path('/etc/systemd/resolved.conf')]
-    dropins_dir = Path('/etc/systemd/resolved.conf.d')
+    paths = [resolved_conf]
     if dropins_dir.is_dir():
         paths.extend(sorted(dropins_dir.glob('*.conf')))
 
@@ -65,32 +67,39 @@ def _resolved_settings() -> tuple[str | None, str | None]:
     return mdns, llmnr
 
 
-def managed_mdns_dropin_status() -> str:
-    if not MANAGED_MDNS_DROPIN.exists():
-        return f'managed drop-in missing: {MANAGED_MDNS_DROPIN}'
+def _dropin_mode(path: Path) -> int | None:
     try:
-        content = MANAGED_MDNS_DROPIN.read_text(encoding='utf-8')
-    except OSError as exc:
-        return f'managed drop-in unreadable: {exc}'
-    if content != MDNS_RESOLVED_DROPIN:
-        return f'managed drop-in drift: {MANAGED_MDNS_DROPIN}'
-    return f'managed drop-in ready: {MANAGED_MDNS_DROPIN}'
+        return path.stat().st_mode & 0o777
+    except OSError:
+        return None
 
 
-def live_mdns_dropin_status() -> str:
-    if not LIVE_MDNS_DROPIN.exists():
-        return f'live drop-in missing: {LIVE_MDNS_DROPIN}'
+def _dropin_status(path: Path, *, label: str, ready_word: str) -> str:
+    if not path.exists():
+        return f'{label} drop-in missing: {path}'
     try:
-        content = LIVE_MDNS_DROPIN.read_text(encoding='utf-8')
+        content = path.read_text(encoding='utf-8')
     except OSError as exc:
-        return f'live drop-in unreadable: {exc}'
+        return f'{label} drop-in unreadable: {exc}'
     if content != MDNS_RESOLVED_DROPIN:
-        return f'live drop-in drift: {LIVE_MDNS_DROPIN}'
-    return f'live drop-in installed: {LIVE_MDNS_DROPIN}'
+        return f'{label} drop-in drift: {path}'
+    mode = _dropin_mode(path)
+    if mode is None:
+        return f'{label} drop-in ready: {path}'
+    if mode != 0o644:
+        return f'WARN: {label} drop-in permissions are {mode:04o} (expected 0644): {path}'
+    return f'{label} drop-in {ready_word}: {path} (mode 0644)'
 
 
-def _nsswitch_hosts_line() -> str | None:
-    path = Path('/etc/nsswitch.conf')
+def managed_mdns_dropin_status(path: Path = MANAGED_MDNS_DROPIN) -> str:
+    return _dropin_status(path, label='managed', ready_word='ready')
+
+
+def live_mdns_dropin_status(path: Path = LIVE_MDNS_DROPIN) -> str:
+    return _dropin_status(path, label='live', ready_word='installed')
+
+
+def _nsswitch_hosts_line(path: Path = Path('/etc/nsswitch.conf')) -> str | None:
     if not path.exists():
         return None
     try:
@@ -118,7 +127,15 @@ def _listener_scope(listener_detail: str) -> str | None:
     return f'Listener scope: {preview} ({len(lines)} socket(s))'
 
 
-def inspect_mdns_exposure(port_lines: str) -> str:
+def inspect_mdns_exposure(
+    port_lines: str,
+    *,
+    managed_dropin: Path = MANAGED_MDNS_DROPIN,
+    live_dropin: Path = LIVE_MDNS_DROPIN,
+    resolved_conf: Path = Path('/etc/systemd/resolved.conf'),
+    resolved_dropins_dir: Path = Path('/etc/systemd/resolved.conf.d'),
+    nsswitch_path: Path = Path('/etc/nsswitch.conf'),
+) -> str:
     if 'udp/5353' not in port_lines and ':5353' not in port_lines:
         return 'No external mDNS listener detected'
 
@@ -149,7 +166,7 @@ def inspect_mdns_exposure(port_lines: str) -> str:
         if state:
             lines.append(state)
 
-    mdns, llmnr = _resolved_settings()
+    mdns, llmnr = _resolved_settings(resolved_conf=resolved_conf, dropins_dir=resolved_dropins_dir)
     if mdns is None and llmnr is None:
         lines.append('systemd-resolved config: no explicit MulticastDNS/LLMNR override found')
     else:
@@ -157,10 +174,10 @@ def inspect_mdns_exposure(port_lines: str) -> str:
             'systemd-resolved config: '
             f"MulticastDNS={mdns or 'default'}, LLMNR={llmnr or 'default'}"
         )
-    lines.append(managed_mdns_dropin_status())
-    lines.append(live_mdns_dropin_status())
+    lines.append(managed_mdns_dropin_status(managed_dropin))
+    lines.append(live_mdns_dropin_status(live_dropin))
 
-    hosts_line = _nsswitch_hosts_line()
+    hosts_line = _nsswitch_hosts_line(nsswitch_path)
     if hosts_line:
         lines.append(f'nsswitch hosts: {hosts_line}')
         if 'mdns' not in hosts_line.lower():
@@ -174,6 +191,12 @@ def inspect_mdns_exposure(port_lines: str) -> str:
         lines.append('HARDENING: set LLMNR=no on public/cloud hosts unless explicitly required')
     lines.append('HARDENING: preview the managed drop-in with `python3 tools/infra_mdns_hardening.py --stdout`')
     lines.append('HARDENING: sync the managed workspace drop-in with `python3 tools/infra_mdns_hardening.py --write-managed-dropin`')
+    lines.append(
+        'HARDENING: stage/test the install outside /etc with '
+        '`python3 tools/infra_mdns_hardening.py --install-to /tmp/resolved.conf.d/99-openclaw-no-mdns.conf '
+        '--validate-live --live-dropin-path /tmp/resolved.conf.d/99-openclaw-no-mdns.conf '
+        '--resolved-dropins-dir /tmp/resolved.conf.d`'
+    )
     lines.append(
         'HARDENING: install the managed drop-in with '
         '`sudo install -D -m 0644 /home/ubuntu/.openclaw/workspace/systemd/99-openclaw-no-mdns.conf '
