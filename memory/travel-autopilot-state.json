@@ -1,7 +1,8 @@
 {
-  "runs": 1,
-  "cursor": 1,
+  "runs": 2,
+  "cursor": 2,
   "progress": {
-    "**Map multi-day hikes:** 6 Foot Track (3 days, bookable now), Grand Canyon Loop.": 1
+    "**Map multi-day hikes:** 6 Foot Track (3 days, bookable now), Grand Canyon Loop.": 1,
+    "**Find surf schools:** Beginner-friendly in Byron Bay, Noosa (compare prices, availability).": 1
   }
 }

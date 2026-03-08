@@ -33,6 +33,12 @@ Finance Head (You)
 │   ├── Target: $297 MRR by Day 7
 │   └── Action: Monitor campaign, close first customer
 │
+├── Product Owner: Web Design (🟢 ACTIVE)
+│   ├── Domain: Productized AI Websites + Lead Qual Integration
+│   ├── Status: Validation phase (creating templates)
+│   ├── Target: $1,500-2,000 one-time + $200-500 MRR
+│   └── Action: Create 3 templates, sell first 2-3 sites
+│
 ├── Product Owner: GitHub Bounties (🟢 ACTIVE)
 │   ├── Domain: GitHub Issue Resolution, Bounty Hunting
 │   ├── Status: Starting hunt (scanning Algora, IssueHunt)
