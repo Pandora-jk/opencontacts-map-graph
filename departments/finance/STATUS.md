@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-08T19:20:30Z
-- Run count: 60
-- Primary task: Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies
+- Last run (UTC): 2026-03-08T19:49:54Z
+- Run count: 61
+- Primary task: Write the one-line sales promise for the core service offer
 - Primary task progress count: 3
-- Last artifact: departments/finance/artifacts/icp/primary-icp-20260308-r60.md
+- Last artifact: departments/finance/artifacts/offers/core-service-offer-20260308-r61.md
 - Blocking items: 0
 - Autonomous queue items: 15
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies
+Write the one-line sales promise for the core service offer
 
 ## Blocking
 - None
