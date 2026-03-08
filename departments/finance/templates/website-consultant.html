@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{{company_name}} - Expert {{service_primary}} consulting for {{target_market}}.">
-    <meta name="keywords" content="{{service_primary}}, {{target_market}}, consultant, {{location}}, business strategy">
     <title>{{company_name}} | {{service_primary}} Consultant</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
@@ -21,27 +19,30 @@
                 <a href="#testimonials" class="text-gray-600 hover:text-gray-900">Testimonials</a>
                 <a href="#contact" class="text-gray-600 hover:text-gray-900">Contact</a>
             </div>
-            <a href="#contact" class="bg-gray-900 text-white px-4 py-2 rounded-md font-medium hover:bg-gray-800">
-                Book a Call
+            <a href="#contact" class="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700">
+                <i class="fas fa-phone-alt mr-2"></i>Book a Call
             </a>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <header id="home" class="bg-white py-20">
+    <header id="home" class="bg-blue-900 text-white py-20">
         <div class="container mx-auto px-6 text-center">
-            <h2 class="text-4xl md:text-5xl font-semibold text-gray-900 mb-6">
+            <div class="mb-6">
+                <i class="fas fa-briefcase text-8xl text-blue-400 mb-4"></i>
+            </div>
+            <h2 class="text-4xl md:text-5xl font-semibold mb-4">
                 Transform Your {{target_market}} with Expert {{service_primary}}
             </h2>
-            <p class="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+            <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
                 Proven strategies, measurable results. Helping {{target_market|lower}} achieve {{result_primary}} and {{result_secondary}}.
             </p>
             <div class="flex flex-col md:flex-row justify-center gap-4">
-                <a href="#contact" class="bg-gray-900 text-white px-8 py-4 rounded-md font-medium text-lg hover:bg-gray-800">
-                    Book Free Consultation
+                <a href="#contact" class="bg-white text-blue-900 px-8 py-4 rounded-md font-medium text-lg hover:bg-blue-100">
+                    <i class="fas fa-calendar-check mr-2"></i>Book Free Consultation
                 </a>
-                <a href="#testimonials" class="bg-white text-gray-900 border border-gray-300 px-8 py-4 rounded-md font-medium text-lg hover:bg-gray-50">
-                    See Results
+                <a href="#testimonials" class="bg-blue-700 text-white px-8 py-4 rounded-md font-medium text-lg hover:bg-blue-800">
+                    <i class="fas fa-chart-line mr-2"></i>See Results
                 </a>
             </div>
         </div>
@@ -52,23 +53,23 @@
         <div class="container mx-auto px-6">
             <h2 class="text-3xl font-semibold text-center mb-12 text-gray-900">How I Can Help</h2>
             <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-white p-6 border border-gray-200 rounded-lg">
-                    <div class="text-gray-900 mb-4">
-                        <i class="fas fa-chart-line text-5xl"></i>
+                <div class="bg-white p-8 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-chart-line text-6xl text-green-600 mb-4"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-2 text-gray-900">{{service_primary}}</h3>
                     <p class="text-gray-600">Comprehensive {{service_primary|lower}} strategies tailored to your unique challenges.</p>
                 </div>
-                <div class="bg-white p-6 border border-gray-200 rounded-lg">
-                    <div class="text-gray-900 mb-4">
-                        <i class="fas fa-tasks text-5xl"></i>
+                <div class="bg-white p-8 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-tasks text-6xl text-purple-600 mb-4"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-2 text-gray-900">Strategy Development</h3>
                     <p class="text-gray-600">Actionable plans with clear milestones and accountability.</p>
                 </div>
-                <div class="bg-white p-6 border border-gray-200 rounded-lg">
-                    <div class="text-gray-900 mb-4">
-                        <i class="fas fa-rocket text-5xl"></i>
+                <div class="bg-white p-8 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-rocket text-6xl text-orange-600 mb-4"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-2 text-gray-900">Implementation Support</h3>
                     <p class="text-gray-600">Hands-on guidance to ensure successful execution.</p>
@@ -83,27 +84,31 @@
             <h2 class="text-3xl font-semibold text-center mb-8 text-gray-900">Why Work With Me?</h2>
             <div class="grid md:grid-cols-4 gap-6 text-center">
                 <div>
-                    <div class="text-4xl font-semibold text-gray-900 mb-2">{{years_experience}}+</div>
-                    <h4 class="font-semibold text-gray-900">Years Experience</h4>
+                    <div class="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user-tie text-3xl text-green-600"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-900">{{years_experience}}+ Years</h4>
                     <p class="text-gray-600 text-sm">Industry expertise</p>
                 </div>
                 <div>
-                    <div class="text-4xl font-semibold text-gray-900 mb-2">{{clients_served}}+</div>
-                    <h4 class="font-semibold text-gray-900">Clients Served</h4>
+                    <div class="bg-purple-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-users text-3xl text-purple-600"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-900">{{clients_served}}+ Clients</h4>
                     <p class="text-gray-600 text-sm">Proven track record</p>
                 </div>
                 <div>
-                    <div class="text-gray-900 mb-2">
-                        <i class="fas fa-chart-bar text-5xl"></i>
+                    <div class="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-trophy text-3xl text-blue-600"></i>
                     </div>
                     <h4 class="font-semibold text-gray-900">Proven Results</h4>
                     <p class="text-gray-600 text-sm">Measurable outcomes</p>
                 </div>
                 <div>
-                    <div class="text-gray-900 mb-2">
-                        <i class="fas fa-users text-5xl"></i>
+                    <div class="bg-orange-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-heart text-3xl text-orange-600"></i>
                     </div>
-                    <h4 class="font-semibold text-gray-900">Personalized Approach</h4>
+                    <h4 class="font-semibold text-gray-900">Personalized</h4>
                     <p class="text-gray-600 text-sm">Tailored to your needs</p>
                 </div>
             </div>
@@ -115,16 +120,19 @@
         <div class="container mx-auto px-6">
             <h2 class="text-3xl font-semibold text-center mb-12 text-gray-900">What Clients Say</h2>
             <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-white p-6 border border-gray-200 rounded-lg">
-                    <p class="text-gray-600 italic mb-4">"{{testimonial_1}}"</p>
+                <div class="bg-white p-8 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow">
+                    <i class="fas fa-quote-left text-3xl text-blue-600 mb-4"></i>
+                    <p class="text-gray-600 italic mb-6">"{{testimonial_1}}"</p>
                     <p class="font-semibold text-gray-900">- {{client_1}}, {{client_1_title}}</p>
                 </div>
-                <div class="bg-white p-6 border border-gray-200 rounded-lg">
-                    <p class="text-gray-600 italic mb-4">"{{testimonial_2}}"</p>
+                <div class="bg-white p-8 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow">
+                    <i class="fas fa-quote-left text-3xl text-green-600 mb-4"></i>
+                    <p class="text-gray-600 italic mb-6">"{{testimonial_2}}"</p>
                     <p class="font-semibold text-gray-900">- {{client_2}}, {{client_2_title}}</p>
                 </div>
-                <div class="bg-white p-6 border border-gray-200 rounded-lg">
-                    <p class="text-gray-600 italic mb-4">"{{testimonial_3}}"</p>
+                <div class="bg-white p-8 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow">
+                    <i class="fas fa-quote-left text-3xl text-purple-600 mb-4"></i>
+                    <p class="text-gray-600 italic mb-6">"{{testimonial_3}}"</p>
                     <p class="font-semibold text-gray-900">- {{client_3}}, {{client_3_title}}</p>
                 </div>
             </div>
@@ -137,29 +145,29 @@
             <h2 class="text-3xl font-semibold text-center mb-8 text-gray-900">Let's Discuss Your Goals</h2>
             <div class="grid md:grid-cols-2 gap-8">
                 <!-- Contact Form -->
-                <div class="bg-white p-6 border border-gray-200 rounded-lg">
+                <div class="bg-white p-8 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow">
                     <form id="lead-form" class="space-y-4">
-                        <input type="text" name="name" placeholder="Your Name" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
-                        <input type="email" name="email" placeholder="Email" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
-                        <input type="text" name="company" placeholder="Company" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
-                        <textarea name="message" placeholder="Tell me about your challenges..." rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
-                        <button type="submit" class="w-full bg-gray-900 text-white py-3 rounded-md font-medium hover:bg-gray-800">
-                            Book Free Consultation
+                        <input type="text" name="name" placeholder="Your Name" required class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <input type="email" name="email" placeholder="Email" required class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <input type="text" name="company" placeholder="Company" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <textarea name="message" placeholder="Tell me about your challenges..." rows="4" required class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"></textarea>
+                        <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-md font-medium hover:bg-blue-700">
+                            <i class="fas fa-paper-plane mr-2"></i>Book Free Consultation
                         </button>
                     </form>
                 </div>
                 <!-- Contact Info -->
                 <div class="space-y-6">
-                    <div>
+                    <div class="bg-white p-6 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow">
                         <h4 class="font-semibold text-lg text-gray-900 mb-3">What to Expect</h4>
                         <ul class="space-y-2 text-gray-600">
-                            <li><i class="fas fa-check text-green-500 mr-2"></i>30-minute complimentary consultation</li>
-                            <li><i class="fas fa-check text-green-500 mr-2"></i>Discussion of your goals and challenges</li>
-                            <li><i class="fas fa-check text-green-500 mr-2"></i>Initial assessment and recommendations</li>
-                            <li><i class="fas fa-check text-green-500 mr-2"></i>No-obligation proposal</li>
+                            <li><i class="fas fa-check-circle text-green-600 mr-2"></i>30-minute complimentary consultation</li>
+                            <li><i class="fas fa-check-circle text-green-600 mr-2"></i>Discussion of your goals and challenges</li>
+                            <li><i class="fas fa-check-circle text-green-600 mr-2"></i>Initial assessment and recommendations</li>
+                            <li><i class="fas fa-check-circle text-green-600 mr-2"></i>No-obligation proposal</li>
                         </ul>
                     </div>
-                    <div>
+                    <div class="bg-white p-6 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow">
                         <h4 class="font-semibold text-lg text-gray-900 mb-3">Contact</h4>
                         <p class="text-gray-600">{{email}}</p>
                         <p class="text-gray-600">{{location}}</p>

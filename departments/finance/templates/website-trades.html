@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{{company_name}} - Professional {{service_primary}} services in {{location}}. Licensed and insured.">
-    <meta name="keywords" content="{{service_primary}}, {{location}}, {{service_secondary}}, emergency service, licensed">
     <title>{{company_name}} | {{service_primary}} in {{location}}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
@@ -27,20 +25,23 @@
     </nav>
 
     <!-- Hero Section -->
-    <header id="home" class="bg-white py-20">
+    <header id="home" class="bg-gray-900 text-white py-20">
         <div class="container mx-auto px-6 text-center">
-            <h2 class="text-4xl md:text-5xl font-semibold text-gray-900 mb-4">
+            <div class="mb-6">
+                <i class="fas fa-hammer text-8xl text-blue-400 mb-4"></i>
+            </div>
+            <h2 class="text-4xl md:text-5xl font-semibold mb-4">
                 Professional {{service_primary}} in {{location}}
             </h2>
-            <p class="text-xl text-gray-600 mb-8">
+            <p class="text-xl text-gray-300 mb-8">
                 Licensed & Insured | 24/7 Emergency Service | Free Estimates
             </p>
             <div class="flex flex-col md:flex-row justify-center gap-4">
-                <a href="tel:{{phone}}" class="bg-gray-900 text-white px-8 py-4 rounded-md font-medium text-lg hover:bg-gray-800">
-                    Call Now: {{phone}}
+                <a href="tel:{{phone}}" class="bg-white text-gray-900 px-8 py-4 rounded-md font-medium text-lg hover:bg-gray-100">
+                    <i class="fas fa-phone-alt mr-2"></i>Call Now: {{phone}}
                 </a>
-                <a href="#contact" class="bg-white text-gray-900 border border-gray-300 px-8 py-4 rounded-md font-medium text-lg hover:bg-gray-50">
-                    Request Quote
+                <a href="#contact" class="bg-blue-600 text-white px-8 py-4 rounded-md font-medium text-lg hover:bg-blue-700">
+                    <i class="fas fa-file-alt mr-2"></i>Request Quote
                 </a>
             </div>
         </div>
@@ -51,23 +52,23 @@
         <div class="container mx-auto px-6">
             <h2 class="text-3xl font-semibold text-center mb-12 text-gray-900">Our Services</h2>
             <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-white p-6 border border-gray-200 rounded-lg">
-                    <div class="text-gray-900 mb-4">
-                        <i class="fas fa-wrench text-5xl"></i>
+                <div class="bg-white p-8 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-wrench text-6xl text-blue-600 mb-4"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-2 text-gray-900">{{service_primary}}</h3>
                     <p class="text-gray-600">Expert {{service_primary|lower}} services for residential and commercial properties.</p>
                 </div>
-                <div class="bg-white p-6 border border-gray-200 rounded-lg">
-                    <div class="text-gray-900 mb-4">
-                        <i class="fas fa-clock text-5xl"></i>
+                <div class="bg-white p-8 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-clock text-6xl text-green-600 mb-4"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-2 text-gray-900">Emergency Service</h3>
                     <p class="text-gray-600">Available 24/7 for urgent repairs and emergencies.</p>
                 </div>
-                <div class="bg-white p-6 border border-gray-200 rounded-lg">
-                    <div class="text-gray-900 mb-4">
-                        <i class="fas fa-file-invoice-dollar text-5xl"></i>
+                <div class="bg-white p-8 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-dollar-sign text-6xl text-purple-600 mb-4"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-2 text-gray-900">Free Estimates</h3>
                     <p class="text-gray-600">No-obligation quotes with transparent pricing.</p>
@@ -82,29 +83,29 @@
             <h2 class="text-3xl font-semibold text-center mb-8 text-gray-900">Why Choose {{company_name}}?</h2>
             <div class="grid md:grid-cols-4 gap-6 text-center">
                 <div>
-                    <div class="text-gray-900 mb-2">
-                        <i class="fas fa-certificate text-5xl"></i>
+                    <div class="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-certificate text-3xl text-blue-600"></i>
                     </div>
                     <h4 class="font-semibold text-gray-900">Licensed</h4>
                     <p class="text-gray-600 text-sm">Fully licensed professionals</p>
                 </div>
                 <div>
-                    <div class="text-gray-900 mb-2">
-                        <i class="fas fa-shield-alt text-5xl"></i>
+                    <div class="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-shield-alt text-3xl text-green-600"></i>
                     </div>
                     <h4 class="font-semibold text-gray-900">Insured</h4>
                     <p class="text-gray-600 text-sm">Complete coverage for peace of mind</p>
                 </div>
                 <div>
-                    <div class="text-gray-900 mb-2">
-                        <i class="fas fa-award text-5xl"></i>
+                    <div class="bg-purple-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-award text-3xl text-purple-600"></i>
                     </div>
                     <h4 class="font-semibold text-gray-900">Experienced</h4>
                     <p class="text-gray-600 text-sm">Years of local expertise</p>
                 </div>
                 <div>
-                    <div class="text-gray-900 mb-2">
-                        <i class="fas fa-smile text-5xl"></i>
+                    <div class="bg-orange-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-smile-beam text-3xl text-orange-600"></i>
                     </div>
                     <h4 class="font-semibold text-gray-900">Satisfaction Guaranteed</h4>
                     <p class="text-gray-600 text-sm">We don't leave until you're happy</p>
@@ -119,42 +120,42 @@
             <h2 class="text-3xl font-semibold text-center mb-8 text-gray-900">Contact Us</h2>
             <div class="grid md:grid-cols-2 gap-8">
                 <!-- Contact Form -->
-                <div class="bg-white p-6 border border-gray-200 rounded-lg">
+                <div class="bg-white p-8 border border-gray-200 rounded-lg">
                     <form id="lead-form" class="space-y-4">
-                        <input type="text" name="name" placeholder="Your Name" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
-                        <input type="email" name="email" placeholder="Email" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
-                        <input type="tel" name="phone" placeholder="Phone" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
-                        <textarea name="message" placeholder="How can we help?" rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
-                        <button type="submit" class="w-full bg-gray-900 text-white py-3 rounded-md font-medium hover:bg-gray-800">
-                            Send Message
+                        <input type="text" name="name" placeholder="Your Name" required class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <input type="email" name="email" placeholder="Email" required class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <input type="tel" name="phone" placeholder="Phone" required class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <textarea name="message" placeholder="How can we help?" rows="4" required class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"></textarea>
+                        <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-md font-medium hover:bg-blue-700">
+                            <i class="fas fa-paper-plane mr-2"></i>Send Message
                         </button>
                     </form>
                 </div>
                 <!-- Contact Info -->
                 <div class="space-y-6">
                     <div class="flex items-start space-x-4">
-                        <i class="fas fa-map-marker-alt text-gray-400 text-2xl mt-1"></i>
+                        <i class="fas fa-map-marker-alt text-3xl text-blue-600 mt-1"></i>
                         <div>
                             <h4 class="font-semibold text-gray-900">Service Area</h4>
                             <p class="text-gray-600">{{location}} & surrounding areas</p>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4">
-                        <i class="fas fa-phone text-gray-400 text-2xl mt-1"></i>
+                        <i class="fas fa-phone text-3xl text-green-600 mt-1"></i>
                         <div>
                             <h4 class="font-semibold text-gray-900">Phone</h4>
                             <p class="text-gray-600">{{phone}}</p>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4">
-                        <i class="fas fa-envelope text-gray-400 text-2xl mt-1"></i>
+                        <i class="fas fa-envelope text-3xl text-purple-600 mt-1"></i>
                         <div>
                             <h4 class="font-semibold text-gray-900">Email</h4>
                             <p class="text-gray-600">{{email}}</p>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4">
-                        <i class="fas fa-clock text-gray-400 text-2xl mt-1"></i>
+                        <i class="fas fa-clock text-3xl text-orange-600 mt-1"></i>
                         <div>
                             <h4 class="font-semibold text-gray-900">Hours</h4>
                             <p class="text-gray-600">24/7 Emergency Service</p>
