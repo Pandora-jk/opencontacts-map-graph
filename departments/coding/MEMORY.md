@@ -9,6 +9,10 @@
 - **Pending Deploys:** None
 
 ## Recent Activity
+- **2026-03-08:**
+  - Added a coding feedback-loop auditor that inventories all unmerged `feature/*` branches across tracked repos.
+  - Branches are now classified as `coding_agent` or `review_agent` work, with explicit `merge_ready` gating for review branches that have test evidence, remote sync, and a clean merge path to `main`.
+  - `coding-autopilot.py` now prioritizes branch feedback work before pulling another Ready card, so review/merge debt is no longer invisible.
 - **2026-03-01:** 
   - Fixed `fix-edit-issues.py` syntax error (Python 2 → 3).
   - Replaced hardcoded paths with env vars.

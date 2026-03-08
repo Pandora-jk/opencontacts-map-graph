@@ -20,6 +20,13 @@ Project scope: OpenClaw workspace automation, reliability, and agent tooling.
   - tests: empty heartbeat, active heartbeat, error fallback
   - acceptance: summary log generated daily
 
+## Ready
+
+- [ ] **Sync GitHub PR and CI status into the coding feedback loop**
+  - branch: `feature/workspace-core-github-pr-feedback-sync-2026-03-08`
+  - tests: PR payload fixture parsing, green/red check classification, missing-check fallback
+  - acceptance: review-agent merge decisions can use GitHub check state instead of local notes only
+
 ## In Progress
 
 ## Review

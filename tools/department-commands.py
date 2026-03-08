@@ -19,6 +19,8 @@ import subprocess
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from coding_feedback_loop import audit_feedback_loop, build_snapshot
+
 ROOT = Path("/home/ubuntu/.openclaw/workspace")
 DEPARTMENTS = ("finance", "coding", "infra", "travel")
 
@@ -70,6 +72,11 @@ def coding_kanban_snapshot() -> str:
     return f"kanban_files={len(files)} ready_cards={ready} in_progress_cards={in_progress}"
 
 
+def coding_feedback_snapshot() -> str:
+    _, summary = audit_feedback_loop(ROOT)
+    return build_snapshot(summary)
+
+
 def coding_ready_cards(limit: int) -> list[str]:
     base = ROOT / "departments" / "coding" / "kanban"
     if not base.exists():
@@ -112,6 +119,7 @@ def status_for(dept: str) -> str:
         extras.append(f"last_activity={last_finance_activity()}")
     if dept == "coding":
         extras.append(coding_kanban_snapshot())
+        extras.append(coding_feedback_snapshot())
     extra_str = f" | {'; '.join(extras)}" if extras else ""
     return f"{dept}: open={c['open']} in_progress={c['in_progress']} done={c['done']}{extra_str}"
 
