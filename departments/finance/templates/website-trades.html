@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{company_name}} - Professional {{service_primary}} services in {{location}}. Licensed, insured, and ready to help.">
+    <meta name="keywords" content="{{service_primary}}, {{location}}, {{service_secondary}}, emergency service, licensed">
+    <title>{{company_name}} | {{service_primary}} in {{location}}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-blue-600 text-white py-4">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">{{company_name}}</h1>
+            <div class="hidden md:flex space-x-6">
+                <a href="#home" class="hover:text-blue-200">Home</a>
+                <a href="#services" class="hover:text-blue-200">Services</a>
+                <a href="#about" class="hover:text-blue-200">About</a>
+                <a href="#contact" class="hover:text-blue-200">Contact</a>
+            </div>
+            <a href="tel:{{phone}}" class="bg-white text-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-blue-100">
+                📞 {{phone}}
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="home" class="bg-blue-700 text-white py-20">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                Professional {{service_primary}} in {{location}}
+            </h2>
+            <p class="text-xl mb-8">
+                Licensed & Insured • 24/7 Emergency Service • Free Estimates
+            </p>
+            <div class="flex flex-col md:flex-row justify-center gap-4">
+                <a href="tel:{{phone}}" class="bg-white text-blue-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-100">
+                    📞 Call Now: {{phone}}
+                </a>
+                <a href="#contact" class="bg-blue-500 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-400">
+                    📧 Request Quote
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Services Section -->
+    <section id="services" class="py-16">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-12">Our Services</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Service 1 -->
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="text-blue-600 text-4xl mb-4">🔧</div>
+                    <h3 class="text-xl font-bold mb-2">{{service_primary}}</h3>
+                    <p class="text-gray-600">Expert {{service_primary|lower}} services for residential and commercial properties.</p>
+                </div>
+                <!-- Service 2 -->
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="text-blue-600 text-4xl mb-4">⚡</div>
+                    <h3 class="text-xl font-bold mb-2">Emergency Service</h3>
+                    <p class="text-gray-600">Available 24/7 for urgent repairs and emergencies.</p>
+                </div>
+                <!-- Service 3 -->
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="text-blue-600 text-4xl mb-4">✅</div>
+                    <h3 class="text-xl font-bold mb-2">Free Estimates</h3>
+                    <p class="text-gray-600">No-obligation quotes with transparent pricing.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="bg-gray-100 py-16">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-8">Why Choose {{company_name}}?</h2>
+            <div class="grid md:grid-cols-4 gap-6 text-center">
+                <div>
+                    <div class="text-4xl mb-2">🏆</div>
+                    <h4 class="font-bold">Licensed</h4>
+                    <p class="text-gray-600">Fully licensed professionals</p>
+                </div>
+                <div>
+                    <div class="text-4xl mb-2">🛡️</div>
+                    <h4 class="font-bold">Insured</h4>
+                    <p class="text-gray-600">Complete coverage for peace of mind</p>
+                </div>
+                <div>
+                    <div class="text-4xl mb-2">⭐</div>
+                    <h4 class="font-bold">Experienced</h4>
+                    <p class="text-gray-600">Years of local expertise</p>
+                </div>
+                <div>
+                    <div class="text-4xl mb-2">💯</div>
+                    <h4 class="font-bold">Satisfaction Guaranteed</h4>
+                    <p class="text-gray-600">We don't leave until you're happy</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-8">Contact Us</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Contact Form -->
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <form id="lead-form" class="space-y-4">
+                        <input type="text" name="name" placeholder="Your Name" required class="w-full px-4 py-2 border rounded-lg">
+                        <input type="email" name="email" placeholder="Email" required class="w-full px-4 py-2 border rounded-lg">
+                        <input type="tel" name="phone" placeholder="Phone" required class="w-full px-4 py-2 border rounded-lg">
+                        <textarea name="message" placeholder="How can we help?" rows="4" required class="w-full px-4 py-2 border rounded-lg"></textarea>
+                        <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+                <!-- Contact Info -->
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-2xl">📍</span>
+                        <div>
+                            <h4 class="font-bold">Service Area</h4>
+                            <p class="text-gray-600">{{location}} & surrounding areas</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-2xl">📞</span>
+                        <div>
+                            <h4 class="font-bold">Phone</h4>
+                            <p class="text-gray-600">{{phone}}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-2xl">📧</span>
+                        <div>
+                            <h4 class="font-bold">Email</h4>
+                            <p class="text-gray-600">{{email}}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-2xl">🕒</span>
+                        <div>
+                            <h4 class="font-bold">Hours</h4>
+                            <p class="text-gray-600">24/7 Emergency Service</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2026 {{company_name}}. All rights reserved.</p>
+            <p class="text-gray-400 text-sm mt-2">Licensed & Insured | Serving {{location}} since {{year_established}}</p>
+        </div>
+    </footer>
+
+    <!-- Lead Qual Integration -->
+    <script>
+        document.getElementById('lead-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/lead', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(Object.fromEntries(formData))
+            });
+            if (response.ok) {
+                alert('Thank you! We\'ll contact you within 1 hour.');
+                e.target.reset();
+            }
+        });
+    </script>
+</body>
+</html>
