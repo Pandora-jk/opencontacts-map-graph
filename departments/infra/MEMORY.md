@@ -2,11 +2,28 @@
 
 ## Current State
 - **Uptime:** 99.9% (AWS EC2)
-- **Disk Usage:** 87% on `/` (Alert)
+- **Disk Usage:** 88% on `/` (Alert)
 - **Last Backup:** 2026-03-01 03:00 AEDT
-- **Security Status:** Alert (`udp/5353` externally exposed, `ufw` unavailable from host checks, 1 pending update)
+- **Security Status:** Alert (`udp/5353` externally exposed, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-08 14:33 UTC:**
+  - Reconfirmed `Run security audit` is still the top infra task from TODO + latest artifacts because `udp/5353` remains externally exposed in fresh runs 22 and 23.
+  - Hardened `tools/infra_mdns_hardening.py` so the helper cannot quietly bypass the staged-first workflow:
+    - added `--allow-live-install` as an explicit opt-in for `--install-to` when the target is the real `/etc/systemd/resolved.conf.d/99-openclaw-no-mdns.conf`
+    - blocked `--stage-dir` from pointing at the live resolved drop-in directory
+    - blocked meaningless `--allow-live-install` usage without `--install-to`
+  - Added regression coverage in `tests/test_infra_mdns_hardening.py` for the new live-path and stage-dir guardrails.
+  - Verification passed: `python3 -m unittest tests.test_infra_network tests.test_infra_mdns_hardening`, `python3 -m py_compile tools/infra_network.py tools/infra_mdns_hardening.py tools/infra-status.py tools/infra-autopilot.py`, `python3 tools/infra_mdns_hardening.py --stage-dir /tmp/openclaw-mdns-stage --validate-live`, `python3 tools/infra_mdns_hardening.py --install-to /etc/systemd/resolved.conf.d/99-openclaw-no-mdns.conf` (expected exit 2), `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260308T143328Z-infra-status.md` and `20260308T143328Z-r23-run-security-audit-check-for-open-ports-ssh-config-faile.md`.
+- **2026-03-08 13:34 UTC:**
+  - Reconfirmed `Run security audit` is still the top infra task from TODO + latest artifacts because `udp/5353` remains externally exposed.
+  - Hardened the mDNS remediation workflow so staged validation no longer claims a `/tmp` drop-in is live:
+    - added explicit `staged drop-in installed` status in `tools/infra_network.py`
+    - updated `tools/infra_mdns_hardening.py` to label validation targets as `staged` vs `live` and emit `STAGED_VALIDATION_DONE` only for staged checks
+    - updated guidance strings so `/etc` install is gated on staged validation, while post-install verification explicitly expects `LIVE_VALIDATION_DONE`
+  - Verification passed: `python3 -m unittest tests.test_infra_network tests.test_infra_mdns_hardening`, `python3 -m py_compile tools/infra_network.py tools/infra_mdns_hardening.py tools/infra-autopilot.py tools/infra-status.py`, `python3 tools/infra_mdns_hardening.py --stage-dir /tmp/openclaw-mdns-stage --validate-live`, `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts `20260308T133410Z-infra-status.md` and `20260308T133409Z-r20-run-security-audit-check-for-open-ports-ssh-config-faile.md` now tell the operator to expect `STAGED_VALIDATION_DONE` before `/etc` install and `LIVE_VALIDATION_DONE` only after the real host restart.
 - **2026-03-01:** 
   - Department created.
   - Noted pending system updates (2 packages).
@@ -28,10 +45,9 @@
   - Live reclaim candidates now surface `/tmp` (`989M`, including stale `/tmp/gradle-home` at `913M`), `/var/cache/apt` (`661M`), `/home/ubuntu/.cache` (`366M`), and `/var/log/journal` (`130M`); no deleted-but-open files detected.
 
 ## Known Issues
-- Root filesystem `/` is at `87%` usage and still needs space reclamation.
+- Root filesystem `/` is at `88%` usage and still needs space reclamation.
 - Unexpected external `udp/5353` listener remains exposed.
 - `ufw` unavailable and no host firewall tool detected from current host checks.
-- 1 system update pending.
 
 ## Backup Status
 - **Frequency:** Daily (03:00 AEDT)

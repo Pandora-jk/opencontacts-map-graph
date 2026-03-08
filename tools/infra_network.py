@@ -99,6 +99,10 @@ def live_mdns_dropin_status(path: Path = LIVE_MDNS_DROPIN) -> str:
     return _dropin_status(path, label='live', ready_word='installed')
 
 
+def staged_mdns_dropin_status(path: Path) -> str:
+    return _dropin_status(path, label='staged', ready_word='installed')
+
+
 def _nsswitch_hosts_line(path: Path = Path('/etc/nsswitch.conf')) -> str | None:
     if not path.exists():
         return None
@@ -132,6 +136,7 @@ def inspect_mdns_exposure(
     *,
     managed_dropin: Path = MANAGED_MDNS_DROPIN,
     live_dropin: Path = LIVE_MDNS_DROPIN,
+    applied_dropin_label: str = 'live',
     resolved_conf: Path = Path('/etc/systemd/resolved.conf'),
     resolved_dropins_dir: Path = Path('/etc/systemd/resolved.conf.d'),
     nsswitch_path: Path = Path('/etc/nsswitch.conf'),
@@ -175,7 +180,10 @@ def inspect_mdns_exposure(
             f"MulticastDNS={mdns or 'default'}, LLMNR={llmnr or 'default'}"
         )
     lines.append(managed_mdns_dropin_status(managed_dropin))
-    lines.append(live_mdns_dropin_status(live_dropin))
+    if applied_dropin_label == 'staged':
+        lines.append(staged_mdns_dropin_status(live_dropin))
+    else:
+        lines.append(live_mdns_dropin_status(live_dropin))
 
     hosts_line = _nsswitch_hosts_line(nsswitch_path)
     if hosts_line:
@@ -195,12 +203,12 @@ def inspect_mdns_exposure(
         'HARDENING: stage/test the install outside /etc with '
         '`python3 tools/infra_mdns_hardening.py --stage-dir /tmp/openclaw-mdns-stage --validate-live`'
     )
-    lines.append('HARDENING: only install to /etc after the staged validation reports the drop-in installed and LIVE_VALIDATION_DONE')
+    lines.append('HARDENING: only install to /etc after the staged validation reports the staged drop-in installed and STAGED_VALIDATION_DONE')
     lines.append(
         'HARDENING: install the managed drop-in with '
         '`sudo install -D -m 0644 /home/ubuntu/.openclaw/workspace/systemd/99-openclaw-no-mdns.conf '
         '/etc/systemd/resolved.conf.d/99-openclaw-no-mdns.conf`'
     )
-    lines.append('HARDENING: restart resolved and verify with `sudo systemctl restart systemd-resolved && python3 tools/infra_mdns_hardening.py --validate-live`')
+    lines.append('HARDENING: restart resolved and verify with `sudo systemctl restart systemd-resolved && python3 tools/infra_mdns_hardening.py --validate-live` (expect LIVE_VALIDATION_DONE)')
     lines.append('HARDENING: if mDNS is unnecessary, disable avahi-daemon/systemd-resolved mDNS support or block udp/5353 upstream')
     return '\n'.join(lines)
