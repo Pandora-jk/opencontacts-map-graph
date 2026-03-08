@@ -1,7 +1,7 @@
 {
-  "runs": 38,
+  "runs": 40,
   "cursor": 1,
   "progress": {
-    "**Run security audit:** Check for open ports, SSH config, failed logins.": 38
+    "**Run security audit:** Check for open ports, SSH config, failed logins.": 40
   }
 }

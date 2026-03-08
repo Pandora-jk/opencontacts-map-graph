@@ -143,12 +143,14 @@ def check_open_ports(port_lines: str | None = None) -> str:
 def check_firewall_status() -> str:
     """Summarize host firewall tooling visibility."""
     lines: list[str] = []
-    ufw = shutil.which('ufw')
+    # Check ufw via sudo since it's in /usr/sbin/
+    ufw_status_cmd = run_cmd(['bash', '-lc', 'sudo ufw status 2>&1'], max_chars=200)
+    ufw_installed = 'Status:' in ufw_status_cmd or 'ufw' in run_cmd(['bash', '-lc', 'sudo which ufw 2>/dev/null'], max_chars=100)
     nft = shutil.which('nft')
     iptables = shutil.which('iptables')
 
-    if ufw:
-        status = run_cmd(['bash', '-lc', 'ufw status verbose 2>&1 | sed -n "1,20p"'], max_chars=1200)
+    if ufw_installed:
+        status = run_cmd(['bash', '-lc', 'sudo ufw status verbose 2>&1 | sed -n "1,20p"'], max_chars=1200)
         if re.search(r'^Status:\s+active\b', status, re.IGNORECASE | re.MULTILINE):
             lines.append('ufw: active')
         elif re.search(r'^Status:\s+inactive\b', status, re.IGNORECASE | re.MULTILINE):
@@ -161,7 +163,7 @@ def check_firewall_status() -> str:
     other_tools = [name for name, found in (('nft', nft), ('iptables', iptables)) if found]
     if other_tools:
         lines.append(f"Other firewall tooling detected: {', '.join(other_tools)}")
-    elif not ufw:
+    elif not ufw_installed:
         lines.append('RISK: No host firewall tool detected (ufw/nft/iptables unavailable)')
 
     lines.append('Note: upstream cloud firewalls/security groups are not visible from this host check')
