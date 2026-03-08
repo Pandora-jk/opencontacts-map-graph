@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Finance autopilot loop with concrete execution artifacts.
+Finance autopilot loop aligned with the service-first finance model.
 
 Each run:
 - Reads finance TODO and state
-- Selects an autonomous task (round-robin)
+- Selects an autonomous task from the queue
 - Executes one concrete micro-step and writes an artifact file
-- Writes departments/finance/STATUS.md with progress details
+- Writes departments/finance/STATUS.md with portfolio-aligned progress details
 - Appends logs/finance-activity.log
 """
 
@@ -23,7 +23,6 @@ ROOT = Path("/home/ubuntu/.openclaw/workspace")
 FIN_DIR = ROOT / "departments" / "finance"
 TODO_FILE = FIN_DIR / "TODO.md"
 STATUS_FILE = FIN_DIR / "STATUS.md"
-INCOME_FILE = ROOT / "INCOME-ENGINE.md"
 ACTIVITY_LOG = ROOT / "logs" / "finance-activity.log"
 STATE_FILE = ROOT / "memory" / "finance-autopilot-state.json"
 ARTIFACTS_DIR = FIN_DIR / "artifacts"
@@ -35,10 +34,11 @@ def parse_todo_sections(text: str) -> tuple[list[str], list[str]]:
     section = ""
     for raw in text.splitlines():
         line = raw.strip()
-        if "User Blocking" in line:
+        lowered = line.lower()
+        if "user blocking" in lowered or "blocking items" in lowered:
             section = "blocking"
             continue
-        if "Autonomous Queue" in line:
+        if "autonomous queue" in lowered:
             section = "autonomous"
             continue
         if line.startswith("## "):
@@ -76,56 +76,6 @@ def save_state(state: dict) -> None:
     STATE_FILE.write_text(json.dumps(state, indent=2))
 
 
-def opportunity_candidates() -> list[dict]:
-    return [
-        {
-            "idea": "Local lead pack subscription (weekly niche CSV refresh)",
-            "speed": 4,
-            "effort": 3,
-            "risk": 2,
-            "upside": 4,
-            "first_action": "Build a 50-row sample + weekly update offer page",
-        },
-        {
-            "idea": "Micro-automation gig bundle (PDF/CSV + cleanup scripts)",
-            "speed": 5,
-            "effort": 2,
-            "risk": 1,
-            "upside": 3,
-            "first_action": "Package 3 scripts with fixed-price tiers",
-        },
-        {
-            "idea": "Niche outreach templates pack (AU local trades)",
-            "speed": 4,
-            "effort": 2,
-            "risk": 1,
-            "upside": 3,
-            "first_action": "Create 10 templates + sample personalization guide",
-        },
-        {
-            "idea": "Monthly data maintenance retainer",
-            "speed": 2,
-            "effort": 4,
-            "risk": 2,
-            "upside": 5,
-            "first_action": "Draft recurring scope + SLA pricing sheet",
-        },
-        {
-            "idea": "Affiliate layer for currently shipped tooling",
-            "speed": 3,
-            "effort": 2,
-            "risk": 1,
-            "upside": 3,
-            "first_action": "Add recommended tools section to product README pages",
-        },
-    ]
-
-
-def score(idea: dict) -> int:
-    # Higher is better: speed/upside positive, effort/risk negative.
-    return (idea["speed"] * 3) + (idea["upside"] * 3) - (idea["effort"] * 2) - (idea["risk"] * 2)
-
-
 def slugify(value: str) -> str:
     out = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
     return out[:64] or "task"
@@ -150,71 +100,95 @@ def write_artifact(rel_path: str, content: str) -> Path:
     return artifact
 
 
-def action_daily_cash(now: dt.datetime, run_id: int) -> Path:
+def action_offer(now: dt.datetime, run_id: int) -> Path:
     content = (
-        f"# Short-Cycle Offer Draft (Run {run_id})\n\n"
+        f"# Core Service Offer Draft (Run {run_id})\n\n"
         f"- Generated at: {now.isoformat().replace('+00:00', 'Z')}\n"
-        "- Offer: Script-fix sprint (24h delivery)\n"
-        "- Price anchor: AUD 49 (basic), AUD 99 (priority)\n"
-        "- CTA: Reply with repo link + issue list\n"
+        "- Offer: done-for-you B2B pipeline setup\n"
+        "- Promise: qualified prospects plus outreach-ready handoff\n"
+        "- Customer: founder-led B2B firms with weak outbound process\n"
     )
-    return write_artifact(f"offers/short-cycle-offer-{now:%Y%m%d}-r{run_id}.md", content)
+    return write_artifact(f"offers/core-service-offer-{now:%Y%m%d}-r{run_id}.md", content)
 
 
-def action_recurring(now: dt.datetime, run_id: int) -> Path:
+def action_icp(now: dt.datetime, run_id: int) -> Path:
     content = (
-        f"# Monthly Retainer Offer (Run {run_id})\n\n"
+        f"# ICP Selection Note (Run {run_id})\n\n"
         f"- Generated at: {now.isoformat().replace('+00:00', 'Z')}\n"
-        "- Package: Weekly data refresh + QA + delivery\n"
-        "- SLA: 48h turnaround\n"
-        "- Pricing: AUD 299 / month starter tier\n"
+        "- Preferred ICP: founder-led B2B agencies, consultants, and niche SaaS\n"
+        "- Team size: 10-200 employees\n"
+        "- Reason: clear revenue pain and ability to pay for pipeline support\n"
     )
-    return write_artifact(f"retainers/monthly-retainer-{now:%Y%m%d}-r{run_id}.md", content)
+    return write_artifact(f"icp/primary-icp-{now:%Y%m%d}-r{run_id}.md", content)
 
 
-def action_pipeline(now: dt.datetime, run_id: int) -> Path:
-    lines = ["name,city,state,category,contact_hint"]
+def action_target_list(now: dt.datetime, run_id: int) -> Path:
+    lines = ["company,segment,team_size,website,decision_maker,email,fit_note"]
     for i in range(1, 51):
-        lines.append(f"Solar Wholesaler {i},Melbourne,VIC,solar,info{i}@example.com")
-    content = "\n".join(lines) + "\n"
-    return write_artifact(f"pipeline/solar-wholesalers-50-{now:%Y%m%d}-r{run_id}.csv", content)
-
-
-def action_outreach_templates(now: dt.datetime, run_id: int) -> Path:
-    blocks = [f"# Outreach Templates (Run {run_id})", ""]
-    for i in range(1, 6):
-        blocks.extend(
-            [
-                f"## Template {i}",
-                "Subject: Quick fix to reduce admin time this week",
-                "Body: Hi {{name}}, we can automate your recurring admin task in 24h. "
-                "Want a fixed-price scope?",
-                "",
-            ]
+        lines.append(
+            f"Example B2B Company {i},agency,10-200,https://example{i}.com,Founder,founder{i}@example.com,needs outbound rigor"
         )
-    return write_artifact(f"templates/plumbing-melbourne-5-{now:%Y%m%d}-r{run_id}.md", "\n".join(blocks))
+    content = "\n".join(lines) + "\n"
+    return write_artifact(f"pipeline/target-list-50-{now:%Y%m%d}-r{run_id}.csv", content)
 
 
-def action_opportunity_scan(now: dt.datetime, run_id: int) -> Path:
-    ranked = sorted(opportunity_candidates(), key=score, reverse=True)[:3]
-    lines = [f"# Opportunity Scan (Run {run_id})", ""]
-    for i, item in enumerate(ranked, start=1):
-        lines.append(f"{i}. {item['idea']} | score={score(item)} | next={item['first_action']}")
-    lines.append("")
-    return write_artifact(f"scans/opportunity-scan-{now:%Y%m%d}-r{run_id}.md", "\n".join(lines))
-
-
-def action_asset_inventory(now: dt.datetime, run_id: int) -> Path:
+def action_outreach(now: dt.datetime, run_id: int) -> Path:
     content = (
-        f"# Asset Inventory (Run {run_id})\n\n"
-        "| SKU | Asset | Price (AUD) | Delivery |\n"
-        "|---|---|---:|---|\n"
-        "| SKU-001 | PDF-to-CSV utility | 29 | digital download |\n"
-        "| SKU-002 | Solar leads starter pack | 49 | CSV file |\n"
-        "| SKU-003 | Outreach template bundle | 19 | markdown pack |\n"
-        f"\nGenerated: {now.isoformat().replace('+00:00', 'Z')}\n"
+        f"# Outreach Draft (Run {run_id})\n\n"
+        "Subject: quick idea to improve outbound pipeline\n\n"
+        "Hi {{name}},\n\n"
+        "I noticed {{company}} appears to fit the kind of B2B team where outbound "
+        "follow-up becomes inconsistent as founder time gets stretched.\n\n"
+        "We help teams build a cleaner qualified prospect pipeline: list building, "
+        "fit review, enrichment, and outreach-ready handoff.\n\n"
+        "If useful, I can show you a short sample with 3 scored prospects.\n"
     )
-    return write_artifact(f"inventory/sku-inventory-{now:%Y%m%d}-r{run_id}.md", content)
+    return write_artifact(f"outreach/outreach-draft-{now:%Y%m%d}-r{run_id}.md", content)
+
+
+def action_demo(now: dt.datetime, run_id: int) -> Path:
+    content = (
+        f"# Demo Script (Run {run_id})\n\n"
+        "1. Show the ICP and why these prospects fit.\n"
+        "2. Walk through 3 example prospects with qualification notes.\n"
+        "3. Show the outreach-ready first line and CTA.\n"
+        "4. Explain weekly delivery and reporting.\n"
+        "5. Close on next step and pricing.\n"
+    )
+    return write_artifact(f"demos/demo-script-{now:%Y%m%d}-r{run_id}.md", content)
+
+
+def action_delivery(now: dt.datetime, run_id: int) -> Path:
+    content = (
+        f"# First Client Delivery Checklist (Run {run_id})\n\n"
+        "- Confirm ICP and target geography\n"
+        "- Confirm target titles and exclusions\n"
+        "- Deliver initial prospect batch\n"
+        "- Deliver outreach copy and usage notes\n"
+        "- Confirm follow-up cadence and reporting format\n"
+    )
+    return write_artifact(f"delivery/first-client-checklist-{now:%Y%m%d}-r{run_id}.md", content)
+
+
+def action_compliance(now: dt.datetime, run_id: int) -> Path:
+    content = (
+        f"# Compliance Check Note (Run {run_id})\n\n"
+        "- Validate footer contains business identity and unsubscribe path\n"
+        "- Confirm public B2B data sources only\n"
+        "- Confirm suppression list process before sending\n"
+        "- Confirm complaint threshold and pause rule\n"
+    )
+    return write_artifact(f"compliance/compliance-check-{now:%Y%m%d}-r{run_id}.md", content)
+
+
+def action_bounties(now: dt.datetime, run_id: int) -> Path:
+    content = (
+        f"# Bounty Scan Note (Run {run_id})\n\n"
+        "- Scope: Ansible, Linux, DevOps, automation\n"
+        "- Purpose: secondary cash only\n"
+        "- Rule: do not displace core service execution\n"
+    )
+    return write_artifact(f"bounties/bounty-scan-{now:%Y%m%d}-r{run_id}.md", content)
 
 
 def execute_primary_task(primary: str, state: dict) -> Path | None:
@@ -222,22 +196,33 @@ def execute_primary_task(primary: str, state: dict) -> Path | None:
     run_id = int(state.get("runs", 0))
     task_lower = primary.lower()
     actions: list[tuple[str, Callable[[dt.datetime, int], Path]]] = [
-        ("daily cash task", action_daily_cash),
-        ("recurring income task", action_recurring),
-        ("pipeline expansion", action_pipeline),
-        ("offer testing", action_outreach_templates),
-        ("opportunity scan", action_opportunity_scan),
-        ("build asset inventory", action_asset_inventory),
+        ("sales promise", action_offer),
+        ("core service offer", action_offer),
+        ("lock the first icp", action_icp),
+        ("first 100-company target list", action_target_list),
+        ("target list", action_target_list),
+        ("extract company name", action_target_list),
+        ("prepare the first outreach batch", action_outreach),
+        ("cold email templates", action_compliance),
+        ("verify email footer", action_compliance),
+        ("test unsubscribe flow", action_compliance),
+        ("suppression list", action_compliance),
+        ("public b2b data sources", action_compliance),
+        ("week 1 kpi chain", action_offer),
+        ("15-minute demo script", action_demo),
+        ("initial delivery checklist", action_delivery),
+        ("github bounties", action_bounties),
+        ("scan github bounties", action_bounties),
     ]
     for key, action in actions:
         if key in task_lower:
             return action(now, run_id)
-    # Fallback: generic artifact if task wording changes.
+
     content = (
         f"# Finance Task Note (Run {run_id})\n\n"
         f"- Task: {primary}\n"
         f"- Executed at: {now.isoformat().replace('+00:00', 'Z')}\n"
-        "- Next: refine into concrete offer/listing in next loop.\n"
+        "- Next: refine into a concrete service-delivery step in the next loop.\n"
     )
     return write_artifact(f"notes/{slugify(primary)}-{now:%Y%m%d}-r{run_id}.md", content)
 
@@ -246,8 +231,6 @@ def build_status(
     blocking: list[str], autonomous: list[str], state: dict, primary: str, artifact: Path | None
 ) -> tuple[str, str]:
     now = dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    ranked = sorted(opportunity_candidates(), key=score, reverse=True)[:3]
-    top = ranked[0] if ranked else None
     progress = state.get("task_progress", {})
     primary_count = int(progress.get(primary, 0)) if primary in progress else 0
     artifact_rel = str(artifact.relative_to(ROOT)) if artifact else "none"
@@ -258,27 +241,23 @@ def build_status(
         "",
         f"- Last run (UTC): {now}",
         f"- Run count: {state.get('runs', 0)}",
-        f"- Primary task: {primary}",
+        f"- Primary task: {primary_clean}",
         f"- Primary task progress count: {primary_count}",
         f"- Last artifact: {artifact_rel}",
         f"- Blocking items: {len(blocking)}",
         f"- Autonomous queue items: {len(autonomous)}",
         "",
-        "## Top Opportunities (scored)",
+        "## Portfolio State",
+        "- Core business: B2B pipeline setup service (ACTIVE)",
+        "- Side cash: GitHub bounties (ACTIVE)",
+        "- Upsell: website cleanup (INCUBATING ONLY)",
+        "- Paused: crypto, data brokerage, generic products",
+        "",
+        "## Next Action",
+        primary_clean,
+        "",
+        "## Blocking",
     ]
-    for i, item in enumerate(ranked, start=1):
-        lines.append(
-            f"{i}. {item['idea']} | score={score(item)} | speed={item['speed']} effort={item['effort']} risk={item['risk']} upside={item['upside']}"
-        )
-    lines.extend(
-        [
-            "",
-            "## Next Action",
-            top["first_action"] if top else "No opportunity available",
-            "",
-            "## Blocking",
-        ]
-    )
     if blocking:
         lines.extend([f"- {b}" for b in blocking])
     else:
@@ -295,19 +274,21 @@ def build_status(
         f"Queue: {len(autonomous)}",
         f"Blocking: {len(blocking)}",
         f"Artifact: {artifact_rel}",
-        "Top Opportunities:",
+        "Portfolio:",
+        "1. Core business: B2B pipeline setup service",
+        "2. Side cash: GitHub bounties",
+        "3. Upsell only: website cleanup",
+        "4. Paused: crypto, data brokerage, generic products",
+        f"Next: {primary_clean}",
     ]
-    for i, item in enumerate(ranked, start=1):
-        telegram.append(f"{i}. {clean_text(item['idea'])} (score {score(item)})")
-    telegram.append(f"Next: {clean_text(top['first_action']) if top else 'No next action'}")
     return status_text, "\n".join(telegram)
 
 
 def append_activity(summary: str) -> None:
     ACTIVITY_LOG.parent.mkdir(parents=True, exist_ok=True)
     now = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
-    with ACTIVITY_LOG.open("a", encoding="utf-8") as f:
-        f.write(f"[{now}] {summary}\n")
+    with ACTIVITY_LOG.open("a", encoding="utf-8") as handle:
+        handle.write(f"[{now}] {summary}\n")
 
 
 def main() -> int:

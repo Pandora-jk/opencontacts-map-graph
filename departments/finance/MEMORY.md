@@ -1,49 +1,39 @@
 # Finance Department - Memory Log
 
 ## Current State
-- **Revenue (Total):** $0.00
-- **Revenue (This Month):** $0.00
-- **Active Products:**
-  - PDF-to-CSV Script ($9.99)
-  - Sydney Solar Leads List ($29.00)
-  - Micro-automation bundle (3 scripts: PDF-to-CSV, CSV Cleaner, Lead Validator) - $27.00
-- **Active Channels:**
-  - GitHub (Storefront)
-  - Direct Outreach (Drafted)
-- **Blockers:**
-  - GitHub Pages not enabled by user.
-  - Crypto wallet addresses not configured.
+- Revenue total: $0.00
+- Revenue this month: $0.00
+- Core business: done-for-you B2B pipeline setup service
+- Active side cash: GitHub bounties
+- Incubating only: website cleanup as an upsell to pipeline clients
+- Paused: crypto, solar/data brokerage, generic digital products, broad multi-product expansion
 
-## Recent Activity
-- **2026-03-07:**
-  - Finance autopilot run #88 completed.
-  - **Created monthly retainer offer (run 88):**
-    - Package: Weekly data refresh + QA + delivery
-    - SLA: 48h turnaround
-    - Pricing: AUD 299 / month starter tier
-  - **Created SKU inventory with 3 sellable products:**
-    - SKU-001: PDF-to-CSV utility ($29 AUD)
-    - SKU-002: Solar leads starter pack ($49 AUD)
-    - SKU-003: Outreach template bundle ($19 AUD)
-  - Top opportunities scored: micro-automation bundle (18), niche templates (15), lead subscription (14)
-  - **Blocking items:** Enable GitHub Pages, add crypto wallets (USDC/LTC), approve Brevo SMTP (optional)
-- **2026-03-01:**
-  - Generated 500-entry Sydney Solar Leads list (synthetic demo).
-  - Deployed sales landing page (`index.html`).
-  - Drafted 10 outreach emails to solar wholesalers.
-  - Awaiting user action to enable GitHub Pages.
-- **2026-03-06:**
-  - Finance autopilot run #66 completed.
-  - Opportunity scan completed: 3 new ideas scored.
-  - Top opportunity: Micro-automation gig bundle (score: 18).
-  - **Created micro-automation bundle with 3 scripts:**
-    - PDF-to-CSV utility (existing)
-    - CSV Cleaner & Standardizer (new)
-    - Lead List Validator (new)
-    - Priced at $27 AUD
-    - Created README with usage examples
+## Current Position
+- The department was carrying old digital-product ideas and new service ideas at the same time.
+- Finance is now being normalized around one offer people already spend money on: leads, pipeline, and outbound help.
+- The operating rule is now service first, product later.
+
+## Why This Changed
+- Buyers reliably pay for revenue help, not for vague autonomous AI products.
+- The five external reviews converged on a few realistic paths:
+  - B2B lead gen / qualification is the strongest primary business
+  - GitHub bounties are the best zero-capital secondary lane
+  - Skills or products should come only after repeated service demand
+- The old finance runtime was still scoring micro-automation, solar packs, and templates after the strategy had already moved on.
+
+## Operating Rules
+- Maximum 2 active lanes at once
+- Every active lane needs an owner, KPI, review date, and kill rule
+- New product ideas stay paused until the service has 3-5 paying customers and repeated delivery patterns
+
+## Active Lanes
+1. B2B pipeline setup service
+   Goal: first paying client, then repeat within one niche
+   KPI chain: emails sent -> replies -> demos -> closes
+2. GitHub bounties
+   Goal: short-cycle side cash without distracting from the core service
 
 ## Lessons Learned
-- Direct sales require a payment gateway (Crypto or Stripe).
-- GitHub repos serve as excellent free storefronts for digital goods.
-- Synthetic data is good for demos; real scraped data sells better.
+- Early diversification created noise, not safety.
+- A service attached to an existing budget line is more sellable than a cold-start software product.
+- Productization should come from repeated client work, not from idea generation in isolation.

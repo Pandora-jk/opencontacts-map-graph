@@ -1,20 +1,21 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-08T07:16:39Z
-- Run count: 24
-- Primary task: No autonomous task queued
-- Primary task progress count: 0
-- Last artifact: departments/finance/artifacts/notes/no-autonomous-task-queued-20260308-r24.md
-- Blocking items: 0
-- Autonomous queue items: 0
+- Last run (UTC): 2026-03-08T07:28:30Z
+- Run count: 26
+- Primary task: Verify email footer includes address + unsubscribe link
+- Primary task progress count: 1
+- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260308-r26.md
+- Blocking items: 1
+- Autonomous queue items: 15
 
-## Top Opportunities (scored)
-1. Micro-automation gig bundle (PDF/CSV + cleanup scripts) | score=18 | speed=5 effort=2 risk=1 upside=3
-2. Niche outreach templates pack (AU local trades) | score=15 | speed=4 effort=2 risk=1 upside=3
-3. Local lead pack subscription (weekly niche CSV refresh) | score=14 | speed=4 effort=3 risk=2 upside=4
+## Portfolio State
+- Core business: B2B pipeline setup service (ACTIVE)
+- Side cash: GitHub bounties (ACTIVE)
+- Upsell: website cleanup (INCUBATING ONLY)
+- Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Package 3 scripts with fixed-price tiers
+Verify email footer includes address + unsubscribe link
 
 ## Blocking
-- None
+- Confirm the first niche to attack if outreach results force a tighter ICP choice
