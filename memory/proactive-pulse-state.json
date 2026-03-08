@@ -1,9 +1,9 @@
 {
-  "last_checked_at": "2026-03-08T05:20:26Z",
+  "last_checked_at": "2026-03-08T06:21:19Z",
   "last_candidate": "cron_failure",
   "last_candidate_fingerprint": "cron:Night Coding Delegation",
   "last_fingerprint": "cron:Night Coding Delegation",
   "last_kind": "cron_failure",
-  "last_sent_at": "2026-03-08T04:20:15Z",
+  "last_sent_at": "2026-03-08T06:21:19Z",
   "last_message": "[PROACTIVE] Automation issue: Night Coding Delegation need attention. Next step: inspect the latest cron run before changing more config."
 }
