@@ -48,6 +48,28 @@
   - Expected Close Rate: 1% (1 customer = $297 MRR)
 - **Next Milestone:** First customer close by Day 7 (2026-03-15).
 
+### 2.4 Email Deliverability Protocol (Research-Based)
+**Critical:** Research identifies deliverability as the #1 failure point for B2B lead gen.
+
+**IP Warming Schedule:**
+- **Day 1-3:** Max 50 emails/day (current: 100 sent on Day 1 - acceptable as initial burst)
+- **Day 4-7:** Increase to 100 emails/day IF bounce rate <2%
+- **Week 2:** Increase to 200 emails/day IF complaint rate <0.1%
+- **Week 3+:** Scale to 500 emails/day IF all metrics healthy
+
+**Alert Thresholds:**
+- Bounce rate >2% → Pause sending, audit list quality
+- Complaint rate >0.1% → Immediate pause, review templates
+- Open rate <20% → A/B test subject lines
+- Reply rate <2% → Revise targeting or messaging
+
+**Compliance (Already Implemented):**
+- ✅ B2B only (no personal emails)
+- ✅ Physical address included
+- ✅ Unsubscribe link in every email
+- ✅ Accurate headers (no misleading subjects)
+- ✅ Suppression list operational
+
 ---
 
 ## 3. Key Metrics (Daily Monitoring)
