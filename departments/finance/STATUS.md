@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-08T14:49:58Z
-- Run count: 49
-- Primary task: Filter out personal emails, low-ticket businesses, solo operators, giant agencies, and weak-fit prospects
+- Last run (UTC): 2026-03-08T15:49:54Z
+- Run count: 51
+- Primary task: Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate
 - Primary task progress count: 2
-- Last artifact: departments/finance/artifacts/notes/filter-out-personal-emails-low-ticket-businesses-solo-operators--20260308-r49.md
+- Last artifact: departments/finance/artifacts/offers/core-service-offer-20260308-r51.md
 - Blocking items: 0
 - Autonomous queue items: 15
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Filter out personal emails, low-ticket businesses, solo operators, giant agencies, and weak-fit prospects
+Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate
 
 ## Blocking
 - None

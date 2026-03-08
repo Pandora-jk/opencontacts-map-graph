@@ -7,6 +7,16 @@
 - **Security Status:** Alert (`udp/5353` externally exposed, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-08 15:35 UTC:**
+  - Reconfirmed `Run security audit` remained the top infra task from TODO + latest logs/artifacts because public `udp/5353` exposure still dominates fresh runs 25 and 26.
+  - Hardened the repo-side mDNS remediation flow so validation now fails closed instead of treating unresolved live exposure as a success:
+    - `tools/infra_network.py` now ignores local-only `127.0.0.1/[::1]:5353` sockets when deciding whether external mDNS exposure exists
+    - `tools/infra_mdns_hardening.py --validate-live` now returns `LIVE_VALIDATION_FAILED` unless the managed live `/etc` drop-in is installed cleanly and external `udp/5353` is no longer exposed
+    - staged validation now ends with `STAGED_VALIDATION_READY` and explicitly warns that staging does not clear the live host listener
+    - `tools/infra-status.py` now passes raw socket lines into `inspect_mdns_exposure`, fixing a brief mismatch where the mDNS subsection could say `No external mDNS listener detected` while the open-port section still flagged `udp/5353`
+  - Added regression coverage in `tests/test_infra_mdns_hardening.py`, `tests/test_infra_network.py`, and new `tests/test_infra_status.py`.
+  - Verification passed: `python3 -m unittest tests.test_infra_network tests.test_infra_mdns_hardening tests.test_infra_status`, `python3 -m py_compile tools/infra_network.py tools/infra_mdns_hardening.py tools/infra-status.py tools/infra-autopilot.py`, `python3 tools/infra_mdns_hardening.py --stage-dir /tmp/openclaw-mdns-stage --validate-live`, `python3 tools/infra_mdns_hardening.py --validate-live` (expected exit 1 with `LIVE_VALIDATION_FAILED`), `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260308T153549Z-infra-status.md` and `20260308T153559Z-r26-run-security-audit-check-for-open-ports-ssh-config-faile.md`.
 - **2026-03-08 14:33 UTC:**
   - Reconfirmed `Run security audit` is still the top infra task from TODO + latest artifacts because `udp/5353` remains externally exposed in fresh runs 22 and 23.
   - Hardened `tools/infra_mdns_hardening.py` so the helper cannot quietly bypass the staged-first workflow:

@@ -8,6 +8,7 @@ sys.path.insert(0, "/home/ubuntu/.openclaw/workspace/tools")
 
 from infra_network import (
     MDNS_RESOLVED_DROPIN,
+    has_external_mdns_listener,
     inspect_mdns_exposure,
     live_mdns_dropin_status,
     managed_mdns_dropin_status,
@@ -76,13 +77,28 @@ class InfraNetworkTests(unittest.TestCase):
                 result,
             )
             self.assertIn(
-                "HARDENING: only install to /etc after the staged validation reports the staged drop-in installed and STAGED_VALIDATION_DONE",
+                "HARDENING: staged validation only confirms the drop-in content/path; it does not clear the live host listener",
                 result,
             )
             self.assertIn(
-                "HARDENING: restart resolved and verify with `sudo systemctl restart systemd-resolved && python3 tools/infra_mdns_hardening.py --validate-live` (expect LIVE_VALIDATION_DONE)",
+                "HARDENING: only install to /etc after the staged validation reports the staged drop-in installed and STAGED_VALIDATION_READY",
                 result,
             )
+            self.assertIn(
+                "HARDENING: restart resolved and verify with `sudo systemctl restart systemd-resolved && python3 tools/infra_mdns_hardening.py --validate-live` (expect LIVE_VALIDATION_DONE; LIVE_VALIDATION_FAILED means the drop-in is missing/drifted or udp/5353 is still exposed)",
+                result,
+            )
+
+    def test_has_external_mdns_listener_ignores_local_only_listener(self) -> None:
+        self.assertFalse(has_external_mdns_listener("udp 127.0.0.1:5353"))
+        self.assertFalse(has_external_mdns_listener("udp [::1]:5353"))
+        self.assertTrue(has_external_mdns_listener("udp 0.0.0.0:5353"))
+
+    def test_mdns_exposure_ignores_local_only_5353_listener(self) -> None:
+        self.assertEqual(
+            inspect_mdns_exposure("udp 127.0.0.1:5353"),
+            "No external mDNS listener detected",
+        )
 
 
 if __name__ == "__main__":

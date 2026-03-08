@@ -60,6 +60,10 @@ def check_disk_usage() -> str:
     return '\n'.join(lines) if lines else 'Disk usage unavailable'
 
 
+def current_port_lines() -> str:
+    return run_cmd(['bash', '-lc', "ss -H -tuln 2>/dev/null | awk '{print $1, $5}' | sort -u | sed -n '1,80p'"])
+
+
 def classify_external_ports(output: str) -> tuple[list[str], int]:
     external: set[str] = set()
     local_only_count = 0
@@ -98,9 +102,9 @@ def explain_unexpected_listener(entry: str) -> str | None:
     return None
 
 
-def check_open_ports() -> str:
+def check_open_ports(port_lines: str | None = None) -> str:
     """Check for externally exposed listening ports."""
-    output = run_cmd(['bash', '-lc', "ss -H -tuln 2>/dev/null | awk '{print $1, $5}' | sort -u | sed -n '1,80p'"])
+    output = port_lines if port_lines is not None else current_port_lines()
     if not output or output == 'n/a':
         return 'No listening ports found'
     if output.startswith('Error:'):
@@ -372,14 +376,15 @@ def generate_report() -> tuple[str, list[str]]:
         'result': check_disk_usage()
     }
 
+    port_lines = current_port_lines()
     findings['checks']['open_ports'] = {
         'status': 'checked',
-        'result': check_open_ports()
+        'result': check_open_ports(port_lines)
     }
 
     findings['checks']['mdns_exposure'] = {
         'status': 'checked',
-        'result': inspect_mdns_exposure(findings['checks']['open_ports']['result'])
+        'result': inspect_mdns_exposure(port_lines)
     }
 
     findings['checks']['firewall_status'] = {

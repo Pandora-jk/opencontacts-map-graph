@@ -10,6 +10,7 @@ from infra_network import (
     LIVE_MDNS_DROPIN,
     MANAGED_MDNS_DROPIN,
     MDNS_RESOLVED_DROPIN,
+    has_external_mdns_listener,
     inspect_mdns_exposure,
     live_mdns_dropin_status,
     managed_mdns_dropin_status,
@@ -79,6 +80,10 @@ def is_live_validation_target(live_dropin: Path, resolved_conf: Path, resolved_d
         and resolved_dropins_dir == Path('/etc/systemd/resolved.conf.d')
         and nsswitch_path == Path('/etc/nsswitch.conf')
     )
+
+
+def _status_is_installed(status_line: str, *, label: str) -> bool:
+    return status_line.startswith(f'{label} drop-in installed:')
 
 
 def main() -> int:
@@ -176,14 +181,32 @@ def main() -> int:
         print('Managed status:')
         print(managed_mdns_dropin_status())
         print('Applied drop-in status:')
+        applied_status: str
         if live_target:
-            print(live_mdns_dropin_status(effective_live_dropin))
+            applied_status = live_mdns_dropin_status(effective_live_dropin)
         else:
-            print(staged_mdns_dropin_status(effective_live_dropin))
+            applied_status = staged_mdns_dropin_status(effective_live_dropin)
+        print(applied_status)
         listener_detail = run_cmd(['bash', '-lc', "ss -H -ulpn 'sport = :5353' 2>/dev/null | sed -n '1,10p'"], max_chars=1200)
         print('Listener check:')
         print(listener_detail)
-        print('LIVE_VALIDATION_DONE' if live_target else 'STAGED_VALIDATION_DONE')
+        if live_target:
+            if not _status_is_installed(applied_status, label='live'):
+                print('ERROR: live validation requires the managed /etc drop-in to be installed cleanly before the host can be marked remediated')
+                print('LIVE_VALIDATION_FAILED')
+                return 1
+            if has_external_mdns_listener(port_lines):
+                print('ERROR: external udp/5353 is still exposed after live validation; investigate avahi-daemon/systemd-resolved state or block the port upstream')
+                print('LIVE_VALIDATION_FAILED')
+                return 1
+            print('LIVE_VALIDATION_DONE')
+        else:
+            if not _status_is_installed(applied_status, label='staged'):
+                print('ERROR: staged validation did not produce a valid staged drop-in')
+                print('STAGED_VALIDATION_FAILED')
+                return 1
+            print('NOTE: staged validation only confirms the managed drop-in content/path; external udp/5353 can remain exposed until the live /etc install and service restart.')
+            print('STAGED_VALIDATION_READY')
     elif args.stdout or (not args.write_dropin and not args.write_managed_dropin and not args.install_to and not args.stage_dir):
         print()
         print('DROPIN_STDOUT_OK')

@@ -70,7 +70,7 @@ class InfraMdnsHardeningTests(unittest.TestCase):
             self.assertNotIn(f"live drop-in installed: {staged} (mode 0644)", output)
             self.assertIn("Validation target: staged", output)
             self.assertIn(f"staged drop-in installed: {staged} (mode 0644)", output)
-            self.assertIn("STAGED_VALIDATION_DONE", output)
+            self.assertIn("STAGED_VALIDATION_READY", output)
             self.assertNotIn("\nLIVE_VALIDATION_DONE\n", output)
 
     def test_allow_live_install_requires_install_to(self) -> None:
@@ -131,7 +131,7 @@ class InfraMdnsHardeningTests(unittest.TestCase):
             self.assertNotIn(f"live drop-in installed: {live} (mode 0644)", output)
             self.assertIn("Validation target: staged", output)
             self.assertIn(f"staged drop-in installed: {live} (mode 0644)", output)
-            self.assertIn("STAGED_VALIDATION_DONE", output)
+            self.assertIn("STAGED_VALIDATION_READY", output)
             self.assertNotIn("\nLIVE_VALIDATION_DONE\n", output)
 
     def test_install_to_live_path_is_blocked_without_allow_live_install(self) -> None:
@@ -149,6 +149,80 @@ class InfraMdnsHardeningTests(unittest.TestCase):
         self.assertEqual(rc, 2)
         self.assertEqual(stdout.getvalue(), "")
         self.assertIn("--install-to matches the live resolved drop-in path", stderr.getvalue())
+
+    def test_live_validation_fails_when_live_dropin_missing(self) -> None:
+        stdout = io.StringIO()
+        argv = [
+            "infra_mdns_hardening.py",
+            "--validate-live",
+        ]
+
+        with mock.patch.object(sys, "argv", argv), mock.patch.object(
+            infra_mdns_hardening, "current_port_lines", return_value="udp 127.0.0.1:323"
+        ), mock.patch.object(
+            infra_mdns_hardening,
+            "run_cmd",
+            return_value="n/a",
+        ), contextlib.redirect_stdout(stdout):
+            rc = infra_mdns_hardening.main()
+
+        output = stdout.getvalue()
+        self.assertEqual(rc, 1)
+        self.assertIn("Validation target: live", output)
+        self.assertIn("LIVE_VALIDATION_FAILED", output)
+        self.assertIn("managed /etc drop-in to be installed cleanly", output)
+
+    def test_live_validation_fails_when_external_listener_persists(self) -> None:
+        stdout = io.StringIO()
+        argv = [
+            "infra_mdns_hardening.py",
+            "--validate-live",
+        ]
+
+        with mock.patch.object(sys, "argv", argv), mock.patch.object(
+            infra_mdns_hardening, "current_port_lines", return_value="udp 0.0.0.0:5353"
+        ), mock.patch.object(
+            infra_mdns_hardening,
+            "live_mdns_dropin_status",
+            return_value="live drop-in installed: /etc/systemd/resolved.conf.d/99-openclaw-no-mdns.conf (mode 0644)",
+        ), mock.patch.object(
+            infra_mdns_hardening,
+            "run_cmd",
+            return_value="UNCONN 0 0 0.0.0.0:5353 0.0.0.0:*",
+        ), contextlib.redirect_stdout(stdout):
+            rc = infra_mdns_hardening.main()
+
+        output = stdout.getvalue()
+        self.assertEqual(rc, 1)
+        self.assertIn("Validation target: live", output)
+        self.assertIn("LIVE_VALIDATION_FAILED", output)
+        self.assertIn("external udp/5353 is still exposed after live validation", output)
+
+    def test_live_validation_succeeds_when_dropin_installed_and_listener_cleared(self) -> None:
+        stdout = io.StringIO()
+        argv = [
+            "infra_mdns_hardening.py",
+            "--validate-live",
+        ]
+
+        with mock.patch.object(sys, "argv", argv), mock.patch.object(
+            infra_mdns_hardening, "current_port_lines", return_value="udp 127.0.0.1:323"
+        ), mock.patch.object(
+            infra_mdns_hardening,
+            "live_mdns_dropin_status",
+            return_value="live drop-in installed: /etc/systemd/resolved.conf.d/99-openclaw-no-mdns.conf (mode 0644)",
+        ), mock.patch.object(
+            infra_mdns_hardening,
+            "run_cmd",
+            return_value="n/a",
+        ), contextlib.redirect_stdout(stdout):
+            rc = infra_mdns_hardening.main()
+
+        output = stdout.getvalue()
+        self.assertEqual(rc, 0)
+        self.assertIn("Validation target: live", output)
+        self.assertIn("LIVE_VALIDATION_DONE", output)
+        self.assertNotIn("LIVE_VALIDATION_FAILED", output)
 
 
 if __name__ == "__main__":

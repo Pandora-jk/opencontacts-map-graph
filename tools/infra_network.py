@@ -22,6 +22,32 @@ def run_cmd(cmd: list[str], max_chars: int = 800) -> str:
     return text[:max_chars] if text else 'n/a'
 
 
+def _is_local_listener(address: str) -> bool:
+    return (
+        address.startswith('127.')
+        or address.startswith('[::1]')
+        or address.startswith('localhost:')
+        or address.startswith('127.0.0.53:')
+        or address.startswith('127.0.0.54:')
+    )
+
+
+def has_external_mdns_listener(port_lines: str) -> bool:
+    for raw in port_lines.splitlines():
+        parts = raw.split()
+        if len(parts) != 2:
+            continue
+        proto, address = parts
+        if proto.lower() != 'udp':
+            continue
+        if not (address == '5353' or address.endswith(':5353')):
+            continue
+        if _is_local_listener(address):
+            continue
+        return True
+    return False
+
+
 def _service_state(service: str) -> str | None:
     systemctl = shutil.which('systemctl')
     if systemctl:
@@ -141,7 +167,7 @@ def inspect_mdns_exposure(
     resolved_dropins_dir: Path = Path('/etc/systemd/resolved.conf.d'),
     nsswitch_path: Path = Path('/etc/nsswitch.conf'),
 ) -> str:
-    if 'udp/5353' not in port_lines and ':5353' not in port_lines:
+    if not has_external_mdns_listener(port_lines):
         return 'No external mDNS listener detected'
 
     lines = ['ALERT: External mDNS listener detected on udp/5353']
@@ -203,12 +229,17 @@ def inspect_mdns_exposure(
         'HARDENING: stage/test the install outside /etc with '
         '`python3 tools/infra_mdns_hardening.py --stage-dir /tmp/openclaw-mdns-stage --validate-live`'
     )
-    lines.append('HARDENING: only install to /etc after the staged validation reports the staged drop-in installed and STAGED_VALIDATION_DONE')
+    lines.append('HARDENING: staged validation only confirms the drop-in content/path; it does not clear the live host listener')
+    lines.append('HARDENING: only install to /etc after the staged validation reports the staged drop-in installed and STAGED_VALIDATION_READY')
     lines.append(
         'HARDENING: install the managed drop-in with '
         '`sudo install -D -m 0644 /home/ubuntu/.openclaw/workspace/systemd/99-openclaw-no-mdns.conf '
         '/etc/systemd/resolved.conf.d/99-openclaw-no-mdns.conf`'
     )
-    lines.append('HARDENING: restart resolved and verify with `sudo systemctl restart systemd-resolved && python3 tools/infra_mdns_hardening.py --validate-live` (expect LIVE_VALIDATION_DONE)')
+    lines.append(
+        'HARDENING: restart resolved and verify with '
+        '`sudo systemctl restart systemd-resolved && python3 tools/infra_mdns_hardening.py --validate-live` '
+        '(expect LIVE_VALIDATION_DONE; LIVE_VALIDATION_FAILED means the drop-in is missing/drifted or udp/5353 is still exposed)'
+    )
     lines.append('HARDENING: if mDNS is unnecessary, disable avahi-daemon/systemd-resolved mDNS support or block udp/5353 upstream')
     return '\n'.join(lines)
