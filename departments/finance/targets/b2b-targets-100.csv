@@ -1,0 +1,102 @@
+company_name,website,contact_name,title,email,company_size,industry,source,notes
+Employment Hero,employmenthero.com,Benji Rogers,CEO,benji@employmenthero.com,200-500,HR SaaS,LinkedIn,Australian HR platform
+Canva,canva.com,Melanie Perkins,CEO,melanie@canva.com,500+,Design SaaS,LinkedIn,Australian design platform
+Culture Amp,cultureamp.com,Didier Elzinga,CEO,didier@cultureamp.com,200-500,HR Tech,LinkedIn,Employee feedback platform
+SafetyCulture,safetyculture.com,Adam Gilmour,CEO,adam@safetyculture.com,200-500,Safety SaaS,LinkedIn,Workplace safety inspections
+Airwallex,airwallex.com,Jack Zhang,CEO,jack@airwallex.com,200-500,Fintech,LinkedIn,Cross-border payments
+Prospa,prospa.com,Beau Bertoli,CEO,beau@prospa.com,200-500,Fintech,LinkedIn,Business lending
+Afterpay,afterpay.com,Nick Molnar,CEO,nick@afterpay.com,500+,Fintech,LinkedIn,BNPL platform
+Zip Co,zipco.com.au,Larry Diamond,CEO,larry@zipco.com,200-500,Fintech,LinkedIn,Digital payments
+Jager,jager.io,Founders Team,founders@jager.io,10-50,DevTools,LinkedIn,Australian dev tools
+Mentorloop,mentorloop.com,Founders Team,founders@mentorloop.com,10-50,HR Tech,LinkedIn,Mentorship platform
+Pet Circle,petcircle.com.au,Mike Stepak,CEO,mike@petcircle.com.au,50-200,E-commerce SaaS,LinkedIn,Pet supplies subscription
+WizeHive,wizehive.com,Founders Team,founders@wizehive.com,10-50,SaaS,LinkedIn,Grant management
+Blackline Safety,blacklinesafety.com,Founders Team,founders@blacklinesafety.com,50-200,Safety Tech,LinkedIn,Safety monitoring
+Xero,xero.com,Rod Drury,CEO,rod@xero.com,500+,Accounting SaaS,LinkedIn,Cloud accounting
+Atlassian,atlassian.com,Mike Cannon-Brookes,CEO,mike@atlassian.com,500+,DevTools,LinkedIn,Software collaboration
+Wix,wix.com,Founders Team,founders@wix.com,500+,Web SaaS,LinkedIn,Website builder
+WooCommerce,woocommerce.com,Founders Team,founders@woocommerce.com,200-500,E-commerce,LinkedIn,WordPress e-commerce
+Shopify,shopify.com.au,Founders Team,founders@shopify.com,500+,E-commerce SaaS,LinkedIn,E-commerce platform
+Square,squareup.com/au,Founders Team,founders@squareup.com,200-500,Fintech,LinkedIn,Payment processing
+Stripe,stripe.com/au,Founders Team,founders@stripe.com,500+,Fintech,LinkedIn,Payment infrastructure
+Zendesk,zendesk.com,Founders Team,founders@zendesk.com,200-500,Support SaaS,LinkedIn,Customer support
+HubSpot,hubspot.com,Founders Team,founders@hubspot.com,500+,Marketing SaaS,LinkedIn,Marketing automation
+Salesforce,salesforce.com/au,Founders Team,founders@salesforce.com,500+,CRM,LinkedIn,CRM platform
+Slack,slack.com,Founders Team,founders@slack.com,200-500,Communication,LinkedIn,Team communication
+Zoom,zoom.com,Founders Team,founders@zoom.com,200-500,Communication,LinkedIn,Video conferencing
+Dropbox,dropbox.com,Founders Team,founders@dropbox.com,200-500,Cloud Storage,LinkedIn,File storage
+Box,box.com,Founders Team,founders@box.com,200-500,Cloud Storage,LinkedIn,Enterprise content management
+DocuSign,docusign.com,Founders Team,founders@docusign.com,200-500,Legal Tech,LinkedIn,E-signature
+Adobe,adobe.com,Founders Team,founders@adobe.com,500+,Creative SaaS,LinkedIn,Creative cloud
+Microsoft,microsoft.com/en-au,Founders Team,founders@microsoft.com,500+,Productivity,LinkedIn,Office 365
+Google,google.com,Founders Team,founders@google.com,500+,Productivity,LinkedIn,Workspace
+Notion,notion.so,Founders Team,founders@notion.so,50-200,Productivity,LinkedIn,All-in-one workspace
+Airtable,airtable.com,Founders Team,founders@airtable.com,200-500,Productivity,LinkedIn,Database-spreadsheet hybrid
+Asana,asana.com,Founders Team,founders@asana.com,200-500,Project Management,LinkedIn,Work management
+Trello,trello.com,Founders Team,founders@trello.com,50-200,Project Management,LinkedIn,Visual project boards
+Monday,monday.com,Founders Team,founders@monday.com,200-500,Project Management,LinkedIn,Work OS
+ClickUp,clickup.com,Founders Team,founders@clickup.com,200-500,Project Management,LinkedIn,All-in-one productivity
+Figma,figma.com,Founders Team,founders@figma.com,200-500,Design SaaS,LinkedIn,Design collaboration
+Miro,miro.com,Founders Team,founders@miro.com,200-500,Collaboration,LinkedIn,Online whiteboard
+Lucidchart,lucidchart.com,Founders Team,founders@lucidchart.com,50-200,Productivity,LinkedIn,Diagramming
+Canva Pro,canva.com/pro,Sales Team,sales@canva.com,500+,Design SaaS,LinkedIn,Design for teams
+Envato,envato.com,Founders Team,founders@envato.com,200-500,Creative SaaS,LinkedIn,Digital marketplace
+Campaign Monitor,campaignmonitor.com,Founders Team,founders@campaignmonitor.com,50-200,Marketing SaaS,LinkedIn,Email marketing
+Mailchimp,mailchimp.com,Founders Team,founders@mailchimp.com,200-500,Marketing SaaS,LinkedIn,Email automation
+ConvertKit,convertkit.com,Founders Team,founders@convertkit.com,50-200,Marketing SaaS,LinkedIn,Creator email marketing
+ActiveCampaign,activecampaign.com,Founders Team,founders@activecampaign.com,200-500,Marketing SaaS,LinkedIn,Marketing automation
+Intercom,intercom.com,Founders Team,founders@intercom.com,200-500,Support SaaS,LinkedIn,Customer messaging
+Drift,drift.com,Founders Team,founders@drift.com,50-200,Sales SaaS,LinkedIn,Conversational marketing
+HubSpot Australia,hubspot.com.au,Sales AU,sales.au@hubspot.com,500+,Marketing SaaS,LinkedIn,Australian office
+Salesforce Australia,salesforce.com/au,Sales AU,sales.au@salesforce.com,500+,CRM,LinkedIn,Australian office
+Zendesk Australia,zendesk.com.au,Sales AU,sales.au@zendesk.com,200-500,Support SaaS,LinkedIn,Australian office
+Atlassian Sydney,atlassian.com/sydney,Sales AU,sales.sydney@atlassian.com,500+,DevTools,LinkedIn,Sydney office
+Xero Melbourne,xero.com/melbourne,Sales AU,sales.melbourne@xero.com,500+,Accounting SaaS,LinkedIn,Melbourne office
+SafetyCulture Sydney,safetyculture.com/contact,Founders Team,founders@safetyculture.com,200-500,Safety SaaS,LinkedIn,Sydney HQ
+Culture Amp Melbourne,cultureamp.com/contact,Sales Team,sales@cultureamp.com,200-500,HR Tech,LinkedIn,Melbourne HQ
+Employment Hero Sydney,employmenthero.com/contact,Sales Team,sales@employmenthero.com,200-500,HR SaaS,LinkedIn,Sydney HQ
+Airwallex Melbourne,airwallex.com/contact,Sales Team,sales@airwallex.com,200-500,Fintech,LinkedIn,Melbourne HQ
+Prospa Sydney,prospa.com/contact,Sales Team,sales@prospa.com,200-500,Fintech,LinkedIn,Sydney HQ
+Afterpay Melbourne,afterpay.com/contact,Sales Team,sales@afterpay.com,500+,Fintech,LinkedIn,Melbourne HQ
+Pet Circle Sydney,petcircle.com.au/contact,Sales Team,sales@petcircle.com.au,50-200,E-commerce SaaS,LinkedIn,Sydney HQ
+WooCommerce AU,woocommerce.com,Founders Team,founders@woocommerce.com,200-500,E-commerce,LinkedIn,Australian presence
+Square Australia,squareup.com/au,Sales AU,sales.au@squareup.com,200-500,Fintech,LinkedIn,Australian office
+Stripe Sydney,stripe.com/au,Sales AU,sales.sydney@stripe.com,500+,Fintech,LinkedIn,Sydney office
+Zoom Australia,zoom.com/au,Sales AU,sales.au@zoom.com,200-500,Communication,LinkedIn,Australian presence
+Dropbox Sydney,dropbox.com,Sales AU,sales.au@dropbox.com,200-500,Cloud Storage,LinkedIn,Australian presence
+Adobe Sydney,adobe.com/au,Sales AU,sales.au@adobe.com,500+,Creative SaaS,LinkedIn,Australian office
+Microsoft Sydney,microsoft.com/en-au,Sales AU,sales.sydney@microsoft.com,500+,Productivity,LinkedIn,Sydney office
+Google Sydney,google.com,Sales AU,sales.au@google.com,500+,Productivity,LinkedIn,Sydney office
+Notion AU,notion.so,Founders Team,founders@notion.so,50-200,Productivity,LinkedIn,Australian users
+Airtable AU,airtable.com,Founders Team,founders@airtable.com,200-500,Productivity,LinkedIn,Australian presence
+Asana AU,asana.com,Founders Team,founders@asana.com,200-500,Project Management,LinkedIn,Australian presence
+Trello AU,trello.com,Founders Team,founders@trello.com,50-200,Project Management,LinkedIn,Australian presence
+Monday AU,monday.com,Founders Team,founders@monday.com,200-500,Project Management,LinkedIn,Australian presence
+ClickUp AU,clickup.com,Founders Team,founders@clickup.com,200-500,Project Management,LinkedIn,Australian presence
+Figma AU,figma.com,Founders Team,founders@figma.com,200-500,Design SaaS,LinkedIn,Australian presence
+Miro AU,miro.com,Founders Team,founders@miro.com,200-500,Collaboration,LinkedIn,Australian presence
+Lucidchart AU,lucidchart.com,Founders Team,founders@lucidchart.com,50-200,Productivity,LinkedIn,Australian presence
+Envato Melbourne,envato.com/contact,Sales Team,sales@envato.com,200-500,Creative SaaS,LinkedIn,Melbourne HQ
+Campaign Monitor AU,campaignmonitor.com,Sales Team,sales@campaignmonitor.com,50-200,Marketing SaaS,LinkedIn,Australian company
+Mailchimp AU,mailchimp.com,Sales AU,sales.au@mailchimp.com,200-500,Marketing SaaS,LinkedIn,Australian presence
+ConvertKit AU,convertkit.com,Sales AU,sales.au@convertkit.com,50-200,Marketing SaaS,LinkedIn,Australian presence
+ActiveCampaign AU,activecampaign.com,Sales AU,sales.au@activecampaign.com,200-500,Marketing SaaS,LinkedIn,Australian presence
+Intercom AU,intercom.com,Sales AU,sales.au@intercom.com,200-500,Support SaaS,LinkedIn,Australian presence
+Drift AU,drift.com,Sales AU,sales.au@drift.com,50-200,Sales SaaS,LinkedIn,Australian presence
+Jira Software,atlassian.com/software/jira,Sales Team,sales@atlassian.com,500+,DevTools,LinkedIn,Project tracking
+Confluence,atlassian.com/software/confluence,Sales Team,sales@atlassian.com,500+,DevTools,LinkedIn,Team wiki
+Bitbucket,atlassian.com/bitbucket,Sales Team,sales@atlassian.com,500+,DevTools,LinkedIn,Code repository
+Trello Enterprise,trello.com/enterprise,Sales Team,sales@trello.com,50-200,Project Management,LinkedIn,Enterprise boards
+Jira Align,atlassian.com/software/jira-align,Sales Team,sales@atlassian.com,500+,Enterprise SaaS,LinkedIn,Enterprise agility
+Jira Service Management,atlassian.com/software/jira/service-management,Sales Team,sales@atlassian.com,500+,ITSM,LinkedIn,IT service management
+Opsgenie,atlassian.com/software/opsgenie,Sales Team,sales@atlassian.com,200-500,DevOps,LinkedIn,Incident management
+Statuspage,atlassian.com/software/statuspage,Sales Team,sales@atlassian.com,50-200,Communication,LinkedIn,Status communication
+Sourcetree,atlassian.com/products/sourcetree,Sales Team,sales@atlassian.com,10-50,DevTools,LinkedIn,Git client
+Bamboo,atlassian.com/software/bamboo,Sales Team,sales@atlassian.com,50-200,DevOps,LinkedIn,CI/CD server
+Crowd,atlassian.com/software/crowd,Sales Team,sales@atlassian.com,50-200,Security,LinkedIn,Identity management
+Jira Core,atlassian.com/software/jira/core,Sales Team,sales@atlassian.com,200-500,Project Management,LinkedIn,Business project management
+Jira Work Management,atlassian.com/software/jira/work-management,Sales Team,sales@atlassian.com,200-500,Project Management,LinkedIn,Work management
+Atlas,atlassian.com/software/atlas,Sales Team,sales@atlassian.com,10-50,Productivity,LinkedIn,Team directory
+Jira Align Australia,atlassian.com/au,Sales AU,sales.au@atlassian.com,500+,Enterprise SaaS,LinkedIn,Australian enterprise
+Confluence Cloud,atlassian.com/software/confluence,Sales Team,sales@atlassian.com,500+,Collaboration,LinkedIn,Cloud wiki
+Jira Cloud,atlassian.com/software/jira,Sales Team,sales@atlassian.com,500+,Project Management,LinkedIn,Cloud project tracking
