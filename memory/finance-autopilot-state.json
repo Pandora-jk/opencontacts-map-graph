@@ -1,7 +1,7 @@
 {
-  "runs": 32,
-  "last_primary_task": "Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md",
-  "task_cursor": 8,
+  "runs": 33,
+  "last_primary_task": "Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes",
+  "task_cursor": 9,
   "task_progress": {
     "**Daily cash task:** close one short-cycle offer (lead pack, template pack, quick script fix).": 1,
     "**Recurring income task:** build/iterate one monthly-retainer style product offer.": 1,
@@ -14,6 +14,7 @@
     "Document approved public B2B data sources": 1,
     "Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies": 1,
     "Write the one-line sales promise for the core service offer": 1,
-    "Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md": 1
+    "Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md": 1,
+    "Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes": 1
   }
 }
