@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-03-08T07:04:54.794509+00:00",
+  "checked_at": "2026-03-08T19:00:37.084732+00:00",
   "providers": {
     "zai": {
       "type": "zai",
@@ -42,15 +42,15 @@
         {
           "key": "agent:main:main",
           "model": "glm-4.7-Flash",
-          "input_tokens": 83970,
-          "output_tokens": 1225,
-          "context_used": 50098,
+          "input_tokens": 107764,
+          "output_tokens": 239,
+          "context_used": 71610,
           "context_limit": 200000
         }
       ],
       "turns_today": {
-        "agent:main:main": 15,
-        "agent:main:telegram:direct:156480904": 7
+        "agent:main:main": 59,
+        "agent:main:telegram:direct:156480904": 10
       }
     },
     "cerebras": {
@@ -60,8 +60,8 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:main": 15,
-        "agent:main:telegram:direct:156480904": 7
+        "agent:main:main": 59,
+        "agent:main:telegram:direct:156480904": 10
       }
     },
     "groq": {
@@ -71,8 +71,8 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:main": 15,
-        "agent:main:telegram:direct:156480904": 7
+        "agent:main:main": 59,
+        "agent:main:telegram:direct:156480904": 10
       }
     },
     "chutes": {
@@ -82,8 +82,8 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:main": 15,
-        "agent:main:telegram:direct:156480904": 7
+        "agent:main:main": 59,
+        "agent:main:telegram:direct:156480904": 10
       }
     },
     "nvidia": {
@@ -95,9 +95,9 @@
         {
           "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a",
           "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27029,
+          "input_tokens": 27031,
           "output_tokens": 69,
-          "context_used": 13557,
+          "context_used": 13558,
           "context_limit": 131072
         },
         {
@@ -143,9 +143,9 @@
         {
           "key": "agent:main:telegram:direct:156480904",
           "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 51439,
-          "output_tokens": 137,
-          "context_used": 51439,
+          "input_tokens": 30727,
+          "output_tokens": 51,
+          "context_used": 30727,
           "context_limit": 131072
         },
         {
@@ -154,14 +154,6 @@
           "input_tokens": 14255,
           "output_tokens": 70,
           "context_used": 14255,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:d788795e-377a-4b49-9dc5-3886e405def0",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27037,
-          "output_tokens": 77,
-          "context_used": 13565,
           "context_limit": 131072
         },
         {
@@ -243,11 +235,51 @@
           "output_tokens": 69,
           "context_used": 13557,
           "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:5f0466b2-cfa9-4480-a3cc-dc8d04b29053",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 27004,
+          "output_tokens": 44,
+          "context_used": 13532,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:4cdf2af2-e972-4dc6-a58f-68d1202b33a8",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 27029,
+          "output_tokens": 69,
+          "context_used": 13557,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:7e887cdd-8f4a-4673-ac87-38f1e038ce40",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 27004,
+          "output_tokens": 44,
+          "context_used": 13532,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:da9839c8-6bc8-40a6-bd82-c77830c52b3c",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 13473,
+          "output_tokens": 3,
+          "context_used": 13473,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:925baf1d-5c41-4868-9bf8-03cdae42e6cd",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 27031,
+          "output_tokens": 69,
+          "context_used": 13558,
+          "context_limit": 131072
         }
       ],
       "turns_today": {
-        "agent:main:main": 15,
-        "agent:main:telegram:direct:156480904": 7
+        "agent:main:main": 59,
+        "agent:main:telegram:direct:156480904": 10
       }
     }
   }
