@@ -3,70 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{{company_name}} - Expert {{service_primary}} consulting for {{target_market}}. Proven results, actionable strategies.">
+    <meta name="description" content="{{company_name}} - Expert {{service_primary}} consulting for {{target_market}}.">
     <meta name="keywords" content="{{service_primary}}, {{target_market}}, consultant, {{location}}, business strategy">
     <title>{{company_name}} | {{service_primary}} Consultant</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
-    <nav class="bg-gray-900 text-white py-4">
+    <nav class="bg-white border-b border-gray-200 py-4">
         <div class="container mx-auto px-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold">{{company_name}}</h1>
-            <div class="hidden md:flex space-x-6">
-                <a href="#home" class="hover:text-gray-300">Home</a>
-                <a href="#services" class="hover:text-gray-300">Services</a>
-                <a href="#about" class="hover:text-gray-300">About</a>
-                <a href="#testimonials" class="hover:text-gray-300">Testimonials</a>
-                <a href="#contact" class="hover:text-gray-300">Contact</a>
+            <h1 class="text-2xl font-semibold text-gray-900">{{company_name}}</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#home" class="text-gray-600 hover:text-gray-900">Home</a>
+                <a href="#services" class="text-gray-600 hover:text-gray-900">Services</a>
+                <a href="#about" class="text-gray-600 hover:text-gray-900">About</a>
+                <a href="#testimonials" class="text-gray-600 hover:text-gray-900">Testimonials</a>
+                <a href="#contact" class="text-gray-600 hover:text-gray-900">Contact</a>
             </div>
-            <a href="#contact" class="bg-white text-gray-900 px-4 py-2 rounded-lg font-bold hover:bg-gray-100">
+            <a href="#contact" class="bg-gray-900 text-white px-4 py-2 rounded-md font-medium hover:bg-gray-800">
                 Book a Call
             </a>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <header id="home" class="bg-gray-800 text-white py-24">
+    <header id="home" class="bg-white py-20">
         <div class="container mx-auto px-6 text-center">
-            <h2 class="text-4xl md:text-5xl font-bold mb-4">
+            <h2 class="text-4xl md:text-5xl font-semibold text-gray-900 mb-6">
                 Transform Your {{target_market}} with Expert {{service_primary}}
             </h2>
-            <p class="text-xl mb-8 max-w-2xl mx-auto">
+            <p class="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
                 Proven strategies, measurable results. Helping {{target_market|lower}} achieve {{result_primary}} and {{result_secondary}}.
             </p>
             <div class="flex flex-col md:flex-row justify-center gap-4">
-                <a href="#contact" class="bg-white text-gray-900 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100">
-                    📅 Book Free Consultation
+                <a href="#contact" class="bg-gray-900 text-white px-8 py-4 rounded-md font-medium text-lg hover:bg-gray-800">
+                    Book Free Consultation
                 </a>
-                <a href="#testimonials" class="bg-gray-700 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-600">
-                    ⭐ See Results
+                <a href="#testimonials" class="bg-white text-gray-900 border border-gray-300 px-8 py-4 rounded-md font-medium text-lg hover:bg-gray-50">
+                    See Results
                 </a>
             </div>
         </div>
     </header>
 
     <!-- Services Section -->
-    <section id="services" class="py-16">
+    <section id="services" class="py-16 bg-white">
         <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-12">How I Can Help</h2>
+            <h2 class="text-3xl font-semibold text-center mb-12 text-gray-900">How I Can Help</h2>
             <div class="grid md:grid-cols-3 gap-8">
-                <!-- Service 1 -->
-                <div class="bg-white p-6 rounded-lg shadow-lg border-t-4 border-gray-900">
-                    <div class="text-gray-900 text-4xl mb-4">📊</div>
-                    <h3 class="text-xl font-bold mb-2">{{service_primary}}</h3>
+                <div class="bg-white p-6 border border-gray-200 rounded-lg">
+                    <div class="text-gray-900 mb-4">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-900">{{service_primary}}</h3>
                     <p class="text-gray-600">Comprehensive {{service_primary|lower}} strategies tailored to your unique challenges.</p>
                 </div>
-                <!-- Service 2 -->
-                <div class="bg-white p-6 rounded-lg shadow-lg border-t-4 border-gray-900">
-                    <div class="text-gray-900 text-4xl mb-4">🎯</div>
-                    <h3 class="text-xl font-bold mb-2">Strategy Development</h3>
+                <div class="bg-white p-6 border border-gray-200 rounded-lg">
+                    <div class="text-gray-900 mb-4">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-900">Strategy Development</h3>
                     <p class="text-gray-600">Actionable plans with clear milestones and accountability.</p>
                 </div>
-                <!-- Service 3 -->
-                <div class="bg-white p-6 rounded-lg shadow-lg border-t-4 border-gray-900">
-                    <div class="text-gray-900 text-4xl mb-4">🚀</div>
-                    <h3 class="text-xl font-bold mb-2">Implementation Support</h3>
+                <div class="bg-white p-6 border border-gray-200 rounded-lg">
+                    <div class="text-gray-900 mb-4">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-900">Implementation Support</h3>
                     <p class="text-gray-600">Hands-on guidance to ensure successful execution.</p>
                 </div>
             </div>
@@ -74,68 +83,76 @@
     </section>
 
     <!-- About Section -->
-    <section id="about" class="bg-gray-100 py-16">
+    <section id="about" class="py-16 bg-gray-50">
         <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-8">Why Work With Me?</h2>
+            <h2 class="text-3xl font-semibold text-center mb-8 text-gray-900">Why Work With Me?</h2>
             <div class="grid md:grid-cols-4 gap-6 text-center">
                 <div>
-                    <div class="text-4xl mb-2">💼</div>
-                    <h4 class="font-bold">{{years_experience}}+ Years</h4>
-                    <p class="text-gray-600">Industry experience</p>
+                    <div class="text-4xl font-semibold text-gray-900 mb-2">{{years_experience}}+</div>
+                    <h4 class="font-semibold text-gray-900">Years Experience</h4>
+                    <p class="text-gray-600 text-sm">Industry expertise</p>
                 </div>
                 <div>
-                    <div class="text-4xl mb-2">👥</div>
-                    <h4 class="font-bold">{{clients_served}}+</h4>
-                    <p class="text-gray-600">Clients served</p>
+                    <div class="text-4xl font-semibold text-gray-900 mb-2">{{clients_served}}+</div>
+                    <h4 class="font-semibold text-gray-900">Clients Served</h4>
+                    <p class="text-gray-600 text-sm">Proven track record</p>
                 </div>
                 <div>
-                    <div class="text-4xl mb-2">📈</div>
-                    <h4 class="font-bold">Proven Results</h4>
-                    <p class="text-gray-600">Measurable outcomes</p>
+                    <div class="text-gray-900 mb-2">
+                        <svg class="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                    </div>
+                    <h4 class="font-semibold text-gray-900">Proven Results</h4>
+                    <p class="text-gray-600 text-sm">Measurable outcomes</p>
                 </div>
                 <div>
-                    <div class="text-4xl mb-2">🤝</div>
-                    <h4 class="font-bold">Personalized Approach</h4>
-                    <p class="text-gray-600">Tailored to your needs</p>
+                    <div class="text-gray-900 mb-2">
+                        <svg class="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <h4 class="font-semibold text-gray-900">Personalized Approach</h4>
+                    <p class="text-gray-600 text-sm">Tailored to your needs</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Testimonials Section -->
-    <section id="testimonials" class="py-16">
+    <section id="testimonials" class="py-16 bg-white">
         <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-12">What Clients Say</h2>
+            <h2 class="text-3xl font-semibold text-center mb-12 text-gray-900">What Clients Say</h2>
             <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="bg-white p-6 border border-gray-200 rounded-lg">
                     <p class="text-gray-600 italic mb-4">"{{testimonial_1}}"</p>
-                    <p class="font-bold">- {{client_1}}, {{client_1_title}}</p>
+                    <p class="font-semibold text-gray-900">- {{client_1}}, {{client_1_title}}</p>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="bg-white p-6 border border-gray-200 rounded-lg">
                     <p class="text-gray-600 italic mb-4">"{{testimonial_2}}"</p>
-                    <p class="font-bold">- {{client_2}}, {{client_2_title}}</p>
+                    <p class="font-semibold text-gray-900">- {{client_2}}, {{client_2_title}}</p>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="bg-white p-6 border border-gray-200 rounded-lg">
                     <p class="text-gray-600 italic mb-4">"{{testimonial_3}}"</p>
-                    <p class="font-bold">- {{client_3}}, {{client_3_title}}</p>
+                    <p class="font-semibold text-gray-900">- {{client_3}}, {{client_3_title}}</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="py-16">
+    <section id="contact" class="py-16 bg-gray-50">
         <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-8">Let's Discuss Your Goals</h2>
+            <h2 class="text-3xl font-semibold text-center mb-8 text-gray-900">Let's Discuss Your Goals</h2>
             <div class="grid md:grid-cols-2 gap-8">
                 <!-- Contact Form -->
-                <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="bg-white p-6 border border-gray-200 rounded-lg">
                     <form id="lead-form" class="space-y-4">
-                        <input type="text" name="name" placeholder="Your Name" required class="w-full px-4 py-2 border rounded-lg">
-                        <input type="email" name="email" placeholder="Email" required class="w-full px-4 py-2 border rounded-lg">
-                        <input type="text" name="company" placeholder="Company" class="w-full px-4 py-2 border rounded-lg">
-                        <textarea name="message" placeholder="Tell me about your challenges..." rows="4" required class="w-full px-4 py-2 border rounded-lg"></textarea>
-                        <button type="submit" class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold hover:bg-gray-800">
+                        <input type="text" name="name" placeholder="Your Name" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
+                        <input type="email" name="email" placeholder="Email" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
+                        <input type="text" name="company" placeholder="Company" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
+                        <textarea name="message" placeholder="Tell me about your challenges..." rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+                        <button type="submit" class="w-full bg-gray-900 text-white py-3 rounded-md font-medium hover:bg-gray-800">
                             Book Free Consultation
                         </button>
                     </form>
@@ -143,16 +160,16 @@
                 <!-- Contact Info -->
                 <div class="space-y-6">
                     <div>
-                        <h4 class="font-bold text-lg">What to Expect</h4>
-                        <ul class="mt-2 space-y-2 text-gray-600">
-                            <li>✓ 30-minute complimentary consultation</li>
-                            <li>✓ Discussion of your goals and challenges</li>
-                            <li>✓ Initial assessment and recommendations</li>
-                            <li>✓ No-obligation proposal</li>
+                        <h4 class="font-semibold text-lg text-gray-900 mb-3">What to Expect</h4>
+                        <ul class="space-y-2 text-gray-600">
+                            <li>30-minute complimentary consultation</li>
+                            <li>Discussion of your goals and challenges</li>
+                            <li>Initial assessment and recommendations</li>
+                            <li>No-obligation proposal</li>
                         </ul>
                     </div>
                     <div>
-                        <h4 class="font-bold text-lg">Contact</h4>
+                        <h4 class="font-semibold text-lg text-gray-900 mb-3">Contact</h4>
                         <p class="text-gray-600">{{email}}</p>
                         <p class="text-gray-600">{{location}}</p>
                     </div>
@@ -169,7 +186,6 @@
         </div>
     </footer>
 
-    <!-- Lead Qual Integration -->
     <script>
         document.getElementById('lead-form').addEventListener('submit', async (e) => {
             e.preventDefault();
