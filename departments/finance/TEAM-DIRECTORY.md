@@ -10,9 +10,11 @@
 
 | Role | Agent | Status | Domain | Current Focus |
 |------|-------|--------|--------|---------------|
-| **Finance Head** | @Finance-Head | 🟢 ACTIVE | Revenue orchestration, capital allocation | Coordinating Lead Qual campaign, monitoring metrics |
+| **Finance Head** | @Finance-Head | 🟢 ACTIVE | Revenue orchestration, capital allocation | Coordinating 3 active product lines, monitoring metrics |
 | **Legal Expert** | @Legal-Expert | 🟢 ACTIVE | Compliance (GDPR, CCPA, CAN-SPAM) | Monitoring complaint rate, reviewing templates |
 | **Product Owner: Lead Qual** | @Product-Owner-Lead-Qual | 🟢 ACTIVE | AI Lead Qualification Service ($297/mo) | Executing Batch 1 (100 emails), closing first customers |
+| **Product Owner: GitHub Bounties** | @Product-Owner-Github-Bounties | 🟢 ACTIVE | GitHub Issue Resolution, Bounty Hunting | Scanning Algora/IssueHunt, targeting 3-5 bounties/week |
+| **Product Owner: ClawHub Skills** | @Product-Owner-ClawHub-Skills | 🟢 ACTIVE | ClawHub Skill Development & Publishing | Drafting first 3 skills (Oracle ARM, Ansible, Audit) |
 | **Product Owner: Crypto** | @Product-Owner-Crypto | ⚪ STANDBY | Crypto trading & yield farming | Monitoring markets, awaiting capital allocation |
 | **Product Owner: Data Brokerage** | @Product-Owner-Data | 🟡 PAUSED | Solar leads data packages | Maintaining dataset, paused for Lead Qual focus |
 

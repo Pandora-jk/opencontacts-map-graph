@@ -33,6 +33,18 @@ Finance Head (You)
 │   ├── Target: $297 MRR by Day 7
 │   └── Action: Monitor campaign, close first customer
 │
+├── Product Owner: GitHub Bounties (🟢 ACTIVE)
+│   ├── Domain: GitHub Issue Resolution, Bounty Hunting
+│   ├── Status: Starting hunt (scanning Algora, IssueHunt)
+│   ├── Target: $200-500/mo (Ansible, DevOps, Linux)
+│   └── Action: Scan 20 bounties/day, attempt 3-5/week
+│
+├── Product Owner: ClawHub Skills (🟢 ACTIVE)
+│   ├── Domain: ClawHub Skill Development & Publishing
+│   ├── Status: Drafting first 3 skills
+│   ├── Target: $50-250/mo passive (3-5 skills Month 1)
+│   └── Action: Publish Skill 1 (Oracle ARM Setup) by Day 3
+│
 ├── Product Owner: Crypto (⚪ STANDBY)
 │   ├── Domain: Crypto trading & yield farming
 │   ├── Status: Awaiting capital allocation
