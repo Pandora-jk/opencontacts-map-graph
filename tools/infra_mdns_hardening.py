@@ -15,6 +15,8 @@ from infra_network import (
     run_cmd,
 )
 
+DEFAULT_STAGE_DIR = Path('/tmp/openclaw-mdns-stage')
+
 
 def current_port_lines() -> str:
     return run_cmd(
@@ -41,11 +43,20 @@ def install_managed_dropin(target: Path) -> None:
     write_dropin(target)
 
 
+def staged_dropin_path(stage_dir: Path) -> Path:
+    return stage_dir / LIVE_MDNS_DROPIN.name
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description='Generate a safe mDNS hardening drop-in preview.')
     parser.add_argument('--write-dropin', type=Path, help='Write the suggested resolved.conf drop-in to this path')
     parser.add_argument('--write-managed-dropin', action='store_true', help='Write the managed workspace drop-in')
     parser.add_argument('--install-to', type=Path, help='Install the managed workspace drop-in to this target path')
+    parser.add_argument(
+        '--stage-dir',
+        type=Path,
+        help=f'Stage the managed drop-in in this directory for validation without touching /etc (example: {DEFAULT_STAGE_DIR})',
+    )
     parser.add_argument('--live-dropin-path', type=Path, default=LIVE_MDNS_DROPIN, help='Override the live drop-in path used during validation')
     parser.add_argument('--resolved-conf', type=Path, default=Path('/etc/systemd/resolved.conf'), help='Override the base resolved.conf path used during validation')
     parser.add_argument('--resolved-dropins-dir', type=Path, default=Path('/etc/systemd/resolved.conf.d'), help='Override the resolved.conf.d directory used during validation')
@@ -54,13 +65,24 @@ def main() -> int:
     parser.add_argument('--validate-live', action='store_true', help='Report managed/live drop-in status plus current listener state')
     args = parser.parse_args()
 
+    effective_live_dropin = args.live_dropin_path
+    effective_resolved_dropins_dir = args.resolved_dropins_dir
+    if args.stage_dir:
+        staged_path = staged_dropin_path(args.stage_dir)
+        install_managed_dropin(staged_path)
+        print(f'STAGED_DROPIN {staged_path}')
+        if args.live_dropin_path == LIVE_MDNS_DROPIN:
+            effective_live_dropin = staged_path
+        if args.resolved_dropins_dir == Path('/etc/systemd/resolved.conf.d'):
+            effective_resolved_dropins_dir = args.stage_dir
+
     port_lines = current_port_lines()
     print(
         inspect_mdns_exposure(
             port_lines,
-            live_dropin=args.live_dropin_path,
+            live_dropin=effective_live_dropin,
             resolved_conf=args.resolved_conf,
-            resolved_dropins_dir=args.resolved_dropins_dir,
+            resolved_dropins_dir=effective_resolved_dropins_dir,
             nsswitch_path=args.nsswitch_path,
         )
     )
@@ -78,10 +100,8 @@ def main() -> int:
     print('Safe staging outside /etc:')
     print(
         'python3 tools/infra_mdns_hardening.py '
-        '--install-to /tmp/resolved.conf.d/99-openclaw-no-mdns.conf '
-        '--validate-live '
-        '--live-dropin-path /tmp/resolved.conf.d/99-openclaw-no-mdns.conf '
-        '--resolved-dropins-dir /tmp/resolved.conf.d'
+        f'--stage-dir {DEFAULT_STAGE_DIR} '
+        '--validate-live'
     )
 
     if args.write_dropin:
@@ -101,12 +121,12 @@ def main() -> int:
         print('Managed status:')
         print(managed_mdns_dropin_status())
         print('Live status:')
-        print(live_mdns_dropin_status(args.live_dropin_path))
+        print(live_mdns_dropin_status(effective_live_dropin))
         listener_detail = run_cmd(['bash', '-lc', "ss -H -ulpn 'sport = :5353' 2>/dev/null | sed -n '1,10p'"], max_chars=1200)
         print('Listener check:')
         print(listener_detail)
         print('LIVE_VALIDATION_DONE')
-    elif args.stdout or (not args.write_dropin and not args.write_managed_dropin and not args.install_to):
+    elif args.stdout or (not args.write_dropin and not args.write_managed_dropin and not args.install_to and not args.stage_dir):
         print()
         print('DROPIN_STDOUT_OK')
 

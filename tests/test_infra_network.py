@@ -71,7 +71,11 @@ class InfraNetworkTests(unittest.TestCase):
 
             self.assertIn(f"managed drop-in ready: {managed} (mode 0644)", result)
             self.assertIn(f"live drop-in installed: {live} (mode 0644)", result)
-            self.assertIn("HARDENING: stage/test the install outside /etc", result)
+            self.assertIn(
+                "HARDENING: stage/test the install outside /etc with `python3 tools/infra_mdns_hardening.py --stage-dir /tmp/openclaw-mdns-stage --validate-live`",
+                result,
+            )
+            self.assertIn("HARDENING: only install to /etc after the staged validation reports the drop-in installed and LIVE_VALIDATION_DONE", result)
 
 
 if __name__ == "__main__":

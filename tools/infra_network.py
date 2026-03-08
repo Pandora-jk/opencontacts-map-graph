@@ -193,10 +193,9 @@ def inspect_mdns_exposure(
     lines.append('HARDENING: sync the managed workspace drop-in with `python3 tools/infra_mdns_hardening.py --write-managed-dropin`')
     lines.append(
         'HARDENING: stage/test the install outside /etc with '
-        '`python3 tools/infra_mdns_hardening.py --install-to /tmp/resolved.conf.d/99-openclaw-no-mdns.conf '
-        '--validate-live --live-dropin-path /tmp/resolved.conf.d/99-openclaw-no-mdns.conf '
-        '--resolved-dropins-dir /tmp/resolved.conf.d`'
+        '`python3 tools/infra_mdns_hardening.py --stage-dir /tmp/openclaw-mdns-stage --validate-live`'
     )
+    lines.append('HARDENING: only install to /etc after the staged validation reports the drop-in installed and LIVE_VALIDATION_DONE')
     lines.append(
         'HARDENING: install the managed drop-in with '
         '`sudo install -D -m 0644 /home/ubuntu/.openclaw/workspace/systemd/99-openclaw-no-mdns.conf '
