@@ -7,6 +7,11 @@ import shlex
 import subprocess
 from pathlib import Path
 
+from infra_home_cache_cleanup import (
+    ALLOWED_CACHE_TARGETS,
+    DEFAULT_MIN_BYTES as HOME_CACHE_MIN_BYTES,
+    scan_cleanup_candidates as scan_home_cache_cleanup_candidates,
+)
 from infra_tmp_cleanup import DEFAULT_MIN_AGE_HOURS, scan_cleanup_candidates
 
 DISK_ALERT_THRESHOLD = 80
@@ -27,6 +32,11 @@ _HOTSPOT_DEPTH = {
     Path('/var/cache/apt'): 2,
     Path('/var/log/journal'): 1,
     Path('/home/ubuntu/.cache'): 2,
+    Path('/home/ubuntu/.gradle/caches'): 2,
+    Path('/home/ubuntu/.gradle/wrapper/dists'): 2,
+    Path('/home/ubuntu/.cache/pip'): 2,
+    Path('/home/ubuntu/.cache/go-build'): 1,
+    Path('/home/ubuntu/.cache/node-gyp'): 2,
 }
 _HOME_REVIEW_ROOT = Path('/home/ubuntu')
 _HOME_REVIEW_THRESHOLD_BYTES = 1024 * 1024 * 1024
@@ -93,6 +103,12 @@ def collect_reclaim_candidates() -> list[tuple[int, Path, str]]:
         if size_bytes is None or size_bytes < min_bytes:
             continue
         candidates.append((size_bytes, path, note))
+    try:
+        home_candidates = scan_home_cache_cleanup_candidates(min_bytes=HOME_CACHE_MIN_BYTES)
+    except (OSError, RuntimeError, subprocess.TimeoutExpired):
+        home_candidates = []
+    for candidate in home_candidates:
+        candidates.append((candidate.size_bytes, candidate.path, candidate.note))
     return sorted(candidates, key=lambda item: item[0], reverse=True)
 
 
@@ -113,6 +129,7 @@ def summarize_hotspots(path: Path) -> list[str]:
 
 def summarize_reclaim_guidance(candidates: list[tuple[int, Path, str]]) -> list[str]:
     lines: list[str] = []
+    home_cache_paths: list[Path] = []
     for _, path, _ in candidates:
         if path == Path('/tmp'):
             stale_tmp_lines = summarize_stale_tmp_entries()
@@ -125,6 +142,9 @@ def summarize_reclaim_guidance(candidates: list[tuple[int, Path, str]]) -> list[
         if hotspot_lines:
             lines.extend(hotspot_lines)
 
+        if path in ALLOWED_CACHE_TARGETS:
+            home_cache_paths.append(path)
+            continue
         if path == Path('/var/cache/apt'):
             lines.append('APT cleanup hint: sudo apt-get clean')
         elif path == Path('/var/log/journal'):
@@ -132,6 +152,9 @@ def summarize_reclaim_guidance(candidates: list[tuple[int, Path, str]]) -> list[
             lines.append('Journal vacuum hint: sudo journalctl --vacuum-time=7d')
         elif path == Path('/home/ubuntu/.cache'):
             lines.append('Cache review hint: focus on package/build caches before deleting app state')
+    helper_lines = summarize_home_cache_cleanup_helper(home_cache_paths)
+    if helper_lines:
+        lines.extend(helper_lines)
     return lines
 
 
@@ -218,6 +241,26 @@ def summarize_tmp_cleanup_helper() -> list[str]:
         f'- Apply: python3 tools/infra_tmp_cleanup.py --apply {quoted}',
     ]
     return lines
+
+
+def summarize_home_cache_cleanup_helper(paths: list[Path]) -> list[str]:
+    unique_paths: list[Path] = []
+    seen: set[Path] = set()
+    for path in paths:
+        if path not in ALLOWED_CACHE_TARGETS or path in seen:
+            continue
+        seen.add(path)
+        unique_paths.append(path)
+
+    if not unique_paths:
+        return []
+
+    quoted = ' '.join(f"--path {shlex.quote(str(path))}" for path in unique_paths)
+    return [
+        'Home cache cleanup helper available for allowlisted user-owned caches:',
+        f'- Review: python3 tools/infra_home_cache_cleanup.py {quoted}',
+        f'- Apply: python3 tools/infra_home_cache_cleanup.py --apply {quoted}',
+    ]
 
 
 def summarize_deleted_open_files() -> list[str]:
