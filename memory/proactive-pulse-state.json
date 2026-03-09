@@ -1,9 +1,9 @@
 {
-  "last_checked_at": "2026-03-09T05:20:51Z",
+  "last_checked_at": "2026-03-09T06:20:51Z",
   "last_candidate": "cron_failure",
-  "last_candidate_fingerprint": "cron:Night Infra Delegation",
-  "last_fingerprint": "cron:Night Infra Delegation",
+  "last_candidate_fingerprint": "cron:Finance Autopilot Loop|Night Infra Delegation",
+  "last_fingerprint": "cron:Finance Autopilot Loop|Night Infra Delegation",
   "last_kind": "cron_failure",
-  "last_sent_at": "2026-03-09T05:20:51Z",
-  "last_message": "[PROACTIVE] Automation issue: Night Infra Delegation need attention. Next step: inspect the latest cron run before changing more config."
+  "last_sent_at": "2026-03-09T06:20:51Z",
+  "last_message": "[PROACTIVE] Automation issue: Finance Autopilot Loop, Night Infra Delegation need attention. Next step: inspect the latest cron run before changing more config."
 }
