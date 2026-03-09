@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-09T19:00:13Z
-- Run count: 115
-- Primary task: Review cold email templates for GDPR/CAN-SPAM compliance
+- Last run (UTC): 2026-03-09T19:22:40Z
+- Run count: 116
+- Primary task: Verify email footer includes address + unsubscribe link
 - Primary task progress count: 7
-- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260309-r115.md
+- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260309-r116.md
 - Blocking items: 0
 - Autonomous queue items: 15
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Review cold email templates for GDPR/CAN-SPAM compliance
+Verify email footer includes address + unsubscribe link
 
 ## Blocking
 - None
