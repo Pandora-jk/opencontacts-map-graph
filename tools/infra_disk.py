@@ -28,6 +28,10 @@ _HOTSPOT_DEPTH = {
     Path('/var/log/journal'): 1,
     Path('/home/ubuntu/.cache'): 2,
 }
+_HOME_REVIEW_ROOT = Path('/home/ubuntu')
+_HOME_REVIEW_THRESHOLD_BYTES = 1024 * 1024 * 1024
+_HOME_REVIEW_LIMIT = 12
+_HOME_REVIEW_DEPTH = 2
 
 
 def run_cmd(cmd: list[str], max_chars: int = 800) -> str:
@@ -129,6 +133,32 @@ def summarize_reclaim_guidance(candidates: list[tuple[int, Path, str]]) -> list[
         elif path == Path('/home/ubuntu/.cache'):
             lines.append('Cache review hint: focus on package/build caches before deleting app state')
     return lines
+
+
+def summarize_home_hotspots() -> list[str]:
+    size_bytes = path_usage_bytes(_HOME_REVIEW_ROOT)
+    if size_bytes is None or size_bytes < _HOME_REVIEW_THRESHOLD_BYTES:
+        return []
+
+    output = run_cmd(
+        [
+            'bash',
+            '-lc',
+            (
+                f"du -x -h --max-depth={_HOME_REVIEW_DEPTH} '{_HOME_REVIEW_ROOT}' 2>/dev/null | "
+                f"sort -hr | sed -n '1,{_HOME_REVIEW_LIMIT}p'"
+            ),
+        ],
+        max_chars=3200,
+    )
+    if output in {'n/a', ''} or output.startswith('Error:'):
+        return []
+
+    return [
+        f'Largest paths under {_HOME_REVIEW_ROOT} (review-only):',
+        output,
+        'Home review hint: prioritize build/package caches before SDKs or active workspaces',
+    ]
 
 
 def summarize_stale_tmp_entries() -> list[str]:
@@ -264,6 +294,7 @@ def build_disk_usage_report() -> list[str]:
             lines.extend(reclaim_lines)
             lines.extend(summarize_reclaim_guidance(candidates))
 
+        lines.extend(summarize_home_hotspots())
         lines.extend(summarize_deleted_open_files())
 
     return lines

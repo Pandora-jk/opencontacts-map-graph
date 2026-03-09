@@ -7,6 +7,13 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-09 12:32 UTC:**
+  - Reconfirmed `Monitor disk usage` is still the top infra task from TODO + latest logs/artifacts because `departments/infra/artifacts/checks/20260309T123254Z-infra-status.md` still shows `/` at `100%` used.
+  - Hardened `tools/infra_disk.py` so critical disk reports no longer stop at `/var` + cache hotspots and now expose the largest paths under `/home/ubuntu` as review-only guidance.
+  - Fresh disk artifacts now surface the previously hidden user-space pressure driving the incident, including `~/.gradle` (`2.3G`), `~/.gradle/caches` (`1.9G`), and `~/.npm-global` (`1.8G`), while keeping cleanup suggestions conservative.
+  - Added regression coverage in `tests/test_infra_disk.py`.
+  - Verification passed: `python3 -m unittest tests.test_infra_disk tests.test_infra_status`, `python3 -m py_compile tools/infra_disk.py tools/infra-status.py tools/infra-autopilot.py tools/infra_tmp_cleanup.py`, `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260309T123252Z-r55-monitor-disk-usage-alert-if-80.md` and `20260309T123254Z-infra-status.md`.
 - **2026-03-09 11:35 UTC:**
   - Reconfirmed `Monitor disk usage` is the top infra task from TODO + latest logs/artifacts because fresh status now shows `/` at `100%` used and the last nine autonomous runs had already shifted to disk pressure.
   - Hardened `tools/infra_disk.py` so critical disk artifacts are actionable instead of stopping at coarse reclaim totals:

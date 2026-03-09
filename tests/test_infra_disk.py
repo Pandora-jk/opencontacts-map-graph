@@ -66,6 +66,8 @@ class InfraDiskTests(unittest.TestCase):
         ), mock.patch.object(
             infra_disk, "collect_reclaim_candidates", return_value=[]
         ), mock.patch.object(
+            infra_disk, "summarize_home_hotspots", return_value=[]
+        ), mock.patch.object(
             infra_disk, "summarize_deleted_open_files", return_value=["No deleted-but-open files detected"]
         ):
             lines = infra_disk.build_disk_usage_report()
@@ -73,6 +75,37 @@ class InfraDiskTests(unittest.TestCase):
         self.assertIn("CRITICAL: Root filesystem usage is 100% (>90%)", lines)
         self.assertNotIn("Reclaim candidates (review before cleanup):", lines)
         self.assertIn("No deleted-but-open files detected", lines)
+
+    def test_build_disk_usage_report_includes_home_hotspots_when_pressure_is_high(self) -> None:
+        with mock.patch.object(
+            infra_disk,
+            "run_cmd",
+            side_effect=[
+                "19G 19G 153M 100% /",
+                "15% /",
+                "18G /\n9.3G /usr\n7.1G /home",
+            ],
+        ), mock.patch.object(
+            infra_disk, "collect_reclaim_candidates", return_value=[]
+        ), mock.patch.object(
+            infra_disk,
+            "summarize_home_hotspots",
+            return_value=[
+                "Largest paths under /home/ubuntu (review-only):",
+                "7.1G /home/ubuntu\n2.3G /home/ubuntu/.gradle",
+                "Home review hint: prioritize build/package caches before SDKs or active workspaces",
+            ],
+        ), mock.patch.object(
+            infra_disk, "summarize_deleted_open_files", return_value=["No deleted-but-open files detected"]
+        ):
+            lines = infra_disk.build_disk_usage_report()
+
+        self.assertIn("Largest paths under /home/ubuntu (review-only):", lines)
+        self.assertIn("7.1G /home/ubuntu\n2.3G /home/ubuntu/.gradle", lines)
+        self.assertIn(
+            "Home review hint: prioritize build/package caches before SDKs or active workspaces",
+            lines,
+        )
 
 
 if __name__ == "__main__":
