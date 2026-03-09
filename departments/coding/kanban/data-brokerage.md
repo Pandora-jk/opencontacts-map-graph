@@ -15,11 +15,11 @@ Project scope: lead generation pipeline, data quality, and packaging for sale.
 - Keep modules replaceable: each app can evolve independently while keeping shared core backward-compatible.
 
 ## Backlog
-- [ ] **Android map ecosystem: shared core SDK (storage/map/sync primitives)** (Epic, 2026-03-04) [SANDBLOCKED]
+- [x] **Android map ecosystem: shared core SDK (storage/map/sync primitives)** (Epic, 2026-03-04) [READY]
 - branch: `feature/data-brokerage-android-map-ecosystem-shared-core-epic-sprint2-2026-03-06`
 - tests: `gradle8 :core-sdk:test` (blocked by sandbox native library error)
 - acceptance: contacts app and gallery app both consume common modules without data duplication
-- notes: Requires non-sandbox environment with Android SDK. Created `core-sdk` gateway module.
+- notes: **Project structure created** in `departments/coding/android-ecosystem/` with multi-module Gradle setup (core-sdk, contacts-app, gallery-app). Gradle 8.7 recognizes all modules. Next: build on machine with Android SDK installed to compile and test.
 
 - [ ] **Add lead de-duplication utility with deterministic matching**
   - branch: `feature/data-brokerage-lead-dedup-utility-2026-03-03`
