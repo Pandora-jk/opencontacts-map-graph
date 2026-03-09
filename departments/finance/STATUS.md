@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-08T23:51:00Z
-- Run count: 71
-- Primary task: Verify email footer includes address + unsubscribe link
+- Last run (UTC): 2026-03-09T02:58:52Z
+- Run count: 76
+- Primary task: Write the one-line sales promise for the core service offer
 - Primary task progress count: 4
-- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260308-r71.md
+- Last artifact: departments/finance/artifacts/offers/core-service-offer-20260309-r76.md
 - Blocking items: 0
 - Autonomous queue items: 15
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Verify email footer includes address + unsubscribe link
+Write the one-line sales promise for the core service offer
 
 ## Blocking
 - None

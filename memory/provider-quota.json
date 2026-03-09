@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-03-08T19:00:37.084732+00:00",
+  "checked_at": "2026-03-09T01:11:54.281811+00:00",
   "providers": {
     "zai": {
       "type": "zai",
@@ -42,15 +42,14 @@
         {
           "key": "agent:main:main",
           "model": "glm-4.7-Flash",
-          "input_tokens": 107764,
-          "output_tokens": 239,
-          "context_used": 71610,
+          "input_tokens": 83271,
+          "output_tokens": 309,
+          "context_used": 84512,
           "context_limit": 200000
         }
       ],
       "turns_today": {
-        "agent:main:main": 59,
-        "agent:main:telegram:direct:156480904": 10
+        "agent:main:main": 8
       }
     },
     "cerebras": {
@@ -60,8 +59,7 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:main": 59,
-        "agent:main:telegram:direct:156480904": 10
+        "agent:main:main": 8
       }
     },
     "groq": {
@@ -71,8 +69,7 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:main": 59,
-        "agent:main:telegram:direct:156480904": 10
+        "agent:main:main": 8
       }
     },
     "chutes": {
@@ -82,8 +79,7 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:main": 59,
-        "agent:main:telegram:direct:156480904": 10
+        "agent:main:main": 8
       }
     },
     "nvidia": {
@@ -135,57 +131,17 @@
         {
           "key": "agent:main:cron:ssh-hardening-reminder-20260305",
           "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 14255,
-          "output_tokens": 70,
-          "context_used": 14255,
+          "input_tokens": 69795,
+          "output_tokens": 339,
+          "context_used": 14129,
           "context_limit": 131072
         },
         {
           "key": "agent:main:telegram:direct:156480904",
           "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 30727,
-          "output_tokens": 51,
-          "context_used": 30727,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:b2517cfa-e30d-49d2-a27c-ffb1c462f8a4",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 14255,
-          "output_tokens": 70,
-          "context_used": 14255,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:a5321dc9-4433-4852-937c-d7119fa8bbef",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27029,
-          "output_tokens": 69,
-          "context_used": 13557,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:2ebe6969-075f-4740-af84-8fc7397b0e1c",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27006,
-          "output_tokens": 44,
-          "context_used": 13533,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:98b1b000-46bd-4bec-a3b5-a0050270fcaa",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27031,
-          "output_tokens": 69,
-          "context_used": 13558,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:ac3fcff6-defd-4f3f-b88e-8afc799c3cbf",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27006,
-          "output_tokens": 44,
-          "context_used": 13533,
+          "input_tokens": 53682,
+          "output_tokens": 105,
+          "context_used": 53682,
           "context_limit": 131072
         },
         {
@@ -275,11 +231,50 @@
           "output_tokens": 69,
           "context_used": 13558,
           "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:528a8d84-d19e-41fb-8009-980815f220f7",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 27029,
+          "output_tokens": 69,
+          "context_used": 13557,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:91f6bc67-0610-44d1-beb7-813d1aae4ae1",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 69795,
+          "output_tokens": 339,
+          "context_used": 14129,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:8f837c93-524c-4c36-8b23-d9b2ccc0ac77",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 27006,
+          "output_tokens": 44,
+          "context_used": 13533,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:cae43081-9ba5-4c56-ab74-26627b03fbf9",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 27031,
+          "output_tokens": 69,
+          "context_used": 13558,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:92fa0dab-6613-4046-9726-253b1eb26aa6",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 27031,
+          "output_tokens": 69,
+          "context_used": 13558,
+          "context_limit": 131072
         }
       ],
       "turns_today": {
-        "agent:main:main": 59,
-        "agent:main:telegram:direct:156480904": 10
+        "agent:main:main": 8
       }
     }
   }
