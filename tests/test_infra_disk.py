@@ -231,6 +231,94 @@ class InfraDiskTests(unittest.TestCase):
             lines,
         )
 
+    def test_summarize_current_session_recovery_plan_reports_shortfall_when_tmp_cleanup_insufficient(self) -> None:
+        tmp_candidates = [
+            infra_home_cache_cleanup.CleanupCandidate(
+                path=Path("/tmp/jiti"),
+                size_bytes=14 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 5, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="tmp dir",
+            ),
+            infra_home_cache_cleanup.CleanupCandidate(
+                path=Path("/tmp/oc-patch-test"),
+                size_bytes=8 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 5, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="tmp dir",
+            ),
+        ]
+
+        with mock.patch.object(infra_disk, "scan_cleanup_candidates", return_value=tmp_candidates):
+            lines = infra_disk.summarize_current_session_recovery_plan(
+                total_bytes=19 * 1024**3,
+                used_bytes=19 * 1024**3,
+                used_pct=100,
+            )
+
+        self.assertIn("Current-session writable recovery plan (stale /tmp only):", lines)
+        self.assertIn("- Need about 1.9G reclaimed to reach <=90% on /", lines)
+        self.assertIn("  All writable stale /tmp paths total 22M across 2 path(s); short by 1.9G", lines)
+        self.assertIn("  Review top stale /tmp paths: python3 tools/infra_tmp_cleanup.py --limit 2", lines)
+        self.assertIn("  Host-level reclaim is still required after current-session cleanup", lines)
+
+    def test_summarize_current_session_recovery_plan_mentions_omitted_tmp_paths_when_scan_is_long(self) -> None:
+        tmp_candidates = [
+            infra_home_cache_cleanup.CleanupCandidate(
+                path=Path(f"/tmp/candidate-{index}"),
+                size_bytes=(10 - index) * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 5, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="tmp dir",
+            )
+            for index in range(7)
+        ]
+
+        with mock.patch.object(infra_disk, "scan_cleanup_candidates", return_value=tmp_candidates):
+            lines = infra_disk.summarize_current_session_recovery_plan(
+                total_bytes=19 * 1024**3,
+                used_bytes=19 * 1024**3,
+                used_pct=100,
+            )
+
+        self.assertIn("  Review top stale /tmp paths: python3 tools/infra_tmp_cleanup.py --limit 5", lines)
+        self.assertIn(
+            "  Current scan found 7 writable stale /tmp path(s); rerun the helper with a higher --limit or targeted --path values before cleanup",
+            lines,
+        )
+
+    def test_summarize_current_session_recovery_plan_builds_apply_bundle_when_tmp_cleanup_can_help(self) -> None:
+        tmp_candidates = [
+            infra_home_cache_cleanup.CleanupCandidate(
+                path=Path("/tmp/jiti"),
+                size_bytes=120 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 5, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="tmp dir",
+            ),
+            infra_home_cache_cleanup.CleanupCandidate(
+                path=Path("/tmp/oc-patch-test"),
+                size_bytes=40 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 5, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="tmp dir",
+            ),
+        ]
+
+        with mock.patch.object(infra_disk, "scan_cleanup_candidates", return_value=tmp_candidates):
+            lines = infra_disk.summarize_current_session_recovery_plan(
+                total_bytes=1024 * 1024 * 1024,
+                used_bytes=950 * 1024 * 1024,
+                used_pct=93,
+            )
+
+        self.assertIn("- Need about 28M reclaimed to reach <=90% on /", lines)
+        self.assertIn("  Writable stale /tmp paths can cover this with 120M across 1 path(s)", lines)
+        self.assertIn(
+            "  Apply bundle: python3 tools/infra_tmp_cleanup.py --apply --path /tmp/jiti",
+            lines,
+        )
+
     def test_collect_protected_home_paths_sorts_largest_first(self) -> None:
         sizes = {
             Path("/home/ubuntu/.npm-global"): 1800 * 1024 * 1024,

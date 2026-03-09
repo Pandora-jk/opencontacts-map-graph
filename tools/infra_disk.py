@@ -409,6 +409,83 @@ def summarize_home_cache_recovery_plan(total_bytes: int, used_bytes: int, used_p
     return lines
 
 
+def total_candidate_bytes(candidates: list[object]) -> int:
+    return sum(getattr(candidate, 'size_bytes', 0) for candidate in candidates)
+
+
+def select_candidate_bundle(candidates: list[object], *, required_bytes: int) -> list[object]:
+    if required_bytes <= 0:
+        return []
+
+    selected: list[object] = []
+    reclaimed = 0
+    for candidate in sorted(candidates, key=lambda item: getattr(item, 'size_bytes', 0), reverse=True):
+        selected.append(candidate)
+        reclaimed += getattr(candidate, 'size_bytes', 0)
+        if reclaimed >= required_bytes:
+            break
+    return selected
+
+
+def tmp_cleanup_args(candidates: list[object]) -> str:
+    return ' '.join(f"--path {shlex.quote(str(getattr(candidate, 'path')))}" for candidate in candidates)
+
+
+def tmp_review_command(limit: int) -> str:
+    return f'python3 tools/infra_tmp_cleanup.py --limit {limit}'
+
+
+def summarize_current_session_recovery_plan(total_bytes: int, used_bytes: int, used_pct: int) -> list[str]:
+    if used_pct <= DISK_ALERT_THRESHOLD:
+        return []
+
+    try:
+        candidates = scan_cleanup_candidates(min_age_hours=DEFAULT_MIN_AGE_HOURS, limit=None)
+    except (OSError, RuntimeError, subprocess.TimeoutExpired):
+        return []
+
+    if not candidates:
+        return []
+
+    total_reclaim = total_candidate_bytes(candidates)
+    targets: list[int] = []
+    if used_pct > DISK_CRITICAL_THRESHOLD:
+        targets.append(DISK_CRITICAL_THRESHOLD)
+    targets.append(DISK_ALERT_THRESHOLD)
+
+    lines = ['Current-session writable recovery plan (stale /tmp only):']
+    for target_pct in targets:
+        required_bytes = bytes_to_target_usage(total_bytes, used_bytes, target_pct)
+        if required_bytes <= 0:
+            continue
+
+        bundle = select_candidate_bundle(candidates, required_bytes=required_bytes)
+        bundle_reclaim = total_candidate_bytes(bundle)
+        lines.append(f'- Need about {human_size(required_bytes)} reclaimed to reach <={target_pct}% on /')
+        if bundle and bundle_reclaim >= required_bytes:
+            args = tmp_cleanup_args(bundle)
+            lines.append(f'  Writable stale /tmp paths can cover this with {human_size(bundle_reclaim)} across {len(bundle)} path(s)')
+            lines.append(f'  Review bundle: python3 tools/infra_tmp_cleanup.py {args}')
+            lines.append(f'  Apply bundle: python3 tools/infra_tmp_cleanup.py --apply {args}')
+            continue
+
+        shortfall = max(0, required_bytes - total_reclaim)
+        review_limit = min(_TMP_STALE_LIMIT, len(candidates))
+        lines.append(
+            f'  All writable stale /tmp paths total {human_size(total_reclaim)} across {len(candidates)} path(s); '
+            f'short by {human_size(shortfall)}'
+        )
+        lines.append(f'  Review top stale /tmp paths: {tmp_review_command(review_limit)}')
+        if len(candidates) > review_limit:
+            lines.append(
+                f'  Current scan found {len(candidates)} writable stale /tmp path(s); '
+                'rerun the helper with a higher --limit or targeted --path values before cleanup'
+            )
+        lines.append('  Host-level reclaim is still required after current-session cleanup')
+
+    return lines
+
+
 def summarize_deleted_open_files() -> list[str]:
     if not shutil.which('lsof'):
         return ['Deleted-but-open-file check unavailable (lsof missing)']
@@ -486,6 +563,7 @@ def build_disk_usage_report() -> list[str]:
             lines.extend(summarize_reclaim_guidance(candidates))
         if root_snapshot is not None:
             total_bytes, used_bytes, _avail_bytes, used_pct, _mount = root_snapshot
+            lines.extend(summarize_current_session_recovery_plan(total_bytes, used_bytes, used_pct))
             lines.extend(summarize_home_cache_recovery_plan(total_bytes, used_bytes, used_pct))
 
         lines.extend(summarize_home_hotspots())
