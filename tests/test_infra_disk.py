@@ -12,6 +12,16 @@ import infra_home_cache_cleanup
 
 
 class InfraDiskTests(unittest.TestCase):
+    def test_current_root_usage_bytes_parses_byte_output(self) -> None:
+        with mock.patch.object(
+            infra_disk,
+            "run_cmd",
+            return_value="20401094656 20246827008 154267648 100% /",
+        ):
+            snapshot = infra_disk.current_root_usage_bytes()
+
+        self.assertEqual(snapshot, (20401094656, 20246827008, 154267648, 100, "/"))
+
     def test_collect_reclaim_candidates_sorts_largest_first(self) -> None:
         sizes = {
             Path("/tmp"): 220 * 1024 * 1024,
@@ -114,6 +124,12 @@ class InfraDiskTests(unittest.TestCase):
         ), mock.patch.object(
             infra_disk, "summarize_home_hotspots", return_value=[]
         ), mock.patch.object(
+            infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
+        ), mock.patch.object(
+            infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_protected_home_paths", return_value=[]
+        ), mock.patch.object(
             infra_disk, "summarize_deleted_open_files", return_value=["No deleted-but-open files detected"]
         ):
             lines = infra_disk.build_disk_usage_report()
@@ -142,6 +158,12 @@ class InfraDiskTests(unittest.TestCase):
                 "Home review hint: prioritize build/package caches before SDKs or active workspaces",
             ],
         ), mock.patch.object(
+            infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
+        ), mock.patch.object(
+            infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_protected_home_paths", return_value=[]
+        ), mock.patch.object(
             infra_disk, "summarize_deleted_open_files", return_value=["No deleted-but-open files detected"]
         ):
             lines = infra_disk.build_disk_usage_report()
@@ -152,6 +174,101 @@ class InfraDiskTests(unittest.TestCase):
             "Home review hint: prioritize build/package caches before SDKs or active workspaces",
             lines,
         )
+
+    def test_collect_protected_home_paths_sorts_largest_first(self) -> None:
+        sizes = {
+            Path("/home/ubuntu/.npm-global"): 1800 * 1024 * 1024,
+            Path("/home/ubuntu/.local/share/pipx/venvs"): 482 * 1024 * 1024,
+            Path("/home/ubuntu/.android-sdk"): 965 * 1024 * 1024,
+        }
+
+        with mock.patch.object(infra_disk, "path_usage_bytes", side_effect=lambda path: sizes.get(path)):
+            candidates = infra_disk.collect_protected_home_paths()
+
+        self.assertEqual(
+            [str(path) for _, path, _ in candidates],
+            [
+                "/home/ubuntu/.npm-global",
+                "/home/ubuntu/.android-sdk",
+                "/home/ubuntu/.local/share/pipx/venvs",
+            ],
+        )
+
+    def test_build_disk_usage_report_includes_protected_home_paths_when_pressure_is_high(self) -> None:
+        with mock.patch.object(
+            infra_disk,
+            "run_cmd",
+            side_effect=[
+                "19G 19G 153M 100% /",
+                "15% /",
+                "18G /\n9.3G /usr\n7.1G /home",
+            ],
+        ), mock.patch.object(
+            infra_disk, "collect_reclaim_candidates", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_home_hotspots", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
+        ), mock.patch.object(
+            infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk,
+            "summarize_protected_home_paths",
+            return_value=[
+                "Protected install roots under /home/ubuntu (manual review, not safe cache cleanup):",
+                "- 1.8G /home/ubuntu/.npm-global (global npm packages; removing may break installed CLIs)",
+            ],
+        ), mock.patch.object(
+            infra_disk, "summarize_deleted_open_files", return_value=["No deleted-but-open files detected"]
+        ):
+            lines = infra_disk.build_disk_usage_report()
+
+        self.assertIn(
+            "Protected install roots under /home/ubuntu (manual review, not safe cache cleanup):",
+            lines,
+        )
+        self.assertIn(
+            "- 1.8G /home/ubuntu/.npm-global (global npm packages; removing may break installed CLIs)",
+            lines,
+        )
+
+    def test_summarize_home_cache_recovery_plan_distinguishes_relief_vs_alert_clear(self) -> None:
+        candidates = [
+            infra_home_cache_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.gradle/caches"),
+                size_bytes=1900 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 9, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="Gradle dependency cache",
+            ),
+            infra_home_cache_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.gradle/wrapper/dists"),
+                size_bytes=410 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 9, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="Gradle wrapper distributions",
+            ),
+            infra_home_cache_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.cache/pip"),
+                size_bytes=198 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 9, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="pip download cache",
+            ),
+        ]
+
+        with mock.patch.object(infra_disk, "scan_home_cache_cleanup_candidates", return_value=candidates):
+            lines = infra_disk.summarize_home_cache_recovery_plan(
+                total_bytes=19 * 1024**3,
+                used_bytes=19 * 1024**3,
+                used_pct=100,
+            )
+
+        self.assertIn("Allowlisted home-cache recovery plan:", lines)
+        self.assertIn("- Need about 1.9G reclaimed to reach <=90% on /", lines)
+        self.assertTrue(any("Review bundle: python3 tools/infra_home_cache_cleanup.py --path /home/ubuntu/.gradle/caches" in line for line in lines))
+        self.assertIn("- Need about 3.8G reclaimed to reach <=80% on /", lines)
+        self.assertTrue(any("short by" in line for line in lines))
 
 
 if __name__ == "__main__":

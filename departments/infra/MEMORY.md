@@ -7,6 +7,23 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-09 15:40 UTC:**
+  - Reconfirmed `Monitor disk usage` is still the top infra task from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh runs 63-64 because `infra-status` still reports `/` at `100%` used.
+  - Hardened the disk-pressure guidance so critical reports now distinguish immediate safe relief from full alert recovery:
+    - `tools/infra_home_cache_cleanup.py` now exposes reusable reclaim-bundle sizing helpers for allowlisted home caches
+    - `tools/infra_disk.py` now calculates how much space is needed to get `/` back under `90%` and `80%`, then prints the smallest review/apply bundle that can cover the target or an explicit shortfall when allowlisted caches are insufficient
+    - live artifacts now show that allowlisted home caches can reclaim enough to drop `/` below the critical band (`<=90%`), but still leave a `995M` gap to fully clear the `80%` alert threshold without extra host-level cleanup
+  - Added regression coverage in `tests/test_infra_disk.py` and `tests/test_infra_home_cache_cleanup.py`, including a parser check for byte-accurate `df -B1 -P` output.
+  - Verification passed: `python3 -m unittest tests.test_infra_disk tests.test_infra_home_cache_cleanup tests.test_infra_status`, `python3 -m py_compile tools/infra_disk.py tools/infra_home_cache_cleanup.py tools/infra-status.py tools/infra-autopilot.py tools/infra_tmp_cleanup.py`, `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260309T154031Z-infra-status.md` and `20260309T154025Z-r64-monitor-disk-usage-alert-if-80.md`.
+- **2026-03-09 14:49 UTC:**
+  - Reconfirmed `Monitor disk usage` is still the top infra task from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh runs 60-61 because `infra-status` still reports `/` at `100%` used.
+  - Hardened the disk-pressure tooling to stay review-first while reducing operator risk:
+    - `tools/infra_disk.py` now calls out large protected install roots under `/home/ubuntu` separately from reclaimable caches, so heavy paths like `~/.npm-global`, `~/.android-sdk`, `~/.local/share/pipx/venvs`, and `~/.local/share/claude/versions` are flagged as manual-review-only instead of looking like cleanup candidates
+    - `tools/infra_home_cache_cleanup.py` now allowlists `~/.npm` as an npm download cache for future safe cleanup when it crosses threshold
+  - Added regression coverage in `tests/test_infra_disk.py` and `tests/test_infra_home_cache_cleanup.py`.
+  - Verification passed: `python3 -m unittest tests.test_infra_disk tests.test_infra_home_cache_cleanup tests.test_infra_status`, `python3 -m py_compile tools/infra_disk.py tools/infra_home_cache_cleanup.py tools/infra-status.py tools/infra-autopilot.py tools/infra_tmp_cleanup.py`, `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260309T144852Z-infra-status.md` and `20260309T144901Z-r61-monitor-disk-usage-alert-if-80.md`.
 - **2026-03-09 12:32 UTC:**
   - Reconfirmed `Monitor disk usage` is still the top infra task from TODO + latest logs/artifacts because `departments/infra/artifacts/checks/20260309T123254Z-infra-status.md` still shows `/` at `100%` used.
   - Hardened `tools/infra_disk.py` so critical disk reports no longer stop at `/var` + cache hotspots and now expose the largest paths under `/home/ubuntu` as review-only guidance.

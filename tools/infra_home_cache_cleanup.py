@@ -17,6 +17,7 @@ DEFAULT_LIST_LIMIT = 6
 ALLOWED_CACHE_TARGETS = {
     Path('/home/ubuntu/.gradle/caches'): 'Gradle dependency cache',
     Path('/home/ubuntu/.gradle/wrapper/dists'): 'Gradle wrapper distributions',
+    Path('/home/ubuntu/.npm'): 'npm download cache',
     Path('/home/ubuntu/.cache/pip'): 'pip download cache',
     Path('/home/ubuntu/.cache/go-build'): 'Go build cache',
     Path('/home/ubuntu/.cache/node-gyp'): 'node-gyp build cache',
@@ -123,6 +124,24 @@ def scan_cleanup_candidates(*, min_bytes: int, limit: int | None = None) -> list
     if limit is not None:
         return candidates[:limit]
     return candidates
+
+
+def total_reclaim_bytes(candidates: list[CleanupCandidate]) -> int:
+    return sum(candidate.size_bytes for candidate in candidates)
+
+
+def select_reclaim_bundle(candidates: list[CleanupCandidate], *, required_bytes: int) -> list[CleanupCandidate]:
+    if required_bytes <= 0:
+        return []
+
+    selected: list[CleanupCandidate] = []
+    reclaimed = 0
+    for candidate in sorted(candidates, key=lambda item: item.size_bytes, reverse=True):
+        selected.append(candidate)
+        reclaimed += candidate.size_bytes
+        if reclaimed >= required_bytes:
+            break
+    return selected
 
 
 def format_candidate(candidate: CleanupCandidate) -> str:

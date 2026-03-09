@@ -11,6 +11,9 @@ from infra_home_cache_cleanup import (
     ALLOWED_CACHE_TARGETS,
     DEFAULT_MIN_BYTES as HOME_CACHE_MIN_BYTES,
     scan_cleanup_candidates as scan_home_cache_cleanup_candidates,
+    select_reclaim_bundle as select_home_cache_reclaim_bundle,
+    suggested_apply_args as suggested_home_cache_apply_args,
+    total_reclaim_bytes as total_home_cache_reclaim_bytes,
 )
 from infra_tmp_cleanup import DEFAULT_MIN_AGE_HOURS, scan_cleanup_candidates
 
@@ -32,6 +35,7 @@ _HOTSPOT_DEPTH = {
     Path('/var/cache/apt'): 2,
     Path('/var/log/journal'): 1,
     Path('/home/ubuntu/.cache'): 2,
+    Path('/home/ubuntu/.npm'): 2,
     Path('/home/ubuntu/.gradle/caches'): 2,
     Path('/home/ubuntu/.gradle/wrapper/dists'): 2,
     Path('/home/ubuntu/.cache/pip'): 2,
@@ -42,6 +46,13 @@ _HOME_REVIEW_ROOT = Path('/home/ubuntu')
 _HOME_REVIEW_THRESHOLD_BYTES = 1024 * 1024 * 1024
 _HOME_REVIEW_LIMIT = 12
 _HOME_REVIEW_DEPTH = 2
+_PROTECTED_HOME_TARGETS = {
+    Path('/home/ubuntu/.npm-global'): 'global npm packages; removing may break installed CLIs',
+    Path('/home/ubuntu/.local/share/pipx/venvs'): 'pipx virtualenvs; removing breaks installed pipx apps',
+    Path('/home/ubuntu/.local/share/claude/versions'): 'Claude local app versions; treat as installed software',
+    Path('/home/ubuntu/.android-sdk'): 'Android SDK toolchains; removing breaks Android builds',
+}
+_PROTECTED_HOME_THRESHOLD_BYTES = 200 * 1024 * 1024
 
 
 def run_cmd(cmd: list[str], max_chars: int = 800) -> str:
@@ -77,6 +88,20 @@ def path_usage_bytes(path: Path) -> int | None:
     if output.startswith('Error:') or not output.isdigit():
         return None
     return int(output) * 1024
+
+
+def current_root_usage_bytes() -> tuple[int, int, int, int, str] | None:
+    output = run_cmd(['bash', '-lc', "df -B1 -P / | awk 'NR==2 {print $2, $3, $4, $5, $6}'"], max_chars=200)
+    match = re.search(r'(\d+)\s+(\d+)\s+(\d+)\s+(\d+)%\s+(\S+)', output)
+    if not match:
+        return None
+    total_bytes, used_bytes, avail_bytes, used_pct, mount = match.groups()
+    return int(total_bytes), int(used_bytes), int(avail_bytes), int(used_pct), mount
+
+
+def bytes_to_target_usage(total_bytes: int, used_bytes: int, target_pct: int) -> int:
+    allowed_used = (total_bytes * target_pct) // 100
+    return max(0, used_bytes - allowed_used)
 
 
 def summarize_reclaim_candidates() -> list[str]:
@@ -184,6 +209,30 @@ def summarize_home_hotspots() -> list[str]:
     ]
 
 
+def collect_protected_home_paths() -> list[tuple[int, Path, str]]:
+    candidates: list[tuple[int, Path, str]] = []
+    for path, note in _PROTECTED_HOME_TARGETS.items():
+        size_bytes = path_usage_bytes(path)
+        if size_bytes is None or size_bytes < _PROTECTED_HOME_THRESHOLD_BYTES:
+            continue
+        candidates.append((size_bytes, path, note))
+    return sorted(candidates, key=lambda item: item[0], reverse=True)
+
+
+def summarize_protected_home_paths() -> list[str]:
+    candidates = collect_protected_home_paths()
+    if not candidates:
+        return []
+
+    lines = ['Protected install roots under /home/ubuntu (manual review, not safe cache cleanup):']
+    for size_bytes, path, note in candidates:
+        lines.append(f'- {human_size(size_bytes)} {path} ({note})')
+    lines.append(
+        'Protected-root hint: reclaim caches first; remove these only when intentionally uninstalling the owning toolchain'
+    )
+    return lines
+
+
 def summarize_stale_tmp_entries() -> list[str]:
     if not Path('/tmp').exists():
         return []
@@ -263,6 +312,54 @@ def summarize_home_cache_cleanup_helper(paths: list[Path]) -> list[str]:
     ]
 
 
+def summarize_home_cache_recovery_plan(total_bytes: int, used_bytes: int, used_pct: int) -> list[str]:
+    if used_pct <= DISK_ALERT_THRESHOLD:
+        return []
+
+    try:
+        candidates = scan_home_cache_cleanup_candidates(min_bytes=HOME_CACHE_MIN_BYTES)
+    except (OSError, RuntimeError, subprocess.TimeoutExpired):
+        return []
+
+    if not candidates:
+        return []
+
+    total_reclaim = total_home_cache_reclaim_bytes(candidates)
+    targets: list[int] = []
+    if used_pct > DISK_CRITICAL_THRESHOLD:
+        targets.append(DISK_CRITICAL_THRESHOLD)
+    targets.append(DISK_ALERT_THRESHOLD)
+
+    lines = ['Allowlisted home-cache recovery plan:']
+    for target_pct in targets:
+        required_bytes = bytes_to_target_usage(total_bytes, used_bytes, target_pct)
+        if required_bytes <= 0:
+            continue
+
+        bundle = select_home_cache_reclaim_bundle(candidates, required_bytes=required_bytes)
+        bundle_reclaim = total_home_cache_reclaim_bytes(bundle)
+        lines.append(f'- Need about {human_size(required_bytes)} reclaimed to reach <={target_pct}% on /')
+        if bundle and bundle_reclaim >= required_bytes:
+            apply_args = suggested_home_cache_apply_args(bundle)
+            lines.append(
+                f'  Allowlisted home caches can cover this with {human_size(bundle_reclaim)} across {len(bundle)} path(s)'
+            )
+            lines.append(f'  Review bundle: python3 tools/infra_home_cache_cleanup.py {apply_args}')
+            lines.append(f'  Apply bundle: python3 tools/infra_home_cache_cleanup.py --apply {apply_args}')
+            continue
+
+        shortfall = max(0, required_bytes - total_reclaim)
+        apply_args = suggested_home_cache_apply_args(candidates)
+        lines.append(
+            f'  All allowlisted home caches total {human_size(total_reclaim)} across {len(candidates)} path(s); '
+            f'short by {human_size(shortfall)}'
+        )
+        lines.append(f'  Review remaining home caches: python3 tools/infra_home_cache_cleanup.py {apply_args}')
+        lines.append('  Additional host-level reclaim is still required after allowlisted home-cache cleanup')
+
+    return lines
+
+
 def summarize_deleted_open_files() -> list[str]:
     if not shutil.which('lsof'):
         return ['Deleted-but-open-file check unavailable (lsof missing)']
@@ -296,12 +393,14 @@ def summarize_deleted_open_files() -> list[str]:
 def build_disk_usage_report() -> list[str]:
     lines: list[str] = []
     high_pressure = False
+    root_snapshot: tuple[int, int, int, int, str] | None = None
 
     disk_line = run_cmd(['bash', '-lc', "df -hP / | awk 'NR==2 {print $2, $3, $4, $5, $6}'"])
     disk_match = re.search(r'(\S+)\s+(\S+)\s+(\S+)\s+(\d+)%\s+(\S+)', disk_line)
     if disk_match:
         size, used, avail, pct_txt, mount = disk_match.groups()
         pct = int(pct_txt)
+        root_snapshot = current_root_usage_bytes()
         lines.append(f'Root usage: {mount}: {pct}% used ({used}/{size}, avail {avail})')
         if pct > DISK_CRITICAL_THRESHOLD:
             lines.append(f'CRITICAL: Root filesystem usage is {pct}% (>{DISK_CRITICAL_THRESHOLD}%)')
@@ -336,8 +435,12 @@ def build_disk_usage_report() -> list[str]:
         if reclaim_lines:
             lines.extend(reclaim_lines)
             lines.extend(summarize_reclaim_guidance(candidates))
+        if root_snapshot is not None:
+            total_bytes, used_bytes, _avail_bytes, used_pct, _mount = root_snapshot
+            lines.extend(summarize_home_cache_recovery_plan(total_bytes, used_bytes, used_pct))
 
         lines.extend(summarize_home_hotspots())
+        lines.extend(summarize_protected_home_paths())
         lines.extend(summarize_deleted_open_files())
 
     return lines
