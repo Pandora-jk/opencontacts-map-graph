@@ -21,6 +21,13 @@ _RECLAIM_TARGETS = (
     (Path('/var/log/journal'), 100 * 1024 * 1024, 'systemd journals'),
     (Path('/home/ubuntu/.cache'), 200 * 1024 * 1024, 'user cache'),
 )
+_HOTSPOT_LIMIT = 6
+_HOTSPOT_DEPTH = {
+    Path('/tmp'): 1,
+    Path('/var/cache/apt'): 2,
+    Path('/var/log/journal'): 1,
+    Path('/home/ubuntu/.cache'): 2,
+}
 
 
 def run_cmd(cmd: list[str], max_chars: int = 800) -> str:
@@ -72,6 +79,55 @@ def summarize_reclaim_candidates() -> list[str]:
     lines = ['Reclaim candidates (review before cleanup):']
     for size_bytes, path, note in sorted(candidates, key=lambda item: item[0], reverse=True):
         lines.append(f'- {human_size(size_bytes)} {path} ({note})')
+    return lines
+
+
+def collect_reclaim_candidates() -> list[tuple[int, Path, str]]:
+    candidates: list[tuple[int, Path, str]] = []
+    for path, min_bytes, note in _RECLAIM_TARGETS:
+        size_bytes = path_usage_bytes(path)
+        if size_bytes is None or size_bytes < min_bytes:
+            continue
+        candidates.append((size_bytes, path, note))
+    return sorted(candidates, key=lambda item: item[0], reverse=True)
+
+
+def summarize_hotspots(path: Path) -> list[str]:
+    depth = _HOTSPOT_DEPTH.get(path, 1)
+    output = run_cmd(
+        [
+            'bash',
+            '-lc',
+            f"du -x -h --max-depth={depth} '{path}' 2>/dev/null | sort -hr | sed -n '1,{_HOTSPOT_LIMIT}p'",
+        ],
+        max_chars=2400,
+    )
+    if output in {'n/a', ''} or output.startswith('Error:'):
+        return []
+    return [f'Largest paths under {path}:', output]
+
+
+def summarize_reclaim_guidance(candidates: list[tuple[int, Path, str]]) -> list[str]:
+    lines: list[str] = []
+    for _, path, _ in candidates:
+        if path == Path('/tmp'):
+            stale_tmp_lines = summarize_stale_tmp_entries()
+            if stale_tmp_lines:
+                lines.extend(stale_tmp_lines)
+                lines.extend(summarize_tmp_cleanup_helper())
+            continue
+
+        hotspot_lines = summarize_hotspots(path)
+        if hotspot_lines:
+            lines.extend(hotspot_lines)
+
+        if path == Path('/var/cache/apt'):
+            lines.append('APT cleanup hint: sudo apt-get clean')
+        elif path == Path('/var/log/journal'):
+            lines.append('Journal review hint: journalctl --disk-usage')
+            lines.append('Journal vacuum hint: sudo journalctl --vacuum-time=7d')
+        elif path == Path('/home/ubuntu/.cache'):
+            lines.append('Cache review hint: focus on package/build caches before deleting app state')
     return lines
 
 
@@ -198,14 +254,15 @@ def build_disk_usage_report() -> list[str]:
         lines.append('Top disk usage under / (depth 1):')
         lines.append(run_cmd(['bash', '-lc', "du -x -h --max-depth=1 / 2>/dev/null | sort -hr | sed -n '1,8p'"], max_chars=1600))
 
-        reclaim_lines = summarize_reclaim_candidates()
+        candidates = collect_reclaim_candidates()
+        reclaim_lines: list[str] = []
+        if candidates:
+            reclaim_lines.append('Reclaim candidates (review before cleanup):')
+            for size_bytes, path, note in candidates:
+                reclaim_lines.append(f'- {human_size(size_bytes)} {path} ({note})')
         if reclaim_lines:
             lines.extend(reclaim_lines)
-            if any('/tmp' in line for line in reclaim_lines):
-                stale_tmp_lines = summarize_stale_tmp_entries()
-                if stale_tmp_lines:
-                    lines.extend(stale_tmp_lines)
-                    lines.extend(summarize_tmp_cleanup_helper())
+            lines.extend(summarize_reclaim_guidance(candidates))
 
         lines.extend(summarize_deleted_open_files())
 

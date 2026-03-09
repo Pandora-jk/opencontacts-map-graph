@@ -2,11 +2,21 @@
 
 ## Current State
 - **Uptime:** 99.9% (AWS EC2)
-- **Disk Usage:** 88% on `/` (Alert)
+- **Disk Usage:** 100% on `/` (Critical)
 - **Last Backup:** 2026-03-01 03:00 AEDT
-- **Security Status:** Alert (`udp/5353` externally exposed, `ufw` unavailable from host checks, no pending package updates)
+- **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-09 11:35 UTC:**
+  - Reconfirmed `Monitor disk usage` is the top infra task from TODO + latest logs/artifacts because fresh status now shows `/` at `100%` used and the last nine autonomous runs had already shifted to disk pressure.
+  - Hardened `tools/infra_disk.py` so critical disk artifacts are actionable instead of stopping at coarse reclaim totals:
+    - reclaim candidates are now collected in priority order
+    - high-pressure reports now expand the biggest paths under `/var/cache/apt`, `/home/ubuntu/.cache`, and `/var/log/journal`
+    - added explicit review/apply hints for `apt-get clean` and `journalctl --vacuum-time=7d`, while keeping `/tmp` cleanup on the existing review-first helper
+    - fixed the empty-heading edge case so reports do not claim reclaim candidates when none qualify
+  - Added regression coverage in `tests/test_infra_disk.py`.
+  - Verification passed: `python3 -m unittest tests.test_infra_disk tests.test_infra_status`, `python3 -m py_compile tools/infra_disk.py tools/infra-status.py tools/infra-autopilot.py tools/infra_tmp_cleanup.py`, `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260309T113513Z-infra-status.md` and `20260309T113533Z-r53-monitor-disk-usage-alert-if-80.md`.
 - **2026-03-08 15:35 UTC:**
   - Reconfirmed `Run security audit` remained the top infra task from TODO + latest logs/artifacts because public `udp/5353` exposure still dominates fresh runs 25 and 26.
   - Hardened the repo-side mDNS remediation flow so validation now fails closed instead of treating unresolved live exposure as a success:
@@ -55,8 +65,8 @@
   - Live reclaim candidates now surface `/tmp` (`989M`, including stale `/tmp/gradle-home` at `913M`), `/var/cache/apt` (`661M`), `/home/ubuntu/.cache` (`366M`), and `/var/log/journal` (`130M`); no deleted-but-open files detected.
 
 ## Known Issues
-- Root filesystem `/` is at `88%` usage and still needs space reclamation.
-- Unexpected external `udp/5353` listener remains exposed.
+- Root filesystem `/` is at `100%` usage and still needs live space reclamation outside the repo sandbox.
+- Unexpected external listeners are still exposed on high ports and need follow-up security-audit work.
 - `ufw` unavailable and no host firewall tool detected from current host checks.
 
 ## Backup Status
