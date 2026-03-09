@@ -1,10 +1,10 @@
 # Infra Status
 
-- Last run (UTC): 2026-03-08T23:45:47Z
-- Run count: 42
+- Last run (UTC): 2026-03-09T03:34:14Z
+- Run count: 43
 - Active task: **Run security audit:** Check for open ports, SSH config, failed logins.
 - Selection reason: risk-based priority: ALERT: Unexpected externally exposed listeners (1): udp/5353; RISK: udp/5353 is mDNS/MulticastDNS; public/cloud hosts usually do not need it. Consider disabling MulticastDNS/LLMNR or blocking it with host/cloud firewall policy.; ALERT: External mDNS listener detected on udp/5353; RISK: udp/5353 listener owner is not systemd-resolved/avahi-daemon: openclaw-gateway; RISK: the managed resolved drop-in is defense-in-depth, but it may not clear udp/5353 while that service still binds the socket; RISK: local host resolution does not reference mdns; external udp/5353 is less likely to be required; WARN: ufw unavailable on host; RISK: No host firewall tool detected (ufw/nft/iptables unavailable); ALERT: 5 suspicious auth lines found in sampled logs (auth.log); unexpected udp/5353 listener still exposed
-- Task progress count: 42
-- Last artifact: departments/infra/artifacts/checks/20260308T234547Z-r42-run-security-audit-check-for-open-ports-ssh-config-faile.md
+- Task progress count: 43
+- Last artifact: departments/infra/artifacts/checks/20260309T033414Z-r43-run-security-audit-check-for-open-ports-ssh-config-faile.md
 - Autonomous open queue: 4
 
