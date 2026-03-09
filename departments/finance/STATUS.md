@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-09T22:32:42Z
-- Run count: 123
-- Primary task: Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes
+- Last run (UTC): 2026-03-09T22:56:50Z
+- Run count: 124
+- Primary task: Filter out personal emails, low-ticket businesses, solo operators, giant agencies, and weak-fit prospects
 - Primary task progress count: 7
-- Last artifact: departments/finance/artifacts/pipeline/founder-led-agencies-first-20-20260309-r123.csv
+- Last artifact: departments/finance/artifacts/notes/filter-out-personal-emails-low-ticket-businesses-solo-operators--20260309-r124.md
 - Blocking items: 0
 - Autonomous queue items: 15
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes
+Filter out personal emails, low-ticket businesses, solo operators, giant agencies, and weak-fit prospects
 
 ## Blocking
 - None
