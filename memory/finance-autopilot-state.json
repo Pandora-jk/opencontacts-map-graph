@@ -1,14 +1,14 @@
 {
-  "runs": 85,
-  "last_primary_task": "Review cold email templates for GDPR/CAN-SPAM compliance",
-  "task_cursor": 1,
+  "runs": 86,
+  "last_primary_task": "Verify email footer includes address + unsubscribe link",
+  "task_cursor": 2,
   "task_progress": {
     "**Daily cash task:** close one short-cycle offer (lead pack, template pack, quick script fix).": 1,
     "**Recurring income task:** build/iterate one monthly-retainer style product offer.": 1,
     "**Pipeline expansion:** scrape 50 new solar wholesalers for outreach expansion.": 1,
     "No autonomous task queued": 0,
     "Review cold email templates for GDPR/CAN-SPAM compliance": 5,
-    "Verify email footer includes address + unsubscribe link": 4,
+    "Verify email footer includes address + unsubscribe link": 5,
     "Test unsubscribe flow end-to-end": 4,
     "Confirm suppression list is operational": 4,
     "Document approved public B2B data sources": 4,
