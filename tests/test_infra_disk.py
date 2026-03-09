@@ -65,6 +65,25 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "summarize_stale_tmp_entries", return_value=["Stale /tmp entries older than 24h:", "- 913M /tmp/gradle-home"]
         ), mock.patch.object(
             infra_disk, "summarize_tmp_cleanup_helper", return_value=["Cleanup helper available"]
+        ), mock.patch.object(
+            infra_disk,
+            "scan_home_cache_cleanup_candidates",
+            return_value=[
+                infra_home_cache_cleanup.CleanupCandidate(
+                    path=Path("/home/ubuntu/.gradle/caches"),
+                    size_bytes=1900 * 1024 * 1024,
+                    mtime=dt.datetime(2026, 3, 9, tzinfo=dt.timezone.utc),
+                    owner="ubuntu",
+                    note="Gradle dependency cache",
+                ),
+                infra_home_cache_cleanup.CleanupCandidate(
+                    path=Path("/home/ubuntu/.gradle/wrapper/dists"),
+                    size_bytes=410 * 1024 * 1024,
+                    mtime=dt.datetime(2026, 3, 9, tzinfo=dt.timezone.utc),
+                    owner="ubuntu",
+                    note="Gradle wrapper distributions",
+                ),
+            ],
         ):
             lines = infra_disk.summarize_reclaim_guidance(candidates)
 
@@ -84,6 +103,43 @@ class InfraDiskTests(unittest.TestCase):
         self.assertIn("Largest paths under /var/log/journal:", lines)
         self.assertIn("Journal review hint: journalctl --disk-usage", lines)
         self.assertIn("Journal vacuum hint: sudo journalctl --vacuum-time=7d", lines)
+
+    def test_summarize_home_cache_cleanup_helper_hides_apply_when_session_cannot_write(self) -> None:
+        blocked_candidates = [
+            infra_home_cache_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.gradle/caches"),
+                size_bytes=1900 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 9, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="Gradle dependency cache",
+                apply_blocked_reason="current session cannot write inside /home/ubuntu/.gradle/caches (Permission denied)",
+            ),
+            infra_home_cache_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.gradle/wrapper/dists"),
+                size_bytes=410 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 9, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="Gradle wrapper distributions",
+                apply_blocked_reason="current session cannot write inside /home/ubuntu/.gradle/wrapper/dists (Permission denied)",
+            ),
+        ]
+
+        with mock.patch.object(infra_disk, "scan_home_cache_cleanup_candidates", return_value=blocked_candidates):
+            lines = infra_disk.summarize_home_cache_cleanup_helper(
+                [Path("/home/ubuntu/.gradle/caches"), Path("/home/ubuntu/.gradle/wrapper/dists")]
+            )
+
+        self.assertIn("Home cache cleanup helper available for allowlisted user-owned caches:", lines)
+        self.assertIn(
+            "- Review: python3 tools/infra_home_cache_cleanup.py --path /home/ubuntu/.gradle/caches --path /home/ubuntu/.gradle/wrapper/dists",
+            lines,
+        )
+        self.assertNotIn(
+            "- Apply: python3 tools/infra_home_cache_cleanup.py --apply --path /home/ubuntu/.gradle/caches --path /home/ubuntu/.gradle/wrapper/dists",
+            lines,
+        )
+        self.assertIn("Home cache apply blocked from current session:", lines)
+        self.assertTrue(any("/home/ubuntu/.gradle/caches" in line for line in lines))
 
     def test_collect_reclaim_candidates_includes_allowlisted_home_caches(self) -> None:
         sizes = {
@@ -269,6 +325,30 @@ class InfraDiskTests(unittest.TestCase):
         self.assertTrue(any("Review bundle: python3 tools/infra_home_cache_cleanup.py --path /home/ubuntu/.gradle/caches" in line for line in lines))
         self.assertIn("- Need about 3.8G reclaimed to reach <=80% on /", lines)
         self.assertTrue(any("short by" in line for line in lines))
+
+    def test_summarize_home_cache_recovery_plan_reports_apply_block_when_bundle_is_not_writable(self) -> None:
+        candidates = [
+            infra_home_cache_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.gradle/caches"),
+                size_bytes=2200 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 9, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="Gradle dependency cache",
+                apply_blocked_reason="current session cannot write inside /home/ubuntu/.gradle/caches (Permission denied)",
+            ),
+        ]
+
+        with mock.patch.object(infra_disk, "scan_home_cache_cleanup_candidates", return_value=candidates):
+            lines = infra_disk.summarize_home_cache_recovery_plan(
+                total_bytes=19 * 1024**3,
+                used_bytes=19 * 1024**3,
+                used_pct=100,
+            )
+
+        self.assertIn("Allowlisted home-cache recovery plan:", lines)
+        self.assertTrue(any("Review bundle: python3 tools/infra_home_cache_cleanup.py --path /home/ubuntu/.gradle/caches" in line for line in lines))
+        self.assertTrue(any("Apply blocked from current session" in line for line in lines))
+        self.assertFalse(any("Apply bundle:" in line for line in lines))
 
 
 if __name__ == "__main__":

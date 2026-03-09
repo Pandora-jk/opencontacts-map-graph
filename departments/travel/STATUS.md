@@ -1,9 +1,9 @@
 # Travel Status
 
-- Last run (UTC): 2026-03-09T15:53:16Z
-- Run count: 24
-- Active task: **Resupply planning:** Major towns every 7-10 days for groceries, fuel, van services.
-- Task progress count: 3
-- Last artifact: departments/travel/artifacts/plans/20260309T155316Z-r24-resupply-planning-major-towns-every-7-10-days-for-grocer.md
+- Last run (UTC): 2026-03-09T17:50:06Z
+- Run count: 25
+- Active task: **Map multi-day hikes:** 6 Foot Track (3 days, bookable now), Grand Canyon Loop.
+- Task progress count: 4
+- Last artifact: departments/travel/artifacts/plans/20260309T175006Z-r25-map-multi-day-hikes-6-foot-track-3-days-bookable-now-gra.md
 - Autonomous open queue: 8
 

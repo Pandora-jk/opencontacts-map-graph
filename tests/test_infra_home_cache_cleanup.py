@@ -39,6 +39,8 @@ class InfraHomeCacheCleanupTests(unittest.TestCase):
         ), mock.patch.object(
             infra_home_cache_cleanup, "du_bytes", return_value=1900 * 1024 * 1024
         ), mock.patch.object(
+            infra_home_cache_cleanup, "probe_write_access", return_value=None
+        ), mock.patch.object(
             infra_home_cache_cleanup.os, "getuid", return_value=1000
         ), mock.patch.object(
             infra_home_cache_cleanup.pwd, "getpwuid", return_value=SimpleNamespace(pw_name="ubuntu")
@@ -71,6 +73,8 @@ class InfraHomeCacheCleanupTests(unittest.TestCase):
             infra_home_cache_cleanup, "has_open_files", return_value=False
         ), mock.patch.object(
             infra_home_cache_cleanup, "du_bytes", return_value=410 * 1024 * 1024
+        ), mock.patch.object(
+            infra_home_cache_cleanup, "probe_write_access", return_value=None
         ), mock.patch.object(
             infra_home_cache_cleanup.os, "getuid", return_value=1000
         ), mock.patch.object(
@@ -105,6 +109,8 @@ class InfraHomeCacheCleanupTests(unittest.TestCase):
         ), mock.patch.object(
             infra_home_cache_cleanup, "du_bytes", return_value=160 * 1024 * 1024
         ), mock.patch.object(
+            infra_home_cache_cleanup, "probe_write_access", return_value=None
+        ), mock.patch.object(
             infra_home_cache_cleanup.os, "getuid", return_value=1000
         ), mock.patch.object(
             infra_home_cache_cleanup.pwd, "getpwuid", return_value=SimpleNamespace(pw_name="ubuntu")
@@ -119,6 +125,44 @@ class InfraHomeCacheCleanupTests(unittest.TestCase):
         assert candidate is not None
         self.assertEqual(candidate.path, target)
         self.assertEqual(candidate.note, "npm download cache")
+        self.assertIsNone(candidate.apply_blocked_reason)
+
+    def test_validate_candidate_marks_apply_blocked_when_probe_fails(self) -> None:
+        target = Path("/home/ubuntu/.gradle/caches")
+        fake_stat = SimpleNamespace(
+            st_uid=1000,
+            st_mtime=dt.datetime(2026, 3, 9, tzinfo=dt.timezone.utc).timestamp(),
+        )
+
+        with mock.patch.object(Path, "exists", return_value=True), mock.patch.object(
+            Path, "is_symlink", return_value=False
+        ), mock.patch.object(
+            Path, "lstat", return_value=fake_stat
+        ), mock.patch.object(
+            infra_home_cache_cleanup, "path_owner", return_value="ubuntu"
+        ), mock.patch.object(
+            infra_home_cache_cleanup, "has_open_files", return_value=False
+        ), mock.patch.object(
+            infra_home_cache_cleanup, "du_bytes", return_value=1900 * 1024 * 1024
+        ), mock.patch.object(
+            infra_home_cache_cleanup, "probe_write_access", return_value="current session cannot write inside /home/ubuntu/.gradle/caches (Permission denied)"
+        ), mock.patch.object(
+            infra_home_cache_cleanup.os, "getuid", return_value=1000
+        ), mock.patch.object(
+            infra_home_cache_cleanup.pwd, "getpwuid", return_value=SimpleNamespace(pw_name="ubuntu")
+        ):
+            candidate, reason = infra_home_cache_cleanup.validate_candidate(
+                target,
+                min_bytes=infra_home_cache_cleanup.DEFAULT_MIN_BYTES,
+            )
+
+        self.assertIsNone(reason)
+        self.assertIsNotNone(candidate)
+        assert candidate is not None
+        self.assertEqual(
+            candidate.apply_blocked_reason,
+            "current session cannot write inside /home/ubuntu/.gradle/caches (Permission denied)",
+        )
 
     def test_scan_cleanup_candidates_sorts_largest_first(self) -> None:
         sizes = {

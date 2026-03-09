@@ -9,6 +9,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -31,6 +32,7 @@ class CleanupCandidate:
     mtime: dt.datetime
     owner: str
     note: str
+    apply_blocked_reason: str | None = None
 
 
 def human_size(num_bytes: int) -> str:
@@ -84,6 +86,23 @@ def has_open_files(path: Path) -> bool:
     return bool((proc.stdout or '').strip())
 
 
+def probe_write_access(path: Path) -> str | None:
+    probe_dir = path if path.is_dir() else path.parent
+    try:
+        fd, probe_path = tempfile.mkstemp(prefix='.openclaw-write-probe-', dir=probe_dir)
+    except OSError as exc:
+        detail = exc.strerror or str(exc)
+        return f'current session cannot write inside {probe_dir} ({detail})'
+
+    os.close(fd)
+    try:
+        Path(probe_path).unlink()
+    except OSError as exc:
+        detail = exc.strerror or str(exc)
+        return f'current session created a probe in {probe_dir} but could not remove it ({detail})'
+    return None
+
+
 def validate_candidate(path: Path, *, min_bytes: int) -> tuple[CleanupCandidate | None, str | None]:
     normalized = normalize_path(path)
     note = ALLOWED_CACHE_TARGETS.get(normalized)
@@ -110,7 +129,17 @@ def validate_candidate(path: Path, *, min_bytes: int) -> tuple[CleanupCandidate 
         return None, f'smaller than {human_size(min_bytes)}'
 
     mtime = dt.datetime.fromtimestamp(stat.st_mtime, tz=dt.timezone.utc)
-    return CleanupCandidate(path=normalized, size_bytes=size_bytes, mtime=mtime, owner=owner, note=note), None
+    return (
+        CleanupCandidate(
+            path=normalized,
+            size_bytes=size_bytes,
+            mtime=mtime,
+            owner=owner,
+            note=note,
+            apply_blocked_reason=probe_write_access(normalized),
+        ),
+        None,
+    )
 
 
 def scan_cleanup_candidates(*, min_bytes: int, limit: int | None = None) -> list[CleanupCandidate]:
@@ -153,6 +182,14 @@ def suggested_apply_args(candidates: list[CleanupCandidate]) -> str:
     return ' '.join(f"--path {shlex.quote(str(candidate.path))}" for candidate in candidates)
 
 
+def applyable_candidates(candidates: list[CleanupCandidate]) -> list[CleanupCandidate]:
+    return [candidate for candidate in candidates if candidate.apply_blocked_reason is None]
+
+
+def blocked_candidates(candidates: list[CleanupCandidate]) -> list[CleanupCandidate]:
+    return [candidate for candidate in candidates if candidate.apply_blocked_reason is not None]
+
+
 def remove_path(path: Path) -> None:
     if path.is_dir():
         shutil.rmtree(path)
@@ -169,7 +206,17 @@ def list_mode(min_bytes: int, limit: int) -> int:
     print('HOME_CACHE_CLEANUP_REVIEW')
     for candidate in candidates:
         print(format_candidate(candidate))
-    print(f"Suggested apply: python3 tools/infra_home_cache_cleanup.py --apply {suggested_apply_args(candidates)}")
+    applyable = applyable_candidates(candidates)
+    blocked = blocked_candidates(candidates)
+    if blocked:
+        print('apply_blocked:')
+        for candidate in blocked:
+            print(f'- {candidate.path}: {candidate.apply_blocked_reason}')
+        print('Run cleanup from a shell with write access to these cache paths before using --apply')
+    if applyable:
+        print(f"Suggested apply: python3 tools/infra_home_cache_cleanup.py --apply {suggested_apply_args(applyable)}")
+    else:
+        print('Suggested apply unavailable from current session')
     return 0
 
 
@@ -186,6 +233,9 @@ def apply_mode(paths: list[str], min_bytes: int) -> int:
         candidate, reason = validate_candidate(Path(raw), min_bytes=min_bytes)
         if candidate is None:
             skipped.append(f'- {raw}: {reason}')
+            continue
+        if candidate.apply_blocked_reason is not None:
+            skipped.append(f'- {candidate.path}: {candidate.apply_blocked_reason}')
             continue
         try:
             remove_path(candidate.path)
@@ -238,7 +288,17 @@ def main() -> int:
             print('skipped:')
             for line in skipped:
                 print(line)
-        print(f"Suggested apply: python3 tools/infra_home_cache_cleanup.py --apply {suggested_apply_args(candidates)}")
+        blocked = blocked_candidates(candidates)
+        if blocked:
+            print('apply_blocked:')
+            for candidate in blocked:
+                print(f'- {candidate.path}: {candidate.apply_blocked_reason}')
+            print('Run cleanup from a shell with write access to these cache paths before using --apply')
+        applyable = applyable_candidates(candidates)
+        if applyable:
+            print(f"Suggested apply: python3 tools/infra_home_cache_cleanup.py --apply {suggested_apply_args(applyable)}")
+        else:
+            print('Suggested apply unavailable from current session')
         return 0
 
     return list_mode(args.min_bytes, args.limit)

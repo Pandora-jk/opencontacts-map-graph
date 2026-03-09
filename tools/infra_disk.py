@@ -9,7 +9,10 @@ from pathlib import Path
 
 from infra_home_cache_cleanup import (
     ALLOWED_CACHE_TARGETS,
+    CleanupCandidate,
     DEFAULT_MIN_BYTES as HOME_CACHE_MIN_BYTES,
+    applyable_candidates as filter_applyable_home_cache_candidates,
+    blocked_candidates as filter_blocked_home_cache_candidates,
     scan_cleanup_candidates as scan_home_cache_cleanup_candidates,
     select_reclaim_bundle as select_home_cache_reclaim_bundle,
     suggested_apply_args as suggested_home_cache_apply_args,
@@ -305,11 +308,39 @@ def summarize_home_cache_cleanup_helper(paths: list[Path]) -> list[str]:
         return []
 
     quoted = ' '.join(f"--path {shlex.quote(str(path))}" for path in unique_paths)
-    return [
+    lines = [
         'Home cache cleanup helper available for allowlisted user-owned caches:',
         f'- Review: python3 tools/infra_home_cache_cleanup.py {quoted}',
-        f'- Apply: python3 tools/infra_home_cache_cleanup.py --apply {quoted}',
     ]
+
+    try:
+        scanned_candidates = scan_home_cache_cleanup_candidates(min_bytes=HOME_CACHE_MIN_BYTES)
+    except (OSError, RuntimeError, subprocess.TimeoutExpired):
+        scanned_candidates = []
+
+    candidate_by_path = {candidate.path: candidate for candidate in scanned_candidates}
+    selected_candidates: list[CleanupCandidate] = []
+    blocked_missing: list[tuple[Path, str]] = []
+    for path in unique_paths:
+        candidate = candidate_by_path.get(path)
+        if candidate is None:
+            blocked_missing.append((path, 'candidate scan unavailable for current session'))
+            continue
+        selected_candidates.append(candidate)
+
+    applyable = filter_applyable_home_cache_candidates(selected_candidates)
+    blocked = filter_blocked_home_cache_candidates(selected_candidates)
+
+    if applyable:
+        lines.append(f'- Apply: python3 tools/infra_home_cache_cleanup.py --apply {suggested_home_cache_apply_args(applyable)}')
+    if blocked or blocked_missing:
+        lines.append('Home cache apply blocked from current session:')
+        for candidate in blocked:
+            lines.append(f'- {candidate.path}: {candidate.apply_blocked_reason}')
+        for path, reason in blocked_missing:
+            lines.append(f'- {path}: {reason}')
+        lines.append('Run cleanup from a shell with write access to these cache paths')
+    return lines
 
 
 def summarize_home_cache_recovery_plan(total_bytes: int, used_bytes: int, used_pct: int) -> list[str]:
@@ -325,6 +356,7 @@ def summarize_home_cache_recovery_plan(total_bytes: int, used_bytes: int, used_p
         return []
 
     total_reclaim = total_home_cache_reclaim_bytes(candidates)
+    total_applyable = total_home_cache_reclaim_bytes(filter_applyable_home_cache_candidates(candidates))
     targets: list[int] = []
     if used_pct > DISK_CRITICAL_THRESHOLD:
         targets.append(DISK_CRITICAL_THRESHOLD)
@@ -338,14 +370,27 @@ def summarize_home_cache_recovery_plan(total_bytes: int, used_bytes: int, used_p
 
         bundle = select_home_cache_reclaim_bundle(candidates, required_bytes=required_bytes)
         bundle_reclaim = total_home_cache_reclaim_bytes(bundle)
+        applyable_bundle = filter_applyable_home_cache_candidates(bundle)
+        applyable_bundle_reclaim = total_home_cache_reclaim_bytes(applyable_bundle)
+        blocked_bundle = filter_blocked_home_cache_candidates(bundle)
         lines.append(f'- Need about {human_size(required_bytes)} reclaimed to reach <={target_pct}% on /')
         if bundle and bundle_reclaim >= required_bytes:
-            apply_args = suggested_home_cache_apply_args(bundle)
+            review_args = suggested_home_cache_apply_args(bundle)
             lines.append(
                 f'  Allowlisted home caches can cover this with {human_size(bundle_reclaim)} across {len(bundle)} path(s)'
             )
-            lines.append(f'  Review bundle: python3 tools/infra_home_cache_cleanup.py {apply_args}')
-            lines.append(f'  Apply bundle: python3 tools/infra_home_cache_cleanup.py --apply {apply_args}')
+            lines.append(f'  Review bundle: python3 tools/infra_home_cache_cleanup.py {review_args}')
+            if applyable_bundle_reclaim >= required_bytes:
+                apply_args = suggested_home_cache_apply_args(applyable_bundle)
+                lines.append(f'  Apply bundle: python3 tools/infra_home_cache_cleanup.py --apply {apply_args}')
+            elif blocked_bundle:
+                lines.append(
+                    f'  Apply blocked from current session; directly writable bundle capacity is only '
+                    f'{human_size(applyable_bundle_reclaim)}'
+                )
+                for candidate in blocked_bundle:
+                    lines.append(f'  - {candidate.path}: {candidate.apply_blocked_reason}')
+                lines.append('  Run this cleanup from a writable shell on the host before relying on it for recovery')
             continue
 
         shortfall = max(0, required_bytes - total_reclaim)
@@ -355,6 +400,10 @@ def summarize_home_cache_recovery_plan(total_bytes: int, used_bytes: int, used_p
             f'short by {human_size(shortfall)}'
         )
         lines.append(f'  Review remaining home caches: python3 tools/infra_home_cache_cleanup.py {apply_args}')
+        if total_applyable < total_reclaim:
+            lines.append(
+                f'  Directly writable home-cache capacity from current session is only {human_size(total_applyable)}'
+            )
         lines.append('  Additional host-level reclaim is still required after allowlisted home-cache cleanup')
 
     return lines
