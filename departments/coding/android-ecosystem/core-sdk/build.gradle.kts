@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.openclaw.androidecosystem.coresdk"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 24
