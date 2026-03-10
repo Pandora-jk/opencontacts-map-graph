@@ -30,7 +30,13 @@ _RECLAIM_TARGETS = (
     (Path('/tmp'), 200 * 1024 * 1024, 'temporary files under /tmp'),
     (Path('/var/cache/apt'), 150 * 1024 * 1024, 'APT package cache'),
     (Path('/var/log/journal'), 100 * 1024 * 1024, 'systemd journals'),
-    (Path('/home/ubuntu/.cache'), 200 * 1024 * 1024, 'user cache'),
+)
+_REVIEW_ONLY_CACHE_ROOTS = (
+    (
+        Path('/home/ubuntu/.cache'),
+        200 * 1024 * 1024,
+        'shared cache root; review allowlisted build/package caches before deleting app state',
+    ),
 )
 _HOTSPOT_LIMIT = 6
 _HOTSPOT_DEPTH = {
@@ -178,8 +184,6 @@ def summarize_reclaim_guidance(candidates: list[tuple[int, Path, str]]) -> list[
         elif path == Path('/var/log/journal'):
             lines.append('Journal review hint: journalctl --disk-usage')
             lines.append('Journal vacuum hint: sudo journalctl --vacuum-time=7d')
-        elif path == Path('/home/ubuntu/.cache'):
-            lines.append('Cache review hint: focus on package/build caches before deleting app state')
     helper_lines = summarize_home_cache_cleanup_helper(home_cache_paths)
     if helper_lines:
         lines.extend(helper_lines)
@@ -210,6 +214,22 @@ def summarize_home_hotspots() -> list[str]:
         output,
         'Home review hint: prioritize build/package caches before SDKs or active workspaces',
     ]
+
+
+def summarize_review_only_cache_roots() -> list[str]:
+    lines: list[str] = []
+    for path, min_bytes, note in _REVIEW_ONLY_CACHE_ROOTS:
+        size_bytes = path_usage_bytes(path)
+        if size_bytes is None or size_bytes < min_bytes:
+            continue
+        if not lines:
+            lines.append('Review-only cache roots (not safe broad cleanup targets):')
+        lines.append(f'- {human_size(size_bytes)} {path} ({note})')
+        hotspot_lines = summarize_hotspots(path)
+        if hotspot_lines:
+            lines.extend(hotspot_lines)
+        lines.append('Cache review hint: focus on package/build caches before deleting app state')
+    return lines
 
 
 def collect_protected_home_paths() -> list[tuple[int, Path, str]]:
@@ -566,6 +586,7 @@ def build_disk_usage_report() -> list[str]:
             lines.extend(summarize_current_session_recovery_plan(total_bytes, used_bytes, used_pct))
             lines.extend(summarize_home_cache_recovery_plan(total_bytes, used_bytes, used_pct))
 
+        lines.extend(summarize_review_only_cache_roots())
         lines.extend(summarize_home_hotspots())
         lines.extend(summarize_protected_home_paths())
         lines.extend(summarize_deleted_open_files())

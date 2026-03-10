@@ -27,7 +27,6 @@ class InfraDiskTests(unittest.TestCase):
             Path("/tmp"): 220 * 1024 * 1024,
             Path("/var/cache/apt"): 628 * 1024 * 1024,
             Path("/var/log/journal"): 143 * 1024 * 1024,
-            Path("/home/ubuntu/.cache"): 366 * 1024 * 1024,
         }
 
         with mock.patch.object(infra_disk, "path_usage_bytes", side_effect=lambda path: sizes.get(path)), mock.patch.object(
@@ -37,13 +36,12 @@ class InfraDiskTests(unittest.TestCase):
 
         self.assertEqual(
             [str(path) for _, path, _ in candidates],
-            ["/var/cache/apt", "/home/ubuntu/.cache", "/tmp", "/var/log/journal"],
+            ["/var/cache/apt", "/tmp", "/var/log/journal"],
         )
 
     def test_summarize_reclaim_guidance_adds_hotspots_and_hints(self) -> None:
         candidates = [
             (628 * 1024 * 1024, Path("/var/cache/apt"), "APT package cache"),
-            (366 * 1024 * 1024, Path("/home/ubuntu/.cache"), "user cache"),
             (
                 1900 * 1024 * 1024,
                 Path("/home/ubuntu/.gradle/caches"),
@@ -89,8 +87,6 @@ class InfraDiskTests(unittest.TestCase):
 
         self.assertIn("Largest paths under /var/cache/apt:", lines)
         self.assertIn("APT cleanup hint: sudo apt-get clean", lines)
-        self.assertIn("Largest paths under /home/ubuntu/.cache:", lines)
-        self.assertIn("Cache review hint: focus on package/build caches before deleting app state", lines)
         self.assertIn("Largest paths under /home/ubuntu/.gradle/caches:", lines)
         self.assertIn("Largest paths under /home/ubuntu/.gradle/wrapper/dists:", lines)
         self.assertIn("Home cache cleanup helper available for allowlisted user-owned caches:", lines)
@@ -144,7 +140,6 @@ class InfraDiskTests(unittest.TestCase):
     def test_collect_reclaim_candidates_includes_allowlisted_home_caches(self) -> None:
         sizes = {
             Path("/var/cache/apt"): 628 * 1024 * 1024,
-            Path("/home/ubuntu/.cache"): 366 * 1024 * 1024,
         }
         home_candidates = [
             infra_home_cache_cleanup.CleanupCandidate(
@@ -162,9 +157,30 @@ class InfraDiskTests(unittest.TestCase):
             candidates = infra_disk.collect_reclaim_candidates()
 
         self.assertEqual(
-            [str(path) for _, path, _ in candidates[:3]],
-            ["/home/ubuntu/.gradle/caches", "/var/cache/apt", "/home/ubuntu/.cache"],
+            [str(path) for _, path, _ in candidates[:2]],
+            ["/home/ubuntu/.gradle/caches", "/var/cache/apt"],
         )
+
+    def test_summarize_review_only_cache_roots_reports_hotspots_without_cleanup_command(self) -> None:
+        def fake_path_usage(path: Path) -> int | None:
+            if path == Path("/home/ubuntu/.cache"):
+                return 366 * 1024 * 1024
+            return None
+
+        with mock.patch.object(infra_disk, "path_usage_bytes", side_effect=fake_path_usage), mock.patch.object(
+            infra_disk,
+            "summarize_hotspots",
+            return_value=["Largest paths under /home/ubuntu/.cache:", "sample output"],
+        ):
+            lines = infra_disk.summarize_review_only_cache_roots()
+
+        self.assertIn("Review-only cache roots (not safe broad cleanup targets):", lines)
+        self.assertIn(
+            "- 366M /home/ubuntu/.cache (shared cache root; review allowlisted build/package caches before deleting app state)",
+            lines,
+        )
+        self.assertIn("Largest paths under /home/ubuntu/.cache:", lines)
+        self.assertIn("Cache review hint: focus on package/build caches before deleting app state", lines)
 
     def test_build_disk_usage_report_skips_empty_reclaim_heading(self) -> None:
         with mock.patch.object(
@@ -183,6 +199,8 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
         ), mock.patch.object(
             infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_review_only_cache_roots", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_protected_home_paths", return_value=[]
         ), mock.patch.object(
@@ -217,6 +235,8 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
         ), mock.patch.object(
             infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_review_only_cache_roots", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_protected_home_paths", return_value=[]
         ), mock.patch.object(
@@ -356,6 +376,8 @@ class InfraDiskTests(unittest.TestCase):
         ), mock.patch.object(
             infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
+            infra_disk, "summarize_review_only_cache_roots", return_value=[]
+        ), mock.patch.object(
             infra_disk,
             "summarize_protected_home_paths",
             return_value=[
@@ -373,6 +395,43 @@ class InfraDiskTests(unittest.TestCase):
         )
         self.assertIn(
             "- 1.8G /home/ubuntu/.npm-global (global npm packages; removing may break installed CLIs)",
+            lines,
+        )
+
+    def test_build_disk_usage_report_includes_review_only_cache_roots_when_pressure_is_high(self) -> None:
+        with mock.patch.object(
+            infra_disk,
+            "run_cmd",
+            side_effect=[
+                "19G 19G 153M 100% /",
+                "15% /",
+                "18G /\n9.3G /usr\n7.1G /home",
+            ],
+        ), mock.patch.object(
+            infra_disk, "collect_reclaim_candidates", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_home_hotspots", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
+        ), mock.patch.object(
+            infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk,
+            "summarize_review_only_cache_roots",
+            return_value=[
+                "Review-only cache roots (not safe broad cleanup targets):",
+                "- 366M /home/ubuntu/.cache (shared cache root; review allowlisted build/package caches before deleting app state)",
+            ],
+        ), mock.patch.object(
+            infra_disk, "summarize_protected_home_paths", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_deleted_open_files", return_value=["No deleted-but-open files detected"]
+        ):
+            lines = infra_disk.build_disk_usage_report()
+
+        self.assertIn("Review-only cache roots (not safe broad cleanup targets):", lines)
+        self.assertIn(
+            "- 366M /home/ubuntu/.cache (shared cache root; review allowlisted build/package caches before deleting app state)",
             lines,
         )
 
