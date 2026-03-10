@@ -62,6 +62,10 @@ _PROTECTED_HOME_TARGETS = {
     Path('/home/ubuntu/.android-sdk'): 'Android SDK toolchains; removing breaks Android builds',
 }
 _PROTECTED_HOME_THRESHOLD_BYTES = 200 * 1024 * 1024
+_HOST_LEVEL_RECOVERY_TARGETS = {
+    Path('/var/cache/apt'): 'sudo apt-get clean',
+    Path('/var/log/journal'): 'sudo journalctl --vacuum-time=7d',
+}
 
 
 def run_cmd(cmd: list[str], max_chars: int = 800) -> str:
@@ -455,6 +459,67 @@ def tmp_review_command(limit: int) -> str:
     return f'python3 tools/infra_tmp_cleanup.py --limit {limit}'
 
 
+def select_host_level_candidates(candidates: list[tuple[int, Path, str]]) -> list[tuple[int, Path, str]]:
+    return [candidate for candidate in candidates if candidate[1] in _HOST_LEVEL_RECOVERY_TARGETS]
+
+
+def host_level_cleanup_hint(path: Path) -> str | None:
+    return _HOST_LEVEL_RECOVERY_TARGETS.get(path)
+
+
+def summarize_host_level_recovery_plan(
+    total_bytes: int,
+    used_bytes: int,
+    used_pct: int,
+    candidates: list[tuple[int, Path, str]],
+) -> list[str]:
+    if used_pct <= DISK_ALERT_THRESHOLD:
+        return []
+
+    host_candidates = select_host_level_candidates(candidates)
+    if not host_candidates:
+        return []
+
+    total_reclaim = sum(size_bytes for size_bytes, _path, _note in host_candidates)
+    targets: list[int] = []
+    if used_pct > DISK_CRITICAL_THRESHOLD:
+        targets.append(DISK_CRITICAL_THRESHOLD)
+    targets.append(DISK_ALERT_THRESHOLD)
+
+    lines = ['Host-level recovery plan (sudo required for host-owned caches/logs):']
+    for target_pct in targets:
+        required_bytes = bytes_to_target_usage(total_bytes, used_bytes, target_pct)
+        if required_bytes <= 0:
+            continue
+
+        bundle = select_candidate_bundle(host_candidates, required_bytes=required_bytes)
+        bundle_reclaim = sum(size_bytes for size_bytes, _path, _note in bundle)
+        lines.append(f'- Need about {human_size(required_bytes)} reclaimed to reach <={target_pct}% on /')
+        if bundle and bundle_reclaim >= required_bytes:
+            lines.append(
+                f'  Host-level caches/logs can cover this with {human_size(bundle_reclaim)} across {len(bundle)} path(s)'
+            )
+            for _size_bytes, path, _note in bundle:
+                hint = host_level_cleanup_hint(path)
+                if hint:
+                    lines.append(f'  - {path}: {hint}')
+            lines.append('  Review these paths from a writable host shell before cleanup')
+            continue
+
+        shortfall = max(0, required_bytes - total_reclaim)
+        lines.append(
+            f'  All host-level caches/logs total {human_size(total_reclaim)} across {len(host_candidates)} path(s); '
+            f'short by {human_size(shortfall)}'
+        )
+        for _size_bytes, path, _note in host_candidates:
+            hint = host_level_cleanup_hint(path)
+            if hint:
+                lines.append(f'  - {path}: {hint}')
+        lines.append('  Additional reclaim is still required after host-level cleanup')
+
+    return lines
+
+
 def summarize_current_session_recovery_plan(total_bytes: int, used_bytes: int, used_pct: int) -> list[str]:
     if used_pct <= DISK_ALERT_THRESHOLD:
         return []
@@ -585,6 +650,7 @@ def build_disk_usage_report() -> list[str]:
             total_bytes, used_bytes, _avail_bytes, used_pct, _mount = root_snapshot
             lines.extend(summarize_current_session_recovery_plan(total_bytes, used_bytes, used_pct))
             lines.extend(summarize_home_cache_recovery_plan(total_bytes, used_bytes, used_pct))
+            lines.extend(summarize_host_level_recovery_plan(total_bytes, used_bytes, used_pct, candidates))
 
         lines.extend(summarize_review_only_cache_roots())
         lines.extend(summarize_home_hotspots())

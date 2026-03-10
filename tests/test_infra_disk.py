@@ -497,6 +497,73 @@ class InfraDiskTests(unittest.TestCase):
         self.assertTrue(any("Apply blocked from current session" in line for line in lines))
         self.assertFalse(any("Apply bundle:" in line for line in lines))
 
+    def test_summarize_host_level_recovery_plan_quantifies_shortfall_and_commands(self) -> None:
+        candidates = [
+            (617 * 1024 * 1024, Path("/var/cache/apt"), "APT package cache"),
+            (159 * 1024 * 1024, Path("/var/log/journal"), "systemd journals"),
+            (1900 * 1024 * 1024, Path("/home/ubuntu/.gradle/caches"), "Gradle dependency cache"),
+        ]
+
+        lines = infra_disk.summarize_host_level_recovery_plan(
+            total_bytes=19 * 1024**3,
+            used_bytes=19 * 1024**3,
+            used_pct=100,
+            candidates=candidates,
+        )
+
+        self.assertIn("Host-level recovery plan (sudo required for host-owned caches/logs):", lines)
+        self.assertIn("- Need about 1.9G reclaimed to reach <=90% on /", lines)
+        self.assertTrue(any("All host-level caches/logs total 776M across 2 path(s); short by 1.1G" in line for line in lines))
+        self.assertIn("  - /var/cache/apt: sudo apt-get clean", lines)
+        self.assertIn("  - /var/log/journal: sudo journalctl --vacuum-time=7d", lines)
+        self.assertIn("  Additional reclaim is still required after host-level cleanup", lines)
+
+    def test_build_disk_usage_report_includes_host_level_recovery_plan_when_pressure_is_high(self) -> None:
+        candidates = [
+            (617 * 1024 * 1024, Path("/var/cache/apt"), "APT package cache"),
+            (159 * 1024 * 1024, Path("/var/log/journal"), "systemd journals"),
+        ]
+
+        with mock.patch.object(
+            infra_disk,
+            "run_cmd",
+            side_effect=[
+                "19G 19G 153M 100% /",
+                "15% /",
+                "18G /\n9.3G /usr\n7.1G /home",
+            ],
+        ), mock.patch.object(
+            infra_disk, "collect_reclaim_candidates", return_value=candidates
+        ), mock.patch.object(
+            infra_disk, "summarize_reclaim_guidance", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
+        ), mock.patch.object(
+            infra_disk, "summarize_current_session_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk,
+            "summarize_host_level_recovery_plan",
+            return_value=[
+                "Host-level recovery plan (sudo required for host-owned caches/logs):",
+                "- Need about 1.9G reclaimed to reach <=90% on /",
+                "  - /var/cache/apt: sudo apt-get clean",
+            ],
+        ), mock.patch.object(
+            infra_disk, "summarize_review_only_cache_roots", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_home_hotspots", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_protected_home_paths", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_deleted_open_files", return_value=["No deleted-but-open files detected"]
+        ):
+            lines = infra_disk.build_disk_usage_report()
+
+        self.assertIn("Host-level recovery plan (sudo required for host-owned caches/logs):", lines)
+        self.assertIn("  - /var/cache/apt: sudo apt-get clean", lines)
+
 
 if __name__ == "__main__":
     unittest.main()
