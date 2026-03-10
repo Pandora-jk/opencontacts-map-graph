@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-10T20:56:50Z
-- Run count: 179
-- Primary task: Document approved public B2B data sources
+- Last run (UTC): 2026-03-10T21:15:19Z
+- Run count: 180
+- Primary task: Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies
 - Primary task progress count: 11
-- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260310-r179.md
+- Last artifact: departments/finance/artifacts/icp/primary-icp-20260310-r180.md
 - Blocking items: 0
 - Autonomous queue items: 15
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Document approved public B2B data sources
+Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies
 
 ## Blocking
 - None
