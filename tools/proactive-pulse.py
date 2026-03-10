@@ -292,6 +292,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Emit one proactive suggestion or NO_REPLY")
     parser.add_argument("--dry-run", action="store_true", help="Do not update state")
     parser.add_argument("--debug", action="store_true", help="Print candidate metadata to stderr")
+    parser.add_argument("--deliver", action="store_true", help="Deliver via Telegram if there's something to report")
     args = parser.parse_args()
 
     state = load_state()
@@ -314,7 +315,14 @@ def main() -> int:
 
     if not args.dry_run:
         save_state(record_check(state, candidate, sent=True))
-    print(candidate["message"])
+    output = candidate["message"]
+    print(output)
+    if args.deliver:
+        try:
+            import subprocess
+            subprocess.run(["python3", "/home/ubuntu/.openclaw/workspace/tools/send-telegram.py", "--to", "156480904", "--text", output], cwd=str(ROOT))
+        except Exception:
+            pass
     return 0
 
 
