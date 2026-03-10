@@ -1,9 +1,9 @@
 {
-  "last_checked_at": "2026-03-10T01:21:18Z",
+  "last_checked_at": "2026-03-10T02:21:22Z",
   "last_candidate": "cron_failure",
   "last_candidate_fingerprint": "cron:Daily Config Hygiene",
   "last_fingerprint": "cron:Daily Config Hygiene",
   "last_kind": "cron_failure",
-  "last_sent_at": "2026-03-10T00:21:12Z",
+  "last_sent_at": "2026-03-10T02:21:22Z",
   "last_message": "[PROACTIVE] Automation issue: Daily Config Hygiene need attention. Next step: inspect the latest cron run before changing more config."
 }
