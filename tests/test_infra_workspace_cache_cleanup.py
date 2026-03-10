@@ -33,6 +33,27 @@ class InfraWorkspaceCacheCleanupTests(unittest.TestCase):
         self.assertEqual(candidate.path, gradle_dir.resolve())
         self.assertEqual(candidate.note, "workspace Gradle cache")
 
+    def test_validate_candidate_rejects_symlink_component_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            real_parent = root / "tools"
+            pycache_dir = real_parent / "__pycache__"
+            pycache_dir.mkdir(parents=True)
+            (pycache_dir / "module.pyc").write_bytes(b"x" * 2048)
+            alias_parent = root / "alias-tools"
+            alias_parent.symlink_to(real_parent, target_is_directory=True)
+
+            with mock.patch.object(infra_workspace_cache_cleanup, "ROOT", root), mock.patch.object(
+                infra_workspace_cache_cleanup, "has_open_files", return_value=False
+            ):
+                candidate, reason = infra_workspace_cache_cleanup.validate_candidate(
+                    alias_parent / "__pycache__",
+                    min_bytes=1024,
+                )
+
+        self.assertIsNone(candidate)
+        self.assertEqual(reason, "symlink skipped")
+
     def test_scan_cleanup_candidates_finds_workspace_caches(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

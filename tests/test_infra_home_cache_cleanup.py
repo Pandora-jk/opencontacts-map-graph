@@ -1,5 +1,6 @@
 import datetime as dt
 from pathlib import Path
+import tempfile
 from types import SimpleNamespace
 from unittest import mock
 import unittest
@@ -20,6 +21,29 @@ class InfraHomeCacheCleanupTests(unittest.TestCase):
 
         self.assertIsNone(candidate)
         self.assertEqual(reason, "not an allowlisted home cache path")
+
+    def test_validate_candidate_rejects_symlink_component_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            real_parent = root / "user" / ".gradle"
+            target = real_parent / "caches"
+            target.mkdir(parents=True)
+            (target / "cache.bin").write_bytes(b"x" * 4096)
+            alias_parent = root / "alias-gradle"
+            alias_parent.symlink_to(real_parent, target_is_directory=True)
+
+            with mock.patch.dict(
+                infra_home_cache_cleanup.ALLOWED_CACHE_TARGETS,
+                {target.resolve(): "Gradle dependency cache"},
+                clear=True,
+            ):
+                candidate, reason = infra_home_cache_cleanup.validate_candidate(
+                    alias_parent / "caches",
+                    min_bytes=1024,
+                )
+
+        self.assertIsNone(candidate)
+        self.assertEqual(reason, "symlink skipped")
 
     def test_validate_candidate_accepts_allowlisted_owned_cache(self) -> None:
         target = Path("/home/ubuntu/.gradle/caches")

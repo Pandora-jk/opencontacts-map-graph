@@ -60,6 +60,22 @@ def normalize_path(path: Path) -> Path:
         return expanded
 
 
+def input_path_has_symlink_component(path: Path) -> bool:
+    expanded = path.expanduser()
+    if expanded.is_absolute():
+        current = Path(expanded.anchor)
+        parts = expanded.parts[1:]
+    else:
+        current = Path.cwd()
+        parts = expanded.parts
+
+    for part in parts:
+        current = current / part
+        if current.is_symlink():
+            return True
+    return False
+
+
 def path_owner(path: Path) -> str:
     try:
         return pwd.getpwuid(path.lstat().st_uid).pw_name
@@ -138,6 +154,9 @@ def iter_allowlisted_paths() -> list[Path]:
 
 
 def validate_candidate(path: Path, *, min_bytes: int) -> tuple[CleanupCandidate | None, str | None]:
+    if input_path_has_symlink_component(path):
+        return None, 'symlink skipped'
+
     normalized = normalize_path(path)
     note = allowed_note(normalized)
     if note is None:

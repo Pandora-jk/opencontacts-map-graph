@@ -57,6 +57,22 @@ def normalize_path(path: Path) -> Path:
         return expanded
 
 
+def input_path_has_symlink_component(path: Path) -> bool:
+    expanded = path.expanduser()
+    if expanded.is_absolute():
+        current = Path(expanded.anchor)
+        parts = expanded.parts[1:]
+    else:
+        current = Path.cwd()
+        parts = expanded.parts
+
+    for part in parts:
+        current = current / part
+        if current.is_symlink():
+            return True
+    return False
+
+
 def du_bytes(path: Path) -> int:
     proc = subprocess.run(
         ['bash', '-lc', f"du -sxk '{path}' 2>/dev/null | awk 'NR==1 {{print $1}}'"],
@@ -104,6 +120,9 @@ def probe_write_access(path: Path) -> str | None:
 
 
 def validate_candidate(path: Path, *, min_bytes: int) -> tuple[CleanupCandidate | None, str | None]:
+    if input_path_has_symlink_component(path):
+        return None, 'symlink skipped'
+
     normalized = normalize_path(path)
     note = ALLOWED_CACHE_TARGETS.get(normalized)
     if note is None:
