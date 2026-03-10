@@ -23,4 +23,8 @@ class ContactGraphBuilder {
 
         return graph.mapValues { (_, neighbors) -> neighbors.toSet() }
     }
+
+    fun buildConnectionGraph(contacts: List<ContactRecord>?): ConnectionGraph {
+        return ConnectionGraph.fromAdjacency(buildGraph(contacts))
+    }
 }

@@ -20,10 +20,18 @@ class ContactSearchFilter {
     }
 
     private fun ContactRecord.matchesQuery(query: String): Boolean {
+        val normalizedDigits = query.filter(Char::isDigit)
+
         return sequenceOf(displayName, email, company)
             .filterNotNull()
-            .map { it.lowercase() }
+            .map { it.trim().lowercase() }
             .any { it.contains(query) } ||
-            tags.any { it.lowercase().contains(query) }
+            tags.any { it.trim().lowercase().contains(query) } ||
+            (
+                normalizedDigits.isNotEmpty() &&
+                    phoneNumbers.any { phone ->
+                        phone.filter(Char::isDigit).contains(normalizedDigits)
+                    }
+                )
     }
 }
