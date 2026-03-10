@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-10T13:36:51Z
-- Run count: 161
-- Primary task: Verify email footer includes address + unsubscribe link
+- Last run (UTC): 2026-03-10T14:56:53Z
+- Run count: 164
+- Primary task: Document approved public B2B data sources
 - Primary task progress count: 10
-- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260310-r161.md
+- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260310-r164.md
 - Blocking items: 0
 - Autonomous queue items: 15
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Verify email footer includes address + unsubscribe link
+Document approved public B2B data sources
 
 ## Blocking
 - None

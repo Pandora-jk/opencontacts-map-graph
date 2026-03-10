@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "com.openclaw.androidecosystem.contacts.contacts-app-debug-42:/drawable_bg_card_surface.xml.flat",
+        "source": "com.openclaw.androidecosystem.contacts.contacts-app-main-44:/drawable/bg_card_surface.xml"
+    },
+    {
+        "merged": "com.openclaw.androidecosystem.contacts.contacts-app-debug-42:/layout_activity_contacts_map.xml.flat",
+        "source": "com.openclaw.androidecosystem.contacts.contacts-app-main-44:/layout/activity_contacts_map.xml"
+    },
+    {
+        "merged": "com.openclaw.androidecosystem.contacts.contacts-app-debug-42:/drawable_bg_marker_surface.xml.flat",
+        "source": "com.openclaw.androidecosystem.contacts.contacts-app-main-44:/drawable/bg_marker_surface.xml"
+    }
+]

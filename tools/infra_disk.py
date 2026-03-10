@@ -604,23 +604,34 @@ def summarize_deleted_open_files() -> list[str]:
 def build_disk_usage_report() -> list[str]:
     lines: list[str] = []
     high_pressure = False
-    root_snapshot: tuple[int, int, int, int, str] | None = None
-
-    disk_line = run_cmd(['bash', '-lc', "df -hP / | awk 'NR==2 {print $2, $3, $4, $5, $6}'"])
-    disk_match = re.search(r'(\S+)\s+(\S+)\s+(\S+)\s+(\d+)%\s+(\S+)', disk_line)
-    if disk_match:
-        size, used, avail, pct_txt, mount = disk_match.groups()
-        pct = int(pct_txt)
-        root_snapshot = current_root_usage_bytes()
-        lines.append(f'Root usage: {mount}: {pct}% used ({used}/{size}, avail {avail})')
-        if pct > DISK_CRITICAL_THRESHOLD:
-            lines.append(f'CRITICAL: Root filesystem usage is {pct}% (>{DISK_CRITICAL_THRESHOLD}%)')
+    root_snapshot = current_root_usage_bytes()
+    if root_snapshot is not None:
+        total_bytes, used_bytes, avail_bytes, used_pct, mount = root_snapshot
+        lines.append(
+            f'Root usage: {mount}: {used_pct}% used '
+            f'({human_size(used_bytes)}/{human_size(total_bytes)}, avail {human_size(avail_bytes)})'
+        )
+        if used_pct > DISK_CRITICAL_THRESHOLD:
+            lines.append(f'CRITICAL: Root filesystem usage is {used_pct}% (>{DISK_CRITICAL_THRESHOLD}%)')
             high_pressure = True
-        elif pct > DISK_ALERT_THRESHOLD:
-            lines.append(f'ALERT: Root filesystem usage is {pct}% (>{DISK_ALERT_THRESHOLD}%)')
+        elif used_pct > DISK_ALERT_THRESHOLD:
+            lines.append(f'ALERT: Root filesystem usage is {used_pct}% (>{DISK_ALERT_THRESHOLD}%)')
             high_pressure = True
     else:
-        lines.append(disk_line)
+        disk_line = run_cmd(['bash', '-lc', "df -hP / | awk 'NR==2 {print $2, $3, $4, $5, $6}'"])
+        disk_match = re.search(r'(\S+)\s+(\S+)\s+(\S+)\s+(\d+)%\s+(\S+)', disk_line)
+        if disk_match:
+            size, used, avail, pct_txt, mount = disk_match.groups()
+            pct = int(pct_txt)
+            lines.append(f'Root usage: {mount}: {pct}% used ({used}/{size}, avail {avail})')
+            if pct > DISK_CRITICAL_THRESHOLD:
+                lines.append(f'CRITICAL: Root filesystem usage is {pct}% (>{DISK_CRITICAL_THRESHOLD}%)')
+                high_pressure = True
+            elif pct > DISK_ALERT_THRESHOLD:
+                lines.append(f'ALERT: Root filesystem usage is {pct}% (>{DISK_ALERT_THRESHOLD}%)')
+                high_pressure = True
+        else:
+            lines.append(disk_line)
 
     inode_line = run_cmd(['bash', '-lc', "df -Pi / | awk 'NR==2 {print $5, $6}'"])
     inode_match = re.search(r'(\d+)%\s+(\S+)', inode_line)

@@ -187,7 +187,6 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk,
             "run_cmd",
             side_effect=[
-                "19G 19G 153M 100% /",
                 "15% /",
                 "18G /\n9.3G /usr\n7.1G /home",
             ],
@@ -217,7 +216,6 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk,
             "run_cmd",
             side_effect=[
-                "19G 19G 153M 100% /",
                 "15% /",
                 "18G /\n9.3G /usr\n7.1G /home",
             ],
@@ -250,6 +248,40 @@ class InfraDiskTests(unittest.TestCase):
             "Home review hint: prioritize build/package caches before SDKs or active workspaces",
             lines,
         )
+
+    def test_build_disk_usage_report_uses_single_root_snapshot_for_summary_and_plans(self) -> None:
+        root_snapshot = (20401094656, 20246827008, 154267648, 99, "/")
+
+        with mock.patch.object(
+            infra_disk,
+            "run_cmd",
+            side_effect=[
+                "15% /",
+                "18G /\n9.3G /usr\n7.1G /home",
+            ],
+        ), mock.patch.object(
+            infra_disk, "collect_reclaim_candidates", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_home_hotspots", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "current_root_usage_bytes", return_value=root_snapshot
+        ), mock.patch.object(
+            infra_disk, "summarize_current_session_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_host_level_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_review_only_cache_roots", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_protected_home_paths", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_deleted_open_files", return_value=["No deleted-but-open files detected"]
+        ):
+            lines = infra_disk.build_disk_usage_report()
+
+        self.assertIn("Root usage: /: 99% used (19G/19G, avail 147M)", lines)
+        self.assertIn("CRITICAL: Root filesystem usage is 99% (>90%)", lines)
 
     def test_summarize_current_session_recovery_plan_reports_shortfall_when_tmp_cleanup_insufficient(self) -> None:
         tmp_candidates = [
@@ -363,7 +395,6 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk,
             "run_cmd",
             side_effect=[
-                "19G 19G 153M 100% /",
                 "15% /",
                 "18G /\n9.3G /usr\n7.1G /home",
             ],
@@ -403,7 +434,6 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk,
             "run_cmd",
             side_effect=[
-                "19G 19G 153M 100% /",
                 "15% /",
                 "18G /\n9.3G /usr\n7.1G /home",
             ],
@@ -528,7 +558,6 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk,
             "run_cmd",
             side_effect=[
-                "19G 19G 153M 100% /",
                 "15% /",
                 "18G /\n9.3G /usr\n7.1G /home",
             ],

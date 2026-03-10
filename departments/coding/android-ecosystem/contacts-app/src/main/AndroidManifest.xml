@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <application
         android:allowBackup="true"
+        android:icon="@android:drawable/sym_def_app_icon"
         android:label="Contacts App"
+        android:theme="@style/Theme.ContactsMap"
         android:supportsRtl="true">
         <activity
-            android:name="com.opencontacts.androidecosystem.contacts.MainActivity"
+            android:name="com.openclaw.androidecosystem.contacts.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

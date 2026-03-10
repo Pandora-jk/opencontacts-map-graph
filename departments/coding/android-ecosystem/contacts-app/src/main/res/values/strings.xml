@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Contacts Intelligence Map</string>
+    <string name="sync_contacts">Sync Contacts</string>
+    <string name="search_hint">Search name, phone, or email</string>
+    <string name="connection_strength_label">Minimum connection strength</string>
+    <string name="connection_strength_value_default">Strength 0+</string>
+    <string name="connection_strength_value">Strength %1$d+</string>
+    <string name="distance_any">Any distance</string>
+    <string name="distance_local">Within 5km</string>
+    <string name="distance_regional">Within 25km</string>
+    <string name="home_filter">Home</string>
+    <string name="work_filter">Work</string>
+    <string name="frequent_filter">Frequent</string>
+    <string name="clear_filters">Clear</string>
+    <string name="ready_status">Ready to build your contact map.</string>
+    <string name="syncing_contacts">Syncing contacts…</string>
+    <string name="permission_required">Contacts permission is required for sync.</string>
+    <string name="sync_status_template">Synced %1$d contacts, skipped %2$d duplicates.</string>
+    <string name="contact_count_default">0 contacts in view</string>
+    <string name="contact_count_template">%1$d contacts in view</string>
+    <string name="suggestions_prefix">Suggestions: </string>
+    <string name="suggestions_empty">Suggestions will appear here when contact intelligence data is available.</string>
+    <string name="empty_contacts_state">No contacts match the current filters.</string>
+    <string name="no_contact_channels">No phone or email on file</string>
+    <string name="contact_meta_template">Strength %1$d • %2$d map markers</string>
+    <string name="marker_strength_template">%1$s • strength %2$d</string>
+    <string name="contact_list_item_description">Contact row for %1$s</string>
+    <string name="marker_info_description">Marker information for %1$s</string>
+</resources>

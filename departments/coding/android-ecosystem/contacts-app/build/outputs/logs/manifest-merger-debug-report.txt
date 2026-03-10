@@ -1,0 +1,52 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:2:1-17:12
+INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:2:1-17:12
+INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:2:1-17:12
+INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:2:1-17:12
+MERGED from [:core-sdk] /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/core-sdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:2:1-7:12
+	package
+		INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:2:11-69
+application
+ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:3:5-16:19
+INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:3:5-16:19
+	android:extractNativeLibs
+		INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml
+	android:supportsRtl
+		ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:6:9-35
+	android:label
+		ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:5:9-37
+	android:allowBackup
+		ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:4:9-35
+activity#com.opencontacts.androidecosystem.contacts.MainActivity
+ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:7:9-15:20
+	android:exported
+		ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:9:13-36
+	android:name
+		ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:8:13-83
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:10:13-14:29
+action#android.intent.action.MAIN
+ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:11:17-69
+	android:name
+		ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:11:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:13:17-77
+	android:name
+		ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml:13:27-74
+uses-sdk
+INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml
+INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml
+MERGED from [:core-sdk] /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/core-sdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44
+MERGED from [:core-sdk] /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/core-sdk/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44
+	android:targetSdkVersion
+		INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/contacts-app/src/main/AndroidManifest.xml

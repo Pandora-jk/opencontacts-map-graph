@@ -1,0 +1,14 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.ContactsMap" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/brandPrimary</item>
+        <item name="android:statusBarColor">@color/surfaceContainer</item>
+        <item name="android:navigationBarColor">@color/surfaceContainer</item>
+        <item name="android:windowBackground">@color/surfaceContainer</item>
+        <item name="android:textColorPrimary">@color/inkPrimary</item>
+        <item name="android:textColorSecondary">@color/inkSecondary</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.Material3.Button.OutlinedButton</item>
+        <item name="materialButtonStyle">@style/Widget.Material3.Button</item>
+        <item name="android:fontFamily">@sans-serif-medium</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
+    </style>
+</resources>
