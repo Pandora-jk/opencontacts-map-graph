@@ -481,8 +481,6 @@
         <enum name="startVertical" value="1"/>
         <enum name="startHorizontal" value="2"/>
         <enum name="flip" value="3"/>
-        <enum name="below" value="4"/>
-        <enum name="above" value="5"/>
     </attr>
     <attr format="float" name="path_percent"/>
     <attr format="float" name="perpendicularPath_percent"/>
@@ -11107,7 +11105,6 @@
     </declare-styleable>
     <declare-styleable name="ConstraintSet">
         <attr format="reference" name="deriveConstraintsFrom"/>
-        <attr format="string" name="stateLabels"/>
         <attr format="enum" name="constraintRotate">
             <enum name="none" value="0"/>
             <enum name="right" value="1"/>
@@ -11467,8 +11464,6 @@
         
         <attr format="string" name="fontProviderQuery"/>
         
-        <attr format="string" name="fontProviderFallbackQuery"/>
-        
         <attr format="reference" name="fontProviderCerts"/>
         
         <attr name="fontProviderFetchStrategy">
@@ -11479,7 +11474,7 @@
               default typeface will be used instead. -->
             <enum name="blocking" value="0"/>
             <!-- The async font fetch works as follows.
-              First, check the local cache, then if the requested font is not cached, trigger a
+              First, check the local cache, then if the requeted font is not cached, trigger a
               request the font and continue with layout inflation. Once the font fetch succeeds, the
               target text view will be refreshed with the downloaded font data. The
               fontProviderFetchTimeout will be ignored if async loading is specified. -->
@@ -11568,22 +11563,6 @@
         <attr name="android:offset"/>
         
         <attr name="android:color"/>
-    </declare-styleable>
-    <declare-styleable name="Grid">
-        <attr format="integer" name="grid_rows"/>
-        <attr format="integer" name="grid_columns"/>
-        <attr format="string" name="grid_spans"/>
-        <attr format="string" name="grid_skips"/>
-        <attr format="string" name="grid_rowWeights"/>
-        <attr format="string" name="grid_columnWeights"/>
-        <attr format="enum" name="grid_orientation">
-            <enum name="horizontal" value="0"/>
-            <enum name="vertical" value="1"/>
-        </attr>
-        <attr format="dimension" name="grid_horizontalGaps"/>
-        <attr format="dimension" name="grid_verticalGaps"/>
-        <attr format="boolean" name="grid_validateInputs"/>
-        <attr format="boolean" name="grid_useRtl"/>
     </declare-styleable>
     <declare-styleable name="ImageFilterView">
         <attr format="reference" name="blendSrc"/>
@@ -11675,7 +11654,6 @@
             <enum name="deltaRelative" value="0"/>
             <enum name="pathRelative" value="1"/>
             <enum name="parentRelative" value="2"/>
-            <enum name="axisRelative" value="3"/>
         </attr>
 
         

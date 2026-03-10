@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.openclaw.androidecosystem.contacts.contacts-app-mergeDebugResources-40:/values-v24/values-v24.xml",
+            "outputFile": "com.openclaw.androidecosystem.contacts.contacts-app-mergeDebugResources-39:/values-v24/values-v24.xml",
             "map": [
                 {
                     "source": "/home/ubuntu/.gradle/caches/transforms-4/30dbe09adc47a6fa3161e128d9fbb6b2/transformed/material-1.12.0/res/values-v24/values-v24.xml",
@@ -23,7 +23,7 @@
                     }
                 },
                 {
-                    "source": "/home/ubuntu/.gradle/caches/transforms-4/36b3856ba9c7cbbdc36c1fd5fe2a4d44/transformed/appcompat-1.7.0/res/values-v24/values-v24.xml",
+                    "source": "/home/ubuntu/.gradle/caches/transforms-4/316503c5dcc4c8b61b00057b23c73fda/transformed/appcompat-1.6.1/res/values-v24/values-v24.xml",
                     "from": {
                         "startLines": "2,3",
                         "startColumns": "4,4",
