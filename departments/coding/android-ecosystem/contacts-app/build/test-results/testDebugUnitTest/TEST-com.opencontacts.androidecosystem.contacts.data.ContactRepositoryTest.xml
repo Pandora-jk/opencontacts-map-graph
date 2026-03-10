@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-03-10T22:28:19" hostname="ip-172-31-34-63" time="4.015">
+  <properties/>
+  <testcase name="queryByPhone_trimsInputBeforeDelegating" classname="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" time="3.534"/>
+  <testcase name="getAll_delegatesToDao" classname="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" time="0.017"/>
+  <testcase name="getFrequentContacts_delegatesPositiveLimitToDao" classname="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" time="0.019"/>
+  <testcase name="syncWithSystemContacts_returnsPermissionDeniedWhenPermissionMissing" classname="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" time="0.041"/>
+  <testcase name="queryByName_returnsEmptyListForBlankInputWithoutDaoCall" classname="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" time="0.018"/>
+  <testcase name="getById_delegatesToDao" classname="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" time="0.133"/>
+  <testcase name="delete_delegatesToDao" classname="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" time="0.123"/>
+  <testcase name="insert_delegatesToDaoAndReturnsId" classname="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" time="0.023"/>
+  <testcase name="queryByPhone_returnsEmptyListForNullInputWithoutDaoCall" classname="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" time="0.022"/>
+  <testcase name="update_delegatesToDao" classname="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" time="0.023"/>
+  <testcase name="queryByName_trimsInputBeforeDelegating" classname="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" time="0.018"/>
+  <testcase name="getFrequentContacts_returnsEmptyListForNonPositiveLimitWithoutDaoCall" classname="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" time="0.008"/>
+  <testcase name="syncWithSystemContacts_callsSyncerWhenPermissionGranted" classname="com.opencontacts.androidecosystem.contacts.data.ContactRepositoryTest" time="0.025"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

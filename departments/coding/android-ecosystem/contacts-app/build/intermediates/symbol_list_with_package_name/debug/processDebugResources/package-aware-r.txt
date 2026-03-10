@@ -3218,7 +3218,6 @@ id checkbox
 id checked
 id chronometer
 id circle_center
-id clearFiltersButton
 id clear_text
 id clip_horizontal
 id clip_vertical
@@ -3227,11 +3226,7 @@ id closest
 id collapseActionView
 id compress
 id confirm_button
-id connectionStrengthSeekBar
-id connectionStrengthValue
 id constraint
-id contactCountText
-id contactsRecyclerView
 id container
 id content
 id contentPanel
@@ -3265,9 +3260,6 @@ id disableIntraAutoTransition
 id disablePostScroll
 id disableScroll
 id disjoint
-id distanceAnyButton
-id distanceLocalButton
-id distanceRegionalButton
 id dragAnticlockwise
 id dragClockwise
 id dragDown
@@ -3286,7 +3278,6 @@ id edit_query
 id edit_text_id
 id elastic
 id embed
-id emptyStateText
 id end
 id endToStart
 id enterAlways
@@ -3310,14 +3301,12 @@ id flip
 id floating
 id forever
 id fragment_container_view_tag
-id frequentFilterButton
 id frost
 id fullscreen_header
 id ghost_view
 id ghost_view_holder
 id gone
 id graph
-id graphView
 id graph_wrap
 id group_divider
 id grouping
@@ -3327,7 +3316,6 @@ id hide_ime_id
 id hideable
 id home
 id homeAsUp
-id homeFilterButton
 id honorRequest
 id horizontal_only
 id icon
@@ -3358,7 +3346,6 @@ id linear
 id listMode
 id list_item
 id m3_side_sheet
-id markerRecyclerView
 id marquee
 id masked
 id match_constraint
@@ -3495,7 +3482,6 @@ id scrollIndicatorDown
 id scrollIndicatorUp
 id scrollView
 id scrollable
-id searchInput
 id search_badge
 id search_bar
 id search_button
@@ -3542,14 +3528,11 @@ id startToEnd
 id startVertical
 id staticLayout
 id staticPostLayout
-id statusText
 id stop
 id stretch
 id submenuarrow
 id submit_area
-id suggestionsText
 id supportScrollUp
-id syncButton
 id tabMode
 id tag_accessibility_actions
 id tag_accessibility_clickable_spans
@@ -3583,7 +3566,6 @@ id textinput_suffix_text
 id time
 id title
 id titleDividerNoCustom
-id titleText
 id title_template
 id toggle
 id top
@@ -3618,7 +3600,6 @@ id west
 id withText
 id with_icon
 id withinBounds
-id workFilterButton
 id wrap
 id wrap_content
 id wrap_content_constrained

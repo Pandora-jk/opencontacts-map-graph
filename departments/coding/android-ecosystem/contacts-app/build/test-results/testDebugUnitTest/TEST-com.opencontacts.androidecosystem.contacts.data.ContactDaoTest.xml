@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-03-10T22:28:10" hostname="ip-172-31-34-63" time="8.979">
+  <properties/>
+  <testcase name="getFrequentContacts_returnsEmptyListForZeroLimit" classname="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" time="8.177"/>
+  <testcase name="queryByPhone_returnsEmptyListForNullInput" classname="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" time="0.051"/>
+  <testcase name="queryByName_returnsEmptyListForNullOrBlankInput" classname="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" time="0.052"/>
+  <testcase name="update_persistsModifiedFields" classname="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" time="0.07"/>
+  <testcase name="getAll_returnsEmptyListWhenDatabaseIsEmpty" classname="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" time="0.04"/>
+  <testcase name="delete_removesPersistedContact" classname="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" time="0.04"/>
+  <testcase name="insert_persistsContactAndReturnsGeneratedId" classname="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" time="0.045"/>
+  <testcase name="getAll_returnsContactsSortedByDisplayName" classname="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" time="0.128"/>
+  <testcase name="insert_allowsDuplicateContactDetailsAsSeparateRows" classname="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" time="0.065"/>
+  <testcase name="queryByPhone_matchesPartialPhoneNumberAndSortsByName" classname="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" time="0.114"/>
+  <testcase name="getFrequentContacts_ordersByStrengthThenRecencyAndAppliesLimit" classname="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" time="0.071"/>
+  <testcase name="queryByName_matchesPartialNameCaseInsensitively" classname="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" time="0.073"/>
+  <testcase name="getById_returnsNullWhenContactDoesNotExist" classname="com.opencontacts.androidecosystem.contacts.data.ContactDaoTest" time="0.05"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

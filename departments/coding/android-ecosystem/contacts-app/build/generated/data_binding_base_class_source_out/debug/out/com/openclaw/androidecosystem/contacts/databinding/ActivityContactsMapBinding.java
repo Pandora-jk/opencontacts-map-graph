@@ -4,119 +4,25 @@ package com.openclaw.androidecosystem.contacts.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ScrollView;
-import android.widget.SeekBar;
-import android.widget.TextView;
+import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
-import androidx.viewbinding.ViewBindings;
-import com.google.android.material.button.MaterialButton;
 import com.openclaw.androidecosystem.contacts.R;
-import com.openclaw.androidecosystem.contacts.contactsui.GraphVisualizationView;
 import java.lang.NullPointerException;
 import java.lang.Override;
-import java.lang.String;
 
 public final class ActivityContactsMapBinding implements ViewBinding {
   @NonNull
-  private final ScrollView rootView;
+  private final FrameLayout rootView;
 
-  @NonNull
-  public final MaterialButton clearFiltersButton;
-
-  @NonNull
-  public final SeekBar connectionStrengthSeekBar;
-
-  @NonNull
-  public final TextView connectionStrengthValue;
-
-  @NonNull
-  public final TextView contactCountText;
-
-  @NonNull
-  public final RecyclerView contactsRecyclerView;
-
-  @NonNull
-  public final MaterialButton distanceAnyButton;
-
-  @NonNull
-  public final MaterialButton distanceLocalButton;
-
-  @NonNull
-  public final MaterialButton distanceRegionalButton;
-
-  @NonNull
-  public final TextView emptyStateText;
-
-  @NonNull
-  public final MaterialButton frequentFilterButton;
-
-  @NonNull
-  public final GraphVisualizationView graphView;
-
-  @NonNull
-  public final MaterialButton homeFilterButton;
-
-  @NonNull
-  public final RecyclerView markerRecyclerView;
-
-  @NonNull
-  public final EditText searchInput;
-
-  @NonNull
-  public final TextView statusText;
-
-  @NonNull
-  public final TextView suggestionsText;
-
-  @NonNull
-  public final MaterialButton syncButton;
-
-  @NonNull
-  public final TextView titleText;
-
-  @NonNull
-  public final MaterialButton workFilterButton;
-
-  private ActivityContactsMapBinding(@NonNull ScrollView rootView,
-      @NonNull MaterialButton clearFiltersButton, @NonNull SeekBar connectionStrengthSeekBar,
-      @NonNull TextView connectionStrengthValue, @NonNull TextView contactCountText,
-      @NonNull RecyclerView contactsRecyclerView, @NonNull MaterialButton distanceAnyButton,
-      @NonNull MaterialButton distanceLocalButton, @NonNull MaterialButton distanceRegionalButton,
-      @NonNull TextView emptyStateText, @NonNull MaterialButton frequentFilterButton,
-      @NonNull GraphVisualizationView graphView, @NonNull MaterialButton homeFilterButton,
-      @NonNull RecyclerView markerRecyclerView, @NonNull EditText searchInput,
-      @NonNull TextView statusText, @NonNull TextView suggestionsText,
-      @NonNull MaterialButton syncButton, @NonNull TextView titleText,
-      @NonNull MaterialButton workFilterButton) {
+  private ActivityContactsMapBinding(@NonNull FrameLayout rootView) {
     this.rootView = rootView;
-    this.clearFiltersButton = clearFiltersButton;
-    this.connectionStrengthSeekBar = connectionStrengthSeekBar;
-    this.connectionStrengthValue = connectionStrengthValue;
-    this.contactCountText = contactCountText;
-    this.contactsRecyclerView = contactsRecyclerView;
-    this.distanceAnyButton = distanceAnyButton;
-    this.distanceLocalButton = distanceLocalButton;
-    this.distanceRegionalButton = distanceRegionalButton;
-    this.emptyStateText = emptyStateText;
-    this.frequentFilterButton = frequentFilterButton;
-    this.graphView = graphView;
-    this.homeFilterButton = homeFilterButton;
-    this.markerRecyclerView = markerRecyclerView;
-    this.searchInput = searchInput;
-    this.statusText = statusText;
-    this.suggestionsText = suggestionsText;
-    this.syncButton = syncButton;
-    this.titleText = titleText;
-    this.workFilterButton = workFilterButton;
   }
 
   @Override
   @NonNull
-  public ScrollView getRoot() {
+  public FrameLayout getRoot() {
     return rootView;
   }
 
@@ -137,131 +43,10 @@ public final class ActivityContactsMapBinding implements ViewBinding {
 
   @NonNull
   public static ActivityContactsMapBinding bind(@NonNull View rootView) {
-    // The body of this method is generated in a way you would not otherwise write.
-    // This is done to optimize the compiled bytecode for size and performance.
-    int id;
-    missingId: {
-      id = R.id.clearFiltersButton;
-      MaterialButton clearFiltersButton = ViewBindings.findChildViewById(rootView, id);
-      if (clearFiltersButton == null) {
-        break missingId;
-      }
-
-      id = R.id.connectionStrengthSeekBar;
-      SeekBar connectionStrengthSeekBar = ViewBindings.findChildViewById(rootView, id);
-      if (connectionStrengthSeekBar == null) {
-        break missingId;
-      }
-
-      id = R.id.connectionStrengthValue;
-      TextView connectionStrengthValue = ViewBindings.findChildViewById(rootView, id);
-      if (connectionStrengthValue == null) {
-        break missingId;
-      }
-
-      id = R.id.contactCountText;
-      TextView contactCountText = ViewBindings.findChildViewById(rootView, id);
-      if (contactCountText == null) {
-        break missingId;
-      }
-
-      id = R.id.contactsRecyclerView;
-      RecyclerView contactsRecyclerView = ViewBindings.findChildViewById(rootView, id);
-      if (contactsRecyclerView == null) {
-        break missingId;
-      }
-
-      id = R.id.distanceAnyButton;
-      MaterialButton distanceAnyButton = ViewBindings.findChildViewById(rootView, id);
-      if (distanceAnyButton == null) {
-        break missingId;
-      }
-
-      id = R.id.distanceLocalButton;
-      MaterialButton distanceLocalButton = ViewBindings.findChildViewById(rootView, id);
-      if (distanceLocalButton == null) {
-        break missingId;
-      }
-
-      id = R.id.distanceRegionalButton;
-      MaterialButton distanceRegionalButton = ViewBindings.findChildViewById(rootView, id);
-      if (distanceRegionalButton == null) {
-        break missingId;
-      }
-
-      id = R.id.emptyStateText;
-      TextView emptyStateText = ViewBindings.findChildViewById(rootView, id);
-      if (emptyStateText == null) {
-        break missingId;
-      }
-
-      id = R.id.frequentFilterButton;
-      MaterialButton frequentFilterButton = ViewBindings.findChildViewById(rootView, id);
-      if (frequentFilterButton == null) {
-        break missingId;
-      }
-
-      id = R.id.graphView;
-      GraphVisualizationView graphView = ViewBindings.findChildViewById(rootView, id);
-      if (graphView == null) {
-        break missingId;
-      }
-
-      id = R.id.homeFilterButton;
-      MaterialButton homeFilterButton = ViewBindings.findChildViewById(rootView, id);
-      if (homeFilterButton == null) {
-        break missingId;
-      }
-
-      id = R.id.markerRecyclerView;
-      RecyclerView markerRecyclerView = ViewBindings.findChildViewById(rootView, id);
-      if (markerRecyclerView == null) {
-        break missingId;
-      }
-
-      id = R.id.searchInput;
-      EditText searchInput = ViewBindings.findChildViewById(rootView, id);
-      if (searchInput == null) {
-        break missingId;
-      }
-
-      id = R.id.statusText;
-      TextView statusText = ViewBindings.findChildViewById(rootView, id);
-      if (statusText == null) {
-        break missingId;
-      }
-
-      id = R.id.suggestionsText;
-      TextView suggestionsText = ViewBindings.findChildViewById(rootView, id);
-      if (suggestionsText == null) {
-        break missingId;
-      }
-
-      id = R.id.syncButton;
-      MaterialButton syncButton = ViewBindings.findChildViewById(rootView, id);
-      if (syncButton == null) {
-        break missingId;
-      }
-
-      id = R.id.titleText;
-      TextView titleText = ViewBindings.findChildViewById(rootView, id);
-      if (titleText == null) {
-        break missingId;
-      }
-
-      id = R.id.workFilterButton;
-      MaterialButton workFilterButton = ViewBindings.findChildViewById(rootView, id);
-      if (workFilterButton == null) {
-        break missingId;
-      }
-
-      return new ActivityContactsMapBinding((ScrollView) rootView, clearFiltersButton,
-          connectionStrengthSeekBar, connectionStrengthValue, contactCountText,
-          contactsRecyclerView, distanceAnyButton, distanceLocalButton, distanceRegionalButton,
-          emptyStateText, frequentFilterButton, graphView, homeFilterButton, markerRecyclerView,
-          searchInput, statusText, suggestionsText, syncButton, titleText, workFilterButton);
+    if (rootView == null) {
+      throw new NullPointerException("rootView");
     }
-    String missingId = rootView.getResources().getResourceName(id);
-    throw new NullPointerException("Missing required view with ID: ".concat(missingId));
+
+    return new ActivityContactsMapBinding((FrameLayout) rootView);
   }
 }

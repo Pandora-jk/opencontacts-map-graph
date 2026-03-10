@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.opencontacts.androidecosystem.contacts.ContactsMapViewModelTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-03-10T22:28:19" hostname="ip-172-31-34-63" time="0.006">
+  <properties/>
+  <testcase name="toMarkers_filtersContactsWithMissingOrInvalidCoordinates" classname="com.opencontacts.androidecosystem.contacts.ContactsMapViewModelTest" time="0.006"/>
+  <testcase name="toMarkers_handlesNullOrEmptyInput_andUsesUnknownTitleFallback" classname="com.opencontacts.androidecosystem.contacts.ContactsMapViewModelTest" time="0.0"/>
+  <testcase name="toMarkers_convertsValidContactsToMarkers" classname="com.opencontacts.androidecosystem.contacts.ContactsMapViewModelTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
