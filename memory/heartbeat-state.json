@@ -6,7 +6,7 @@
     "heartbeat": 1741514280,
     "disk": 1741514280
   },
-  "lastUpdate": "2026-03-10T06:22:00Z",
+  "lastUpdate": "2026-03-10T07:55:00Z",
   "proactiveOutreachSent": false,
-  "notable": "Disk cleanup: Recovered 72M from /tmp stale files. Usage down from 100% to 99% (206M free). Still needs elevated cleanup of ~/.gradle/caches (~1.8G) to reach ≤90%."
+  "notable": "Disk improved from 100% to 99% (223M free). Still critical (>90%). Need elevated cleanup of ~/.gradle/caches (~1.8G) to reach ≤90%."
 }
