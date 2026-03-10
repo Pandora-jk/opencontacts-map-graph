@@ -10,6 +10,7 @@ sys.path.insert(0, "/home/ubuntu/.openclaw/workspace/tools")
 import infra_disk
 import infra_home_cache_cleanup
 import infra_workspace_cache_cleanup
+import infra_workspace_log_cleanup
 
 
 class InfraDiskTests(unittest.TestCase):
@@ -34,6 +35,8 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "scan_home_cache_cleanup_candidates", return_value=[]
         ), mock.patch.object(
             infra_disk, "scan_workspace_cache_cleanup_candidates", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "scan_workspace_log_cleanup_candidates", return_value=[]
         ):
             candidates = infra_disk.collect_reclaim_candidates()
 
@@ -61,6 +64,11 @@ class InfraDiskTests(unittest.TestCase):
                 1700 * 1024,
                 Path("/home/ubuntu/.openclaw/workspace/.gradle"),
                 "workspace Gradle cache",
+            ),
+            (
+                6 * 1024 * 1024,
+                Path("/home/ubuntu/.openclaw/workspace/logs/night-infra.log"),
+                "generated workspace log",
             ),
         ]
 
@@ -102,6 +110,18 @@ class InfraDiskTests(unittest.TestCase):
                     note="workspace Gradle cache",
                 ),
             ],
+        ), mock.patch.object(
+            infra_disk,
+            "scan_workspace_log_cleanup_candidates",
+            return_value=[
+                infra_workspace_log_cleanup.CleanupCandidate(
+                    path=Path("/home/ubuntu/.openclaw/workspace/logs/night-infra.log"),
+                    size_bytes=6 * 1024 * 1024,
+                    mtime=dt.datetime(2026, 3, 10, tzinfo=dt.timezone.utc),
+                    owner="ubuntu",
+                    note="generated workspace log",
+                ),
+            ],
         ):
             lines = infra_disk.summarize_reclaim_guidance(candidates)
 
@@ -123,6 +143,15 @@ class InfraDiskTests(unittest.TestCase):
         )
         self.assertIn(
             "- Apply: python3 tools/infra_workspace_cache_cleanup.py --apply --path /home/ubuntu/.openclaw/workspace/.gradle",
+            lines,
+        )
+        self.assertIn("Workspace log cleanup helper available for repo-local generated logs:", lines)
+        self.assertIn(
+            "- Review: python3 tools/infra_workspace_log_cleanup.py --path /home/ubuntu/.openclaw/workspace/logs/night-infra.log",
+            lines,
+        )
+        self.assertIn(
+            "- Apply: python3 tools/infra_workspace_log_cleanup.py --apply --path /home/ubuntu/.openclaw/workspace/logs/night-infra.log",
             lines,
         )
         self.assertIn("Largest paths under /var/log/journal:", lines)
@@ -184,6 +213,8 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "scan_home_cache_cleanup_candidates", return_value=home_candidates
         ), mock.patch.object(
             infra_disk, "scan_workspace_cache_cleanup_candidates", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "scan_workspace_log_cleanup_candidates", return_value=[]
         ):
             candidates = infra_disk.collect_reclaim_candidates()
 
@@ -210,12 +241,42 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "scan_home_cache_cleanup_candidates", return_value=[]
         ), mock.patch.object(
             infra_disk, "scan_workspace_cache_cleanup_candidates", return_value=workspace_candidates
+        ), mock.patch.object(
+            infra_disk, "scan_workspace_log_cleanup_candidates", return_value=[]
         ):
             candidates = infra_disk.collect_reclaim_candidates()
 
         self.assertEqual(
             [str(path) for _, path, _ in candidates[:2]],
             ["/var/cache/apt", "/home/ubuntu/.openclaw/workspace/.gradle"],
+        )
+
+    def test_collect_reclaim_candidates_includes_workspace_logs(self) -> None:
+        sizes = {
+            Path("/var/cache/apt"): 628 * 1024 * 1024,
+        }
+        workspace_log_candidates = [
+            infra_workspace_log_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.openclaw/workspace/logs/night-infra.log"),
+                size_bytes=6 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 10, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="generated workspace log",
+            )
+        ]
+
+        with mock.patch.object(infra_disk, "path_usage_bytes", side_effect=lambda path: sizes.get(path)), mock.patch.object(
+            infra_disk, "scan_home_cache_cleanup_candidates", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "scan_workspace_cache_cleanup_candidates", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "scan_workspace_log_cleanup_candidates", return_value=workspace_log_candidates
+        ):
+            candidates = infra_disk.collect_reclaim_candidates()
+
+        self.assertEqual(
+            [str(path) for _, path, _ in candidates[:2]],
+            ["/var/cache/apt", "/home/ubuntu/.openclaw/workspace/logs/night-infra.log"],
         )
 
     def test_summarize_review_only_cache_roots_reports_hotspots_without_cleanup_command(self) -> None:
@@ -256,6 +317,8 @@ class InfraDiskTests(unittest.TestCase):
         ), mock.patch.object(
             infra_disk, "summarize_current_session_recovery_plan", return_value=[]
         ), mock.patch.object(
+            infra_disk, "summarize_workspace_log_recovery_plan", return_value=[]
+        ), mock.patch.object(
             infra_disk, "summarize_workspace_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
@@ -295,6 +358,8 @@ class InfraDiskTests(unittest.TestCase):
         ), mock.patch.object(
             infra_disk, "summarize_current_session_recovery_plan", return_value=[]
         ), mock.patch.object(
+            infra_disk, "summarize_workspace_log_recovery_plan", return_value=[]
+        ), mock.patch.object(
             infra_disk, "summarize_workspace_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
@@ -332,6 +397,8 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "current_root_usage_bytes", return_value=root_snapshot
         ), mock.patch.object(
             infra_disk, "summarize_current_session_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_workspace_log_recovery_plan", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_workspace_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
@@ -504,6 +571,72 @@ class InfraDiskTests(unittest.TestCase):
             lines,
         )
 
+    def test_summarize_workspace_log_recovery_plan_reports_shortfall(self) -> None:
+        candidates = [
+            infra_workspace_log_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.openclaw/workspace/logs/night-infra.log"),
+                size_bytes=6 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 10, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="generated workspace log",
+            ),
+            infra_workspace_log_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.openclaw/workspace/logs/night-coding.log"),
+                size_bytes=2 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 10, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="generated workspace log",
+            ),
+        ]
+
+        with mock.patch.object(infra_disk, "scan_workspace_log_cleanup_candidates", return_value=candidates):
+            lines = infra_disk.summarize_workspace_log_recovery_plan(
+                total_bytes=19 * 1024**3,
+                used_bytes=19 * 1024**3,
+                used_pct=100,
+            )
+
+        self.assertIn("Current-session writable workspace-log plan:", lines)
+        self.assertIn("- Need about 1.9G reclaimed to reach <=90% on /", lines)
+        self.assertIn("  All workspace logs total 8.0M across 2 path(s); short by 1.9G", lines)
+        self.assertIn(
+            "  Review remaining workspace logs: python3 tools/infra_workspace_log_cleanup.py --path /home/ubuntu/.openclaw/workspace/logs/night-infra.log --path /home/ubuntu/.openclaw/workspace/logs/night-coding.log",
+            lines,
+        )
+        self.assertIn("  Host-level reclaim is still required after workspace-log cleanup", lines)
+
+    def test_summarize_workspace_log_recovery_plan_builds_apply_bundle(self) -> None:
+        candidates = [
+            infra_workspace_log_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.openclaw/workspace/logs/night-infra.log"),
+                size_bytes=40 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 10, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="generated workspace log",
+            ),
+            infra_workspace_log_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.openclaw/workspace/logs/night-coding.log"),
+                size_bytes=5 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 10, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="generated workspace log",
+            ),
+        ]
+
+        with mock.patch.object(infra_disk, "scan_workspace_log_cleanup_candidates", return_value=candidates):
+            lines = infra_disk.summarize_workspace_log_recovery_plan(
+                total_bytes=1024 * 1024 * 1024,
+                used_bytes=950 * 1024 * 1024,
+                used_pct=93,
+            )
+
+        self.assertIn("- Need about 28M reclaimed to reach <=90% on /", lines)
+        self.assertIn("  Workspace logs can cover this with 40M across 1 path(s)", lines)
+        self.assertIn(
+            "  Apply bundle: python3 tools/infra_workspace_log_cleanup.py --apply --path /home/ubuntu/.openclaw/workspace/logs/night-infra.log",
+            lines,
+        )
+
     def test_collect_protected_home_paths_sorts_largest_first(self) -> None:
         sizes = {
             Path("/home/ubuntu/.npm-global"): 1800 * 1024 * 1024,
@@ -539,6 +672,8 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
         ), mock.patch.object(
             infra_disk, "summarize_current_session_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_workspace_log_recovery_plan", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_workspace_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
@@ -582,6 +717,8 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
         ), mock.patch.object(
             infra_disk, "summarize_current_session_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_workspace_log_recovery_plan", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_workspace_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
@@ -710,6 +847,8 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
         ), mock.patch.object(
             infra_disk, "summarize_current_session_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_workspace_log_recovery_plan", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_workspace_cache_recovery_plan", return_value=[]
         ), mock.patch.object(

@@ -29,6 +29,16 @@ from infra_workspace_cache_cleanup import (
     suggested_apply_args as suggested_workspace_cache_apply_args,
     total_reclaim_bytes as total_workspace_cache_reclaim_bytes,
 )
+from infra_workspace_log_cleanup import (
+    DEFAULT_MIN_BYTES as WORKSPACE_LOG_MIN_BYTES,
+    CleanupCandidate as WorkspaceLogCleanupCandidate,
+    applyable_candidates as filter_applyable_workspace_log_candidates,
+    blocked_candidates as filter_blocked_workspace_log_candidates,
+    scan_cleanup_candidates as scan_workspace_log_cleanup_candidates,
+    select_reclaim_bundle as select_workspace_log_reclaim_bundle,
+    suggested_apply_args as suggested_workspace_log_apply_args,
+    total_reclaim_bytes as total_workspace_log_reclaim_bytes,
+)
 
 DISK_ALERT_THRESHOLD = 80
 DISK_CRITICAL_THRESHOLD = 90
@@ -77,6 +87,7 @@ _HOST_LEVEL_RECOVERY_TARGETS = {
     Path('/var/cache/apt'): 'sudo apt-get clean',
     Path('/var/log/journal'): 'sudo journalctl --vacuum-time=7d',
 }
+_WORKSPACE_LOG_ROOT = Path('/home/ubuntu/.openclaw/workspace/logs')
 
 
 def run_cmd(cmd: list[str], max_chars: int = 800) -> str:
@@ -164,6 +175,12 @@ def collect_reclaim_candidates() -> list[tuple[int, Path, str]]:
         workspace_candidates = []
     for candidate in workspace_candidates:
         candidates.append((candidate.size_bytes, candidate.path, candidate.note))
+    try:
+        workspace_log_candidates = scan_workspace_log_cleanup_candidates(min_bytes=WORKSPACE_LOG_MIN_BYTES)
+    except (OSError, RuntimeError, subprocess.TimeoutExpired):
+        workspace_log_candidates = []
+    for candidate in workspace_log_candidates:
+        candidates.append((candidate.size_bytes, candidate.path, candidate.note))
     return sorted(candidates, key=lambda item: item[0], reverse=True)
 
 
@@ -186,12 +203,16 @@ def summarize_reclaim_guidance(candidates: list[tuple[int, Path, str]]) -> list[
     lines: list[str] = []
     home_cache_paths: list[Path] = []
     workspace_cache_paths: list[Path] = []
+    workspace_log_paths: list[Path] = []
     for _, path, _ in candidates:
         if path == Path('/tmp'):
             stale_tmp_lines = summarize_stale_tmp_entries()
             if stale_tmp_lines:
                 lines.extend(stale_tmp_lines)
                 lines.extend(summarize_tmp_cleanup_helper())
+            continue
+        if path.parent == _WORKSPACE_LOG_ROOT:
+            workspace_log_paths.append(path)
             continue
 
         hotspot_lines = summarize_hotspots(path)
@@ -212,6 +233,9 @@ def summarize_reclaim_guidance(candidates: list[tuple[int, Path, str]]) -> list[
     helper_lines = summarize_home_cache_cleanup_helper(home_cache_paths)
     if helper_lines:
         lines.extend(helper_lines)
+    workspace_log_helper_lines = summarize_workspace_log_cleanup_helper(workspace_log_paths)
+    if workspace_log_helper_lines:
+        lines.extend(workspace_log_helper_lines)
     workspace_helper_lines = summarize_workspace_cache_cleanup_helper(workspace_cache_paths)
     if workspace_helper_lines:
         lines.extend(workspace_helper_lines)
@@ -441,6 +465,54 @@ def summarize_workspace_cache_cleanup_helper(paths: list[Path]) -> list[str]:
     return lines
 
 
+def summarize_workspace_log_cleanup_helper(paths: list[Path]) -> list[str]:
+    unique_paths: list[Path] = []
+    seen: set[Path] = set()
+    for path in paths:
+        if path in seen:
+            continue
+        seen.add(path)
+        unique_paths.append(path)
+
+    if not unique_paths:
+        return []
+
+    quoted = ' '.join(f"--path {shlex.quote(str(path))}" for path in unique_paths)
+    lines = [
+        'Workspace log cleanup helper available for repo-local generated logs:',
+        f'- Review: python3 tools/infra_workspace_log_cleanup.py {quoted}',
+    ]
+
+    try:
+        scanned_candidates = scan_workspace_log_cleanup_candidates(min_bytes=WORKSPACE_LOG_MIN_BYTES)
+    except (OSError, RuntimeError, subprocess.TimeoutExpired):
+        scanned_candidates = []
+
+    candidate_by_path = {candidate.path: candidate for candidate in scanned_candidates}
+    selected_candidates: list[WorkspaceLogCleanupCandidate] = []
+    blocked_missing: list[tuple[Path, str]] = []
+    for path in unique_paths:
+        candidate = candidate_by_path.get(path)
+        if candidate is None:
+            blocked_missing.append((path, 'candidate scan unavailable for current session'))
+            continue
+        selected_candidates.append(candidate)
+
+    applyable = filter_applyable_workspace_log_candidates(selected_candidates)
+    blocked = filter_blocked_workspace_log_candidates(selected_candidates)
+
+    if applyable:
+        lines.append(f'- Apply: python3 tools/infra_workspace_log_cleanup.py --apply {suggested_workspace_log_apply_args(applyable)}')
+    if blocked or blocked_missing:
+        lines.append('Workspace log apply blocked from current session:')
+        for candidate in blocked:
+            lines.append(f'- {candidate.path}: {candidate.apply_blocked_reason}')
+        for path, reason in blocked_missing:
+            lines.append(f'- {path}: {reason}')
+        lines.append('Run cleanup from a shell with write access to these workspace log paths')
+    return lines
+
+
 def summarize_home_cache_recovery_plan(total_bytes: int, used_bytes: int, used_pct: int) -> list[str]:
     if used_pct <= DISK_ALERT_THRESHOLD:
         return []
@@ -566,6 +638,69 @@ def summarize_workspace_cache_recovery_plan(total_bytes: int, used_bytes: int, u
                 f'  Directly writable workspace-cache capacity from current session is only {human_size(total_applyable)}'
             )
         lines.append('  Host-level reclaim is still required after workspace-cache cleanup')
+
+    return lines
+
+
+def summarize_workspace_log_recovery_plan(total_bytes: int, used_bytes: int, used_pct: int) -> list[str]:
+    if used_pct <= DISK_ALERT_THRESHOLD:
+        return []
+
+    try:
+        candidates = scan_workspace_log_cleanup_candidates(min_bytes=WORKSPACE_LOG_MIN_BYTES)
+    except (OSError, RuntimeError, subprocess.TimeoutExpired):
+        return []
+
+    if not candidates:
+        return []
+
+    total_reclaim = total_workspace_log_reclaim_bytes(candidates)
+    total_applyable = total_workspace_log_reclaim_bytes(filter_applyable_workspace_log_candidates(candidates))
+    targets: list[int] = []
+    if used_pct > DISK_CRITICAL_THRESHOLD:
+        targets.append(DISK_CRITICAL_THRESHOLD)
+    targets.append(DISK_ALERT_THRESHOLD)
+
+    lines = ['Current-session writable workspace-log plan:']
+    for target_pct in targets:
+        required_bytes = bytes_to_target_usage(total_bytes, used_bytes, target_pct)
+        if required_bytes <= 0:
+            continue
+
+        bundle = select_workspace_log_reclaim_bundle(candidates, required_bytes=required_bytes)
+        bundle_reclaim = total_workspace_log_reclaim_bytes(bundle)
+        applyable_bundle = filter_applyable_workspace_log_candidates(bundle)
+        applyable_bundle_reclaim = total_workspace_log_reclaim_bytes(applyable_bundle)
+        blocked_bundle = filter_blocked_workspace_log_candidates(bundle)
+        lines.append(f'- Need about {human_size(required_bytes)} reclaimed to reach <={target_pct}% on /')
+        if bundle and bundle_reclaim >= required_bytes:
+            review_args = suggested_workspace_log_apply_args(bundle)
+            lines.append(f'  Workspace logs can cover this with {human_size(bundle_reclaim)} across {len(bundle)} path(s)')
+            lines.append(f'  Review bundle: python3 tools/infra_workspace_log_cleanup.py {review_args}')
+            if applyable_bundle_reclaim >= required_bytes:
+                apply_args = suggested_workspace_log_apply_args(applyable_bundle)
+                lines.append(f'  Apply bundle: python3 tools/infra_workspace_log_cleanup.py --apply {apply_args}')
+            elif blocked_bundle:
+                lines.append(
+                    f'  Apply blocked from current session; directly writable workspace-log capacity is only '
+                    f'{human_size(applyable_bundle_reclaim)}'
+                )
+                for candidate in blocked_bundle:
+                    lines.append(f'  - {candidate.path}: {candidate.apply_blocked_reason}')
+            continue
+
+        shortfall = max(0, required_bytes - total_reclaim)
+        apply_args = suggested_workspace_log_apply_args(candidates)
+        lines.append(
+            f'  All workspace logs total {human_size(total_reclaim)} across {len(candidates)} path(s); '
+            f'short by {human_size(shortfall)}'
+        )
+        lines.append(f'  Review remaining workspace logs: python3 tools/infra_workspace_log_cleanup.py {apply_args}')
+        if total_applyable < total_reclaim:
+            lines.append(
+                f'  Directly writable workspace-log capacity from current session is only {human_size(total_applyable)}'
+            )
+        lines.append('  Host-level reclaim is still required after workspace-log cleanup')
 
     return lines
 
@@ -797,6 +932,7 @@ def build_disk_usage_report() -> list[str]:
         if root_snapshot is not None:
             total_bytes, used_bytes, _avail_bytes, used_pct, _mount = root_snapshot
             lines.extend(summarize_current_session_recovery_plan(total_bytes, used_bytes, used_pct))
+            lines.extend(summarize_workspace_log_recovery_plan(total_bytes, used_bytes, used_pct))
             lines.extend(summarize_workspace_cache_recovery_plan(total_bytes, used_bytes, used_pct))
             lines.extend(summarize_home_cache_recovery_plan(total_bytes, used_bytes, used_pct))
             lines.extend(summarize_host_level_recovery_plan(total_bytes, used_bytes, used_pct, candidates))
