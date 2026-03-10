@@ -20,11 +20,9 @@ class GraphVisualizationView {
                 height = height,
             )
         }
-
         val centerX = width / 2f
         val centerY = height / 2f
         val radius = min(width, height) * 0.35f
-
         val nodes = if (nodeIds.size == 1) {
             listOf(GraphRenderNode(nodeIds.single(), centerX, centerY))
         } else {
@@ -35,9 +33,8 @@ class GraphVisualizationView {
                 GraphRenderNode(nodeId, x, y)
             }
         }
-
-        val edges = graph.asMap()
-            .flatMap { (nodeId, neighbors) ->
+        val edges = graph?.asMap()
+            ?.flatMap { (nodeId, neighbors) ->
                 neighbors.map { neighbor ->
                     if (nodeId <= neighbor) {
                         GraphRenderEdge(nodeId, neighbor)
@@ -46,8 +43,8 @@ class GraphVisualizationView {
                     }
                 }
             }
-            .distinct()
-
+            ?.distinct()
+            .orEmpty()
         return GraphRenderState(
             nodes = nodes,
             edges = edges,
