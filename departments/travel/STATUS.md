@@ -1,9 +1,9 @@
 # Travel Status
 
-- Last run (UTC): 2026-03-10T15:12:27Z
-- Run count: 39
-- Active task: **Weather monitoring:** Cyclone season (north QLD), fire danger (NSW).
+- Last run (UTC): 2026-03-10T16:42:22Z
+- Run count: 40
+- Active task: **Resupply planning:** Major towns every 7-10 days for groceries, fuel, van services.
 - Task progress count: 5
-- Last artifact: departments/travel/artifacts/plans/20260310T151227Z-r39-weather-monitoring-cyclone-season-north-qld-fire-danger-.md
+- Last artifact: departments/travel/artifacts/plans/20260310T164222Z-r40-resupply-planning-major-towns-every-7-10-days-for-grocer.md
 - Autonomous open queue: 8
 

@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-10T15:43:50Z
-- Run count: 166
-- Primary task: Write the one-line sales promise for the core service offer
+- Last run (UTC): 2026-03-10T16:56:52Z
+- Run count: 169
+- Primary task: Filter out personal emails, low-ticket businesses, solo operators, giant agencies, and weak-fit prospects
 - Primary task progress count: 10
-- Last artifact: departments/finance/artifacts/offers/core-service-offer-20260310-r166.md
+- Last artifact: departments/finance/artifacts/notes/filter-out-personal-emails-low-ticket-businesses-solo-operators--20260310-r169.md
 - Blocking items: 0
 - Autonomous queue items: 15
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Write the one-line sales promise for the core service offer
+Filter out personal emails, low-ticket businesses, solo operators, giant agencies, and weak-fit prospects
 
 ## Blocking
 - None
