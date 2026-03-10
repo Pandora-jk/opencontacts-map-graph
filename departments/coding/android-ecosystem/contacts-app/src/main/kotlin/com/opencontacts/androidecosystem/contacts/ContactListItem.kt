@@ -4,7 +4,7 @@ class ContactListItem(
     private val onClick: (ContactRecord) -> Unit = {},
 ) {
     fun render(contact: ContactRecord): ContactListItemModel {
-        val title = contact.displayName?.trim().takeUnless { it.isNullOrEmpty() }
+        val title = contact?.displayName?.trim().takeUnless { it.isNullOrEmpty() }
             ?: contact.email?.trim().takeUnless { it.isNullOrEmpty() }
             ?: contact.phoneNumbers.firstOrNull { it.trim().isNotEmpty() }?.trim()
             ?: "Unknown contact"

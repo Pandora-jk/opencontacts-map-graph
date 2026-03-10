@@ -25,15 +25,20 @@ data class ContactLocation(
         if (!isValid() || other == null || !other.isValid()) {
             return null
         }
-        if (latitude == other.latitude && longitude == other.longitude) {
+        val startLatitude = latitude!!
+        val startLongitude = longitude!!
+        val endLatitude = other.latitude!!
+        val endLongitude = other.longitude!!
+
+        if (startLatitude == endLatitude && startLongitude == endLongitude) {
             return 0.0
         }
 
         val earthRadiusKm = 6371.0
-        val latitudeDelta = Math.toRadians(other.latitude!! - latitude!!)
-        val longitudeDelta = Math.toRadians(other.longitude!! - longitude!!)
-        val latitudeA = Math.toRadians(latitude)
-        val latitudeB = Math.toRadians(other.latitude)
+        val latitudeDelta = Math.toRadians(endLatitude - startLatitude)
+        val longitudeDelta = Math.toRadians(endLongitude - startLongitude)
+        val latitudeA = Math.toRadians(startLatitude)
+        val latitudeB = Math.toRadians(endLatitude)
 
         val haversine = sin(latitudeDelta / 2).pow(2) +
             sin(longitudeDelta / 2).pow(2) * cos(latitudeA) * cos(latitudeB)

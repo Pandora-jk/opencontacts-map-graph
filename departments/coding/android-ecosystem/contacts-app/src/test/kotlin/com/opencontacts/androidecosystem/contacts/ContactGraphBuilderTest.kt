@@ -1,6 +1,8 @@
 package com.opencontacts.androidecosystem.contacts
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ContactGraphBuilderTest {
@@ -38,5 +40,55 @@ class ContactGraphBuilderTest {
     fun buildGraph_handlesNullAndEmptyInput() {
         assertEquals(emptyMap<String, Set<String>>(), graphBuilder.buildGraph(null))
         assertEquals(emptyMap<String, Set<String>>(), graphBuilder.buildGraph(emptyList()))
+    }
+
+    @Test
+    fun buildGraph_preservesIsolatedNodes() {
+        val graph = graphBuilder.buildGraph(
+            listOf(
+                contact(id = "alice"),
+                contact(id = "bob"),
+            )
+        )
+
+        assertEquals(setOf("alice", "bob"), graph.keys)
+        assertEquals(emptySet<String>(), graph["alice"])
+        assertEquals(emptySet<String>(), graph["bob"])
+    }
+
+    @Test
+    fun buildGraph_usesLastContactWhenDuplicateIdsAppear() {
+        val graph = graphBuilder.buildGraph(
+            listOf(
+                contact(id = "alice", connectionIds = listOf("bob")),
+                contact(id = "alice", connectionIds = listOf("carol")),
+                contact(id = "bob"),
+                contact(id = "carol"),
+            )
+        )
+
+        assertEquals(setOf("carol"), graph["alice"])
+        assertEquals(emptySet<String>(), graph["bob"])
+    }
+
+    @Test
+    fun buildConnectionGraph_createsConnectionGraphWrapper() {
+        val graph = graphBuilder.buildConnectionGraph(
+            listOf(
+                contact(id = "alice", connectionIds = listOf("bob")),
+                contact(id = "bob"),
+            )
+        )
+
+        assertTrue(graph.hasEdge("alice", "bob"))
+        assertEquals(2, graph.nodes().size)
+    }
+
+    @Test
+    fun buildConnectionGraph_returnsEmptyGraphForEmptyInput() {
+        val graph = graphBuilder.buildConnectionGraph(emptyList())
+
+        assertTrue(graph.nodes().isEmpty())
+        assertFalse(graph.hasNode("alice"))
     }
 }
