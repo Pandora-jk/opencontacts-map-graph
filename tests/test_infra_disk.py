@@ -9,6 +9,7 @@ sys.path.insert(0, "/home/ubuntu/.openclaw/workspace/tools")
 
 import infra_disk
 import infra_home_cache_cleanup
+import infra_workspace_cache_cleanup
 
 
 class InfraDiskTests(unittest.TestCase):
@@ -31,6 +32,8 @@ class InfraDiskTests(unittest.TestCase):
 
         with mock.patch.object(infra_disk, "path_usage_bytes", side_effect=lambda path: sizes.get(path)), mock.patch.object(
             infra_disk, "scan_home_cache_cleanup_candidates", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "scan_workspace_cache_cleanup_candidates", return_value=[]
         ):
             candidates = infra_disk.collect_reclaim_candidates()
 
@@ -54,6 +57,11 @@ class InfraDiskTests(unittest.TestCase):
             ),
             (220 * 1024 * 1024, Path("/tmp"), "temporary files under /tmp"),
             (143 * 1024 * 1024, Path("/var/log/journal"), "systemd journals"),
+            (
+                1700 * 1024,
+                Path("/home/ubuntu/.openclaw/workspace/.gradle"),
+                "workspace Gradle cache",
+            ),
         ]
 
         def fake_hotspots(path: Path) -> list[str]:
@@ -82,6 +90,18 @@ class InfraDiskTests(unittest.TestCase):
                     note="Gradle wrapper distributions",
                 ),
             ],
+        ), mock.patch.object(
+            infra_disk,
+            "scan_workspace_cache_cleanup_candidates",
+            return_value=[
+                infra_workspace_cache_cleanup.CleanupCandidate(
+                    path=Path("/home/ubuntu/.openclaw/workspace/.gradle"),
+                    size_bytes=1700 * 1024,
+                    mtime=dt.datetime(2026, 3, 10, tzinfo=dt.timezone.utc),
+                    owner="ubuntu",
+                    note="workspace Gradle cache",
+                ),
+            ],
         ):
             lines = infra_disk.summarize_reclaim_guidance(candidates)
 
@@ -96,6 +116,15 @@ class InfraDiskTests(unittest.TestCase):
         )
         self.assertIn("Stale /tmp entries older than 24h:", lines)
         self.assertIn("Cleanup helper available", lines)
+        self.assertIn("Workspace cache cleanup helper available for repo-local caches:", lines)
+        self.assertIn(
+            "- Review: python3 tools/infra_workspace_cache_cleanup.py --path /home/ubuntu/.openclaw/workspace/.gradle",
+            lines,
+        )
+        self.assertIn(
+            "- Apply: python3 tools/infra_workspace_cache_cleanup.py --apply --path /home/ubuntu/.openclaw/workspace/.gradle",
+            lines,
+        )
         self.assertIn("Largest paths under /var/log/journal:", lines)
         self.assertIn("Journal review hint: journalctl --disk-usage", lines)
         self.assertIn("Journal vacuum hint: sudo journalctl --vacuum-time=7d", lines)
@@ -153,12 +182,40 @@ class InfraDiskTests(unittest.TestCase):
 
         with mock.patch.object(infra_disk, "path_usage_bytes", side_effect=lambda path: sizes.get(path)), mock.patch.object(
             infra_disk, "scan_home_cache_cleanup_candidates", return_value=home_candidates
+        ), mock.patch.object(
+            infra_disk, "scan_workspace_cache_cleanup_candidates", return_value=[]
         ):
             candidates = infra_disk.collect_reclaim_candidates()
 
         self.assertEqual(
             [str(path) for _, path, _ in candidates[:2]],
             ["/home/ubuntu/.gradle/caches", "/var/cache/apt"],
+        )
+
+    def test_collect_reclaim_candidates_includes_workspace_caches(self) -> None:
+        sizes = {
+            Path("/var/cache/apt"): 628 * 1024 * 1024,
+        }
+        workspace_candidates = [
+            infra_workspace_cache_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.openclaw/workspace/.gradle"),
+                size_bytes=1700 * 1024,
+                mtime=dt.datetime(2026, 3, 10, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="workspace Gradle cache",
+            )
+        ]
+
+        with mock.patch.object(infra_disk, "path_usage_bytes", side_effect=lambda path: sizes.get(path)), mock.patch.object(
+            infra_disk, "scan_home_cache_cleanup_candidates", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "scan_workspace_cache_cleanup_candidates", return_value=workspace_candidates
+        ):
+            candidates = infra_disk.collect_reclaim_candidates()
+
+        self.assertEqual(
+            [str(path) for _, path, _ in candidates[:2]],
+            ["/var/cache/apt", "/home/ubuntu/.openclaw/workspace/.gradle"],
         )
 
     def test_summarize_review_only_cache_roots_reports_hotspots_without_cleanup_command(self) -> None:
@@ -197,6 +254,10 @@ class InfraDiskTests(unittest.TestCase):
         ), mock.patch.object(
             infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
         ), mock.patch.object(
+            infra_disk, "summarize_current_session_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_workspace_cache_recovery_plan", return_value=[]
+        ), mock.patch.object(
             infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_review_only_cache_roots", return_value=[]
@@ -231,6 +292,10 @@ class InfraDiskTests(unittest.TestCase):
             ],
         ), mock.patch.object(
             infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
+        ), mock.patch.object(
+            infra_disk, "summarize_current_session_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_workspace_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
@@ -267,6 +332,8 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "current_root_usage_bytes", return_value=root_snapshot
         ), mock.patch.object(
             infra_disk, "summarize_current_session_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_workspace_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
@@ -371,6 +438,72 @@ class InfraDiskTests(unittest.TestCase):
             lines,
         )
 
+    def test_summarize_workspace_cache_recovery_plan_reports_shortfall(self) -> None:
+        candidates = [
+            infra_workspace_cache_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.openclaw/workspace/.gradle"),
+                size_bytes=1700 * 1024,
+                mtime=dt.datetime(2026, 3, 10, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="workspace Gradle cache",
+            ),
+            infra_workspace_cache_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.openclaw/workspace/tools/__pycache__"),
+                size_bytes=316 * 1024,
+                mtime=dt.datetime(2026, 3, 10, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="Python bytecode cache",
+            ),
+        ]
+
+        with mock.patch.object(infra_disk, "scan_workspace_cache_cleanup_candidates", return_value=candidates):
+            lines = infra_disk.summarize_workspace_cache_recovery_plan(
+                total_bytes=19 * 1024**3,
+                used_bytes=19 * 1024**3,
+                used_pct=100,
+            )
+
+        self.assertIn("Current-session writable workspace-cache plan:", lines)
+        self.assertIn("- Need about 1.9G reclaimed to reach <=90% on /", lines)
+        self.assertIn("  All workspace caches total 2.0M across 2 path(s); short by 1.9G", lines)
+        self.assertIn(
+            "  Review remaining workspace caches: python3 tools/infra_workspace_cache_cleanup.py --path /home/ubuntu/.openclaw/workspace/.gradle --path /home/ubuntu/.openclaw/workspace/tools/__pycache__",
+            lines,
+        )
+        self.assertIn("  Host-level reclaim is still required after workspace-cache cleanup", lines)
+
+    def test_summarize_workspace_cache_recovery_plan_builds_apply_bundle(self) -> None:
+        candidates = [
+            infra_workspace_cache_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.openclaw/workspace/.gradle"),
+                size_bytes=40 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 10, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="workspace Gradle cache",
+            ),
+            infra_workspace_cache_cleanup.CleanupCandidate(
+                path=Path("/home/ubuntu/.openclaw/workspace/tools/__pycache__"),
+                size_bytes=5 * 1024 * 1024,
+                mtime=dt.datetime(2026, 3, 10, tzinfo=dt.timezone.utc),
+                owner="ubuntu",
+                note="Python bytecode cache",
+            ),
+        ]
+
+        with mock.patch.object(infra_disk, "scan_workspace_cache_cleanup_candidates", return_value=candidates):
+            lines = infra_disk.summarize_workspace_cache_recovery_plan(
+                total_bytes=1024 * 1024 * 1024,
+                used_bytes=950 * 1024 * 1024,
+                used_pct=93,
+            )
+
+        self.assertIn("- Need about 28M reclaimed to reach <=90% on /", lines)
+        self.assertIn("  Workspace caches can cover this with 40M across 1 path(s)", lines)
+        self.assertIn(
+            "  Apply bundle: python3 tools/infra_workspace_cache_cleanup.py --apply --path /home/ubuntu/.openclaw/workspace/.gradle",
+            lines,
+        )
+
     def test_collect_protected_home_paths_sorts_largest_first(self) -> None:
         sizes = {
             Path("/home/ubuntu/.npm-global"): 1800 * 1024 * 1024,
@@ -404,6 +537,10 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "summarize_home_hotspots", return_value=[]
         ), mock.patch.object(
             infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
+        ), mock.patch.object(
+            infra_disk, "summarize_current_session_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_workspace_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
@@ -443,6 +580,10 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "summarize_home_hotspots", return_value=[]
         ), mock.patch.object(
             infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
+        ), mock.patch.object(
+            infra_disk, "summarize_current_session_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_workspace_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
@@ -569,6 +710,8 @@ class InfraDiskTests(unittest.TestCase):
             infra_disk, "current_root_usage_bytes", return_value=(19 * 1024**3, 19 * 1024**3, 153 * 1024**2, 100, "/")
         ), mock.patch.object(
             infra_disk, "summarize_current_session_recovery_plan", return_value=[]
+        ), mock.patch.object(
+            infra_disk, "summarize_workspace_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
             infra_disk, "summarize_home_cache_recovery_plan", return_value=[]
         ), mock.patch.object(
