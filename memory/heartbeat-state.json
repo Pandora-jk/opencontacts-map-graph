@@ -6,7 +6,7 @@
     "heartbeat": 1741514280,
     "disk": 1741514280
   },
-  "lastUpdate": "2026-03-10T07:55:00Z",
+  "lastUpdate": "2026-03-10T08:22:00Z",
   "proactiveOutreachSent": false,
-  "notable": "Disk improved from 100% to 99% (223M free). Still critical (>90%). Need elevated cleanup of ~/.gradle/caches (~1.8G) to reach ≤90%."
+  "notable": "Disk at 99% (201M free). Backup archive /tmp/latest-workspace-backup.tar.gz is missing (was not readable). Need elevated cleanup of ~/.gradle/caches (~1.8G) and backup regeneration."
 }
