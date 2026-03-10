@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-03-10T07:01:59.878883+00:00",
+  "checked_at": "2026-03-10T19:02:11.928087+00:00",
   "providers": {
     "zai": {
       "type": "zai",
@@ -42,15 +42,15 @@
         {
           "key": "agent:main:main",
           "model": "glm-4.7-Flash",
-          "input_tokens": 23756,
-          "output_tokens": 210,
-          "context_used": 25415,
+          "input_tokens": 31821,
+          "output_tokens": 370,
+          "context_used": 33480,
           "context_limit": 200000
         }
       ],
       "turns_today": {
-        "agent:main:main": 51,
-        "agent:main:telegram:direct:156480904": 17
+        "agent:main:main": 104,
+        "agent:main:telegram:direct:156480904": 71
       }
     },
     "cerebras": {
@@ -60,8 +60,8 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:main": 51,
-        "agent:main:telegram:direct:156480904": 17
+        "agent:main:main": 104,
+        "agent:main:telegram:direct:156480904": 71
       }
     },
     "groq": {
@@ -71,8 +71,8 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:main": 51,
-        "agent:main:telegram:direct:156480904": 17
+        "agent:main:main": 104,
+        "agent:main:telegram:direct:156480904": 71
       }
     },
     "chutes": {
@@ -82,8 +82,8 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:main": 51,
-        "agent:main:telegram:direct:156480904": 17
+        "agent:main:main": 104,
+        "agent:main:telegram:direct:156480904": 71
       }
     },
     "nvidia": {
@@ -95,9 +95,9 @@
         {
           "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a",
           "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 40537,
-          "output_tokens": 126,
-          "context_used": 13618,
+          "input_tokens": 26914,
+          "output_tokens": 72,
+          "context_used": 13501,
           "context_limit": 131072
         },
         {
@@ -142,51 +142,11 @@
         },
         {
           "key": "agent:main:telegram:direct:156480904",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 1086449,
-          "output_tokens": 3963,
-          "context_used": 72636,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:42f85c1c-4a18-40f4-8d3c-59d33193be16",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27029,
-          "output_tokens": 69,
-          "context_used": 13557,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:c925a5d0-5279-4e71-82d8-cf7bedbec9fd",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27004,
-          "output_tokens": 44,
-          "context_used": 13532,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:6e5ea7ab-5902-4b7b-ae4a-2fa59f7aa96c",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27004,
-          "output_tokens": 44,
-          "context_used": 13532,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:24545476-7b7b-4e2c-b40f-f21d48e4b86b",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27031,
-          "output_tokens": 69,
-          "context_used": 13558,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:2d57a9e1-d1b7-444b-95e9-b886afc7e755",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27006,
-          "output_tokens": 44,
-          "context_used": 13533,
-          "context_limit": 131072
+          "model": "moonshotai/kimi-k2-thinking",
+          "input_tokens": 983114,
+          "output_tokens": 2555,
+          "context_used": 123922,
+          "context_limit": 256000
         },
         {
           "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:7dd523f4-0de4-479d-b641-5fdd4383865e",
@@ -275,11 +235,51 @@
           "output_tokens": 126,
           "context_used": 13618,
           "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:531e6a0b-1eb8-4e39-87d2-57c2c757f360",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 26918,
+          "output_tokens": 44,
+          "context_used": 13506,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:ad0e4a8c-6cb1-4080-8abe-18e8bc27c3bf",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 40534,
+          "output_tokens": 127,
+          "context_used": 13617,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:7a5b4e57-fb7e-4917-bc31-35412fd04839",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 26884,
+          "output_tokens": 44,
+          "context_used": 13472,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:b43f5d3a-d1c8-4c3e-ae25-c2fdc228582d",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 26886,
+          "output_tokens": 44,
+          "context_used": 13473,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:e820464a-bec2-4ba9-86aa-6e068989eeaf",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 26914,
+          "output_tokens": 72,
+          "context_used": 13501,
+          "context_limit": 131072
         }
       ],
       "turns_today": {
-        "agent:main:main": 51,
-        "agent:main:telegram:direct:156480904": 17
+        "agent:main:main": 104,
+        "agent:main:telegram:direct:156480904": 71
       }
     }
   }
