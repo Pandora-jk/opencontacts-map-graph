@@ -1,9 +1,9 @@
 {
-  "last_checked_at": "2026-03-11T05:23:59Z",
-  "last_candidate": "disk_pressure",
-  "last_candidate_fingerprint": "disk:100:122M",
-  "last_fingerprint": "disk:100:122M",
-  "last_kind": "disk_pressure",
-  "last_sent_at": "2026-03-10T21:22:20Z",
-  "last_message": "[PROACTIVE] Host risk: root disk is 100% full (122M free). Next step: reclaim disk space and rerun infra status."
+  "last_checked_at": "2026-03-11T06:29:43Z",
+  "last_candidate": "cron_failure",
+  "last_candidate_fingerprint": "cron:Finance Autopilot Loop",
+  "last_fingerprint": "cron:Finance Autopilot Loop",
+  "last_kind": "cron_failure",
+  "last_sent_at": "2026-03-11T06:29:43Z",
+  "last_message": "[PROACTIVE] Automation issue: Finance Autopilot Loop need attention. Next step: inspect the latest cron run before changing more config."
 }
