@@ -80,7 +80,7 @@ class GroupContactsActivity : AppCompatActivity() {
                 allContacts
             }
             
-            contactAdapter.submitList(filtered)
+            (contactAdapter as? ContactAdapter)?.submitContactList(filtered)
             
             val emptyText = findViewById<TextView>(R.id.empty_text)
             val recyclerView = findViewById<RecyclerView>(R.id.recycler_view)

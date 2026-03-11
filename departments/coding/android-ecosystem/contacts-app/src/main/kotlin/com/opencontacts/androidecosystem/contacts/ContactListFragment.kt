@@ -21,7 +21,6 @@ class ContactListFragment(
 
     private lateinit var viewModel: ContactMapViewModel
     private val contactAdapter = ContactAdapter { contact ->
-        // Open contact details in a new Activity
         val intent = ContactDetailsActivity.createIntent(requireContext(), contact)
         startActivity(intent)
     }
@@ -47,7 +46,21 @@ class ContactListFragment(
 
         viewModel = ViewModelProvider(requireActivity())[ContactMapViewModel::class.java]
 
-        // Check permission and load contacts
+        // Observe loading state
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            view.findViewById<View>(R.id.loading_spinner).visibility = 
+                if (isLoading) View.VISIBLE else View.GONE
+            recyclerView.visibility = if (isLoading) View.GONE else View.VISIBLE
+        }
+
+        // Observe error state
+        viewModel.loadError.observe(viewLifecycleOwner) { error ->
+            error?.let {
+                emptyText.text = "Error: $it"
+                emptyText.visibility = View.VISIBLE
+            }
+        }
+
         checkPermissionAndLoad()
 
         return view
@@ -68,13 +81,11 @@ class ContactListFragment(
     private fun loadContacts() {
         viewModel.loadContacts(requireContext())
         
-        // Observe contacts based on mode
         viewModel.contacts.observe(viewLifecycleOwner) { allContacts ->
             val filtered = when (mode) {
                 ContactListMode.ALL -> allContacts
                 ContactListMode.FAVORITES -> allContacts.filter { it.isFavorite }
                 ContactListMode.GROUPS -> {
-                    // Filter by group name if specified
                     if (groupName != null) {
                         allContacts.filter { contact ->
                             contact.groups.contains(groupName)
@@ -85,22 +96,27 @@ class ContactListFragment(
                 }
             }
             
-            contactAdapter.submitList(filtered)
+            // Submit with headers
+            contactAdapter.submitContactList(filtered)
             
             val emptyText = view?.findViewById<TextView>(R.id.empty_text)
             val recyclerView = view?.findViewById<RecyclerView>(R.id.recycler_view)
+            val loadingSpinner = view?.findViewById<View>(R.id.loading_spinner)
             
-            if (filtered.isEmpty()) {
-                emptyText?.visibility = View.VISIBLE
-                recyclerView?.visibility = View.GONE
-                emptyText?.text = when {
-                    mode == ContactListMode.FAVORITES -> "No favorite contacts"
-                    groupName != null -> "No contacts in '$groupName'"
-                    else -> "No contacts"
+            if (viewModel.isLoading.value == false) {
+                if (filtered.isEmpty()) {
+                    emptyText?.visibility = View.VISIBLE
+                    recyclerView?.visibility = View.GONE
+                    loadingSpinner?.visibility = View.GONE
+                    emptyText?.text = when {
+                        mode == ContactListMode.FAVORITES -> "No favorite contacts"
+                        groupName != null -> "No contacts in '$groupName'"
+                        else -> "No contacts"
+                    }
+                } else {
+                    emptyText?.visibility = View.GONE
+                    recyclerView?.visibility = View.VISIBLE
                 }
-            } else {
-                emptyText?.visibility = View.GONE
-                recyclerView?.visibility = View.VISIBLE
             }
         }
     }

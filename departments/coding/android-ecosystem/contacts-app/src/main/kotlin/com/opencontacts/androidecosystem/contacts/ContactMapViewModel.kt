@@ -5,17 +5,51 @@ import android.provider.ContactsContract
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import android.database.Cursor
 
 class ContactMapViewModel : ViewModel() {
 
     private val _contacts = MutableLiveData<List<ContactRecord>>(emptyList())
     val contacts: LiveData<List<ContactRecord>> = _contacts
+    
+    private val _isLoading = MutableLiveData<Boolean>(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+    
+    private val _loadError = MutableLiveData<String?>(null)
+    val loadError: LiveData<String?> = _loadError
 
     fun loadContacts(context: Context) {
-        // Only load if not already loaded
+        // Don't reload if already loaded
         if (_contacts.value?.isNotEmpty() == true) return
+        
+        viewModelScope.launch {
+            _isLoading.value = true
+            _loadError.value = null
+            
+            try {
+                val contactList = withContext(Dispatchers.IO) {
+                    loadContactsFromDevice(context)
+                }
+                _contacts.value = contactList
+            } catch (e: Exception) {
+                _loadError.value = "Failed to load contacts: ${e.message}"
+                e.printStackTrace()
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+    
+    fun reloadContacts(context: Context) {
+        _contacts.value = emptyList()
+        loadContacts(context)
+    }
 
+    private fun loadContactsFromDevice(context: Context): List<ContactRecord> {
         val contactList = mutableListOf<ContactRecord>()
         var cursor: Cursor? = null
         
@@ -82,13 +116,14 @@ class ContactMapViewModel : ViewModel() {
                         }
                     }
 
-                    // Get name components, company, job title
+                    // Get name components, company, job title, address
                     var firstName: String? = null
                     var lastName: String? = null
                     var company: String? = null
                     var jobTitle: String? = null
                     var address: String? = null
 
+                    // Get structured name
                     val nameCursor = context.contentResolver.query(
                         ContactsContract.Data.CONTENT_URI,
                         null,
@@ -105,7 +140,7 @@ class ContactMapViewModel : ViewModel() {
                         }
                     }
 
-                    // Get organization (company, title)
+                    // Get organization
                     val orgCursor = context.contentResolver.query(
                         ContactsContract.Data.CONTENT_URI,
                         null,
@@ -134,11 +169,11 @@ class ContactMapViewModel : ViewModel() {
                         val addrIndex = ac.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS)
                         while (ac.moveToNext()) {
                             address = ac.getString(addrIndex)
-                            break // Just get first address
+                            break
                         }
                     }
 
-                    // Get groups for this contact
+                    // Get groups
                     val groups = getContactGroups(context, id)
 
                     contactList.add(
@@ -160,12 +195,12 @@ class ContactMapViewModel : ViewModel() {
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            throw e
         } finally {
             cursor?.close()
         }
 
-        _contacts.value = contactList
+        return contactList
     }
 
     private fun getContactGroups(context: Context, contactId: String): List<String> {
@@ -186,7 +221,6 @@ class ContactMapViewModel : ViewModel() {
                 while (it.moveToNext()) {
                     val groupId = it.getLong(groupIdIndex)
                     
-                    // Get group name by ID
                     val groupCursor = context.contentResolver.query(
                         ContactsContract.Groups.CONTENT_URI,
                         arrayOf(ContactsContract.Groups.TITLE),
