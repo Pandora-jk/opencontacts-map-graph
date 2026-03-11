@@ -34,5 +34,11 @@
             android:theme="@style/Theme.ContactsMap"
             android:parentActivityName=".MainActivity" />
 
+        <activity
+            android:name=".EditContactActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ContactsMap"
+            android:parentActivityName=".MainActivity" />
+
     </application>
 </manifest>

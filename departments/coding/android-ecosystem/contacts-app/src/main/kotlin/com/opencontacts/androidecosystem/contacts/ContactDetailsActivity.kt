@@ -20,6 +20,7 @@ import com.google.android.material.chip.Chip
 /**
  * Full-screen contact details view.
  * Shows contact info with action buttons (call, message, etc.)
+ * Only displays fields that have actual values.
  */
 class ContactDetailsActivity : AppCompatActivity() {
 
@@ -66,10 +67,12 @@ class ContactDetailsActivity : AppCompatActivity() {
             address = contactAddress
         )
 
-        // Set up UI
+        // Set up UI - only show fields with values
+        
+        // Contact Name (always show)
         findViewById<TextView>(R.id.contact_name).text = contactName ?: "Unknown"
         
-        // Show first/last name if available
+        // Full Name (only if different from display name and has value)
         val fullName = buildString {
             if (!contactFirstName.isNullOrBlank()) {
                 append(contactFirstName)
@@ -79,72 +82,9 @@ class ContactDetailsActivity : AppCompatActivity() {
                 append(contactLastName)
             }
         }
-        if (fullName.isNotBlank()) {
-            findViewById<TextView>(R.id.contact_full_name).apply {
-                text = fullName
-                visibility = View.VISIBLE
-            }
-        }
-
-        // Phone
-        findViewById<TextView>(R.id.contact_phone).apply {
-            text = contactPhone ?: "No phone number"
-            visibility = if (contactPhone != null) View.VISIBLE else View.GONE
-        }
-
-        // Email
-        findViewById<TextView>(R.id.contact_email).apply {
-            text = contactEmail
-            visibility = if (!contactEmail.isNullOrBlank()) View.VISIBLE else View.GONE
-            setOnClickListener {
-                contactEmail?.let { email ->
-                    val intent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = Uri.parse("mailto:$email")
-                    }
-                    startActivity(intent)
-                }
-            }
-        }
-
-        // Company & Job Title
-        findViewById<TextView>(R.id.contact_company).apply {
-            val companyText = buildString {
-                if (!contactJobTitle.isNullOrBlank()) {
-                    append(contactJobTitle)
-                }
-                if (!contactCompany.isNullOrBlank()) {
-                    if (isNotEmpty()) append(" at ")
-                    append(contactCompany)
-                }
-            }
-            text = companyText
-            visibility = if (companyText.isNotBlank()) View.VISIBLE else View.GONE
-        }
-
-        // Address
-        findViewById<TextView>(R.id.contact_address).apply {
-            text = contactAddress
-            visibility = if (!contactAddress.isNullOrBlank()) View.VISIBLE else View.GONE
-            setOnClickListener {
-                contactAddress?.let { addr ->
-                    val intent = Intent(Intent.ACTION_VIEW).apply {
-                        data = Uri.parse("geo:0,0?q=${Uri.encode(addr)}")
-                    }
-                    startActivity(intent)
-                }
-            }
-        }
-
-        // Groups chip
-        val groupsContainer = findViewById<View>(R.id.contact_groups_container)
-        if (contactGroups != null && contactGroups.isNotEmpty()) {
-            groupsContainer.visibility = View.VISIBLE
-            // Groups will be displayed as chips
-        } else {
-            groupsContainer.visibility = View.GONE
-        }
-
-        // Favorite badge
+        setupTextView(R.id.contact_full_name, fullName, contactName)
+        
+        // Favorite badge (only if favorite)
         val favoriteBadge = findViewById<TextView>(R.id.favorite_badge)
         if (isFavorite) {
             favoriteBadge.text = "★ Favorite"
@@ -153,24 +93,114 @@ class ContactDetailsActivity : AppCompatActivity() {
             favoriteBadge.visibility = View.GONE
         }
 
-        // Call button
-        findViewById<MaterialButton>(R.id.btn_call).setOnClickListener {
-            contactPhone?.let { phone ->
-                val intent = Intent(Intent.ACTION_DIAL).apply {
-                    data = Uri.parse("tel:$phone")
+        // Phone (only if has value)
+        setupTextView(R.id.contact_phone, contactPhone, null)
+        setupClickableField(R.id.contact_phone, contactPhone) {
+            val intent = Intent(Intent.ACTION_DIAL).apply {
+                data = Uri.parse("tel:$contactPhone")
+            }
+            startActivity(intent)
+        }
+
+        // Email (only if has value)
+        setupTextView(R.id.contact_email, contactEmail, null)
+        setupClickableField(R.id.contact_email, contactEmail) {
+            contactEmail?.let { email ->
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:$email")
                 }
                 startActivity(intent)
             }
         }
 
-        // Message button
-        findViewById<MaterialButton>(R.id.btn_message).setOnClickListener {
-            contactPhone?.let { phone ->
-                val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("smsto:${Uri.encode(phone)}")
+        // Company & Job Title (only if has value)
+        val companyText = buildString {
+            if (!contactJobTitle.isNullOrBlank()) {
+                append(contactJobTitle)
+            }
+            if (!contactCompany.isNullOrBlank()) {
+                if (isNotEmpty()) append(" at ")
+                append(contactCompany)
+            }
+        }
+        setupTextView(R.id.contact_company, companyText, null)
+
+        // Address (only if has value)
+        setupTextView(R.id.contact_address, contactAddress, null)
+        setupClickableField(R.id.contact_address, contactAddress) {
+            contactAddress?.let { addr ->
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse("geo:0,0?q=${Uri.encode(addr)}")
                 }
                 startActivity(intent)
             }
+        }
+
+        // Groups (only if has value)
+        val groupsContainer = findViewById<View>(R.id.contact_groups_container)
+        val groupsTextView = findViewById<TextView>(R.id.contact_groups)
+        if (contactGroups != null && contactGroups.isNotEmpty()) {
+            groupsContainer.visibility = View.VISIBLE
+            groupsTextView.text = contactGroups.joinToString(", ")
+        } else {
+            groupsContainer.visibility = View.GONE
+        }
+
+        // Call button (only if has phone)
+        findViewById<MaterialButton>(R.id.btn_call).apply {
+            if (contactPhone != null) {
+                visibility = View.VISIBLE
+                setOnClickListener {
+                    contactPhone?.let { phone ->
+                        val intent = Intent(Intent.ACTION_DIAL).apply {
+                            data = Uri.parse("tel:$phone")
+                        }
+                        startActivity(intent)
+                    }
+                }
+            } else {
+                visibility = View.GONE
+            }
+        }
+
+        // Message button (only if has phone)
+        findViewById<MaterialButton>(R.id.btn_message).apply {
+            if (contactPhone != null) {
+                visibility = View.VISIBLE
+                setOnClickListener {
+                    contactPhone?.let { phone ->
+                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                            data = Uri.parse("smsto:${Uri.encode(phone)}")
+                        }
+                        startActivity(intent)
+                    }
+                }
+            } else {
+                visibility = View.GONE
+            }
+        }
+    }
+    
+    /**
+     * Sets text and visibility - only shows if value is not blank
+     */
+    private fun setupTextView(viewId: Int, value: String?, hideIfBlank: String?) {
+        val textView = findViewById<TextView>(viewId)
+        if (!value.isNullOrBlank()) {
+            textView.text = value
+            textView.visibility = View.VISIBLE
+        } else {
+            textView.visibility = View.GONE
+        }
+    }
+    
+    /**
+     * Makes a field clickable only if it has a value
+     */
+    private fun setupClickableField(viewId: Int, value: String?, onClick: () -> Unit) {
+        val textView = findViewById<TextView>(viewId)
+        if (!value.isNullOrBlank()) {
+            textView.setOnClickListener { onClick() }
         }
     }
 
