@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-03-11T01:03:29.476666+00:00",
+  "checked_at": "2026-03-11T07:12:07.029725+00:00",
   "providers": {
     "zai": {
       "type": "zai",
@@ -42,14 +42,15 @@
         {
           "key": "agent:main:main",
           "model": "glm-4.7-Flash",
-          "input_tokens": 48637,
-          "output_tokens": 346,
-          "context_used": 50296,
+          "input_tokens": 65673,
+          "output_tokens": 464,
+          "context_used": 35483,
           "context_limit": 200000
         }
       ],
       "turns_today": {
-        "agent:main:main": 10
+        "agent:main:telegram:direct:156480904": 92,
+        "agent:main:main": 45
       }
     },
     "cerebras": {
@@ -59,7 +60,8 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:main": 10
+        "agent:main:telegram:direct:156480904": 92,
+        "agent:main:main": 45
       }
     },
     "groq": {
@@ -69,7 +71,8 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:main": 10
+        "agent:main:telegram:direct:156480904": 92,
+        "agent:main:main": 45
       }
     },
     "chutes": {
@@ -79,7 +82,8 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:main": 10
+        "agent:main:telegram:direct:156480904": 92,
+        "agent:main:main": 45
       }
     },
     "nvidia": {
@@ -91,9 +95,9 @@
         {
           "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a",
           "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 26886,
+          "input_tokens": 26913,
           "output_tokens": 44,
-          "context_used": 13473,
+          "context_used": 13501,
           "context_limit": 131072
         },
         {
@@ -139,57 +143,9 @@
         {
           "key": "agent:main:telegram:direct:156480904",
           "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 820250,
-          "output_tokens": 2120,
-          "context_used": 60459,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:bc3c329e-e9b1-4db1-ae84-242a2978136d",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27006,
-          "output_tokens": 44,
-          "context_used": 13533,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:ceb3bad5-6403-4709-bfc6-f84a360090e4",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27031,
-          "output_tokens": 69,
-          "context_used": 13558,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:cc8cd5b3-32f1-4e54-af72-0d3023265b50",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27006,
-          "output_tokens": 44,
-          "context_used": 13533,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:bffa5218-9d4b-4b63-a358-5d963d45f4d4",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27031,
-          "output_tokens": 69,
-          "context_used": 13558,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:486a3150-0c42-4a21-8ec4-86f3bae8189d",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 26884,
-          "output_tokens": 44,
-          "context_used": 13472,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:efa9c498-5c19-4949-970a-0dd1dc4c5eae",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 40537,
-          "output_tokens": 126,
-          "context_used": 13618,
+          "input_tokens": 1746004,
+          "output_tokens": 3450,
+          "context_used": 92463,
           "context_limit": 131072
         },
         {
@@ -271,10 +227,59 @@
           "output_tokens": 44,
           "context_used": 13473,
           "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:8d9b6d5c-f279-4b58-bd93-31723f497599",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 26884,
+          "output_tokens": 44,
+          "context_used": 13472,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:de6f7231-785d-47ef-932f-0c04c1640620",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 26884,
+          "output_tokens": 44,
+          "context_used": 13472,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:316fd62f-2221-4546-89fc-9ed4af467fe7",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 26884,
+          "output_tokens": 64,
+          "context_used": 13472,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:b6a12b10-2024-497f-b628-c1137b9f52b1",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 26884,
+          "output_tokens": 44,
+          "context_used": 13472,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:8990cf37-d49e-4bfa-ba55-a8ba2ccab171",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 26884,
+          "output_tokens": 44,
+          "context_used": 13472,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:c7d3f95a-e931-49bc-9bcd-5a531ce9d5c6",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 26913,
+          "output_tokens": 44,
+          "context_used": 13501,
+          "context_limit": 131072
         }
       ],
       "turns_today": {
-        "agent:main:main": 10
+        "agent:main:telegram:direct:156480904": 92,
+        "agent:main:main": 45
       }
     }
   }
