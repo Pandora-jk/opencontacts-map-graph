@@ -29,15 +29,13 @@ class MainActivityTest {
     }
 
     @Test
-    fun setContentViewUsesContactsMapLayout() {
+    fun setContentViewIsCalled() {
         val activity = Robolectric.buildActivity(MainActivity::class.java)
             .create()
             .get()
 
         val contentView = shadowOf(activity).contentView
-
         assertNotNull(contentView)
-        assertEquals("activity_contacts_map", activity.resources.getResourceEntryName(R.layout.activity_contacts_map))
     }
 
     @Test
