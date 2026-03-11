@@ -1,35 +1,17 @@
+# Android/Gradle - ignore all build outputs
+.gradle/
+/build/
+*/build/
+*/*/build/
+*/*/*/build/
+*/*/*/*/build/
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-*.manifest
-*.spec
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Kotlin/Gradle
-.gradle/
-build/
-!gradle/wrapper/gradle-wrapper.properties
-!**/src/main/**/build/
-!**/src/test/**/build/
 
 # IDE
 .idea/
@@ -45,9 +27,10 @@ build/
 .DS_Store
 Thumbs.db
 
-# Logs - keep activity logs for audit trail
-# (no log exclusion)
-
 # Local config
 .local.env
 .env.local
+
+# Keep logs but ignore other *.log files outside logs/
+*.log
+!logs/
