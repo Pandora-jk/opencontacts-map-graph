@@ -3,7 +3,6 @@ package com.opencontacts.androidecosystem.contacts
 import android.Manifest
 import android.content.pm.PackageManager
 import android.database.Cursor
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -24,14 +23,7 @@ import android.provider.ContactsContract
 class ContactGroupsFragment : Fragment() {
 
     private lateinit var viewModel: ContactMapViewModel
-    private val groupAdapter = GroupAdapter { group ->
-        // Navigate to contacts filtered by this group
-        val fragment = ContactListFragment(ContactListMode.ALL, groupName = group.name)
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .addToBackStack(null)
-            .commit()
-    }
+    private val groupAdapter = GroupAdapter()
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -83,8 +75,7 @@ class ContactGroupsFragment : Fragment() {
                 ContactsContract.Groups.CONTENT_URI,
                 arrayOf(
                     ContactsContract.Groups._ID,
-                    ContactsContract.Groups.TITLE,
-                    ContactsContract.Groups.COUNT
+                    ContactsContract.Groups.TITLE
                 ),
                 null,
                 null,
@@ -93,15 +84,17 @@ class ContactGroupsFragment : Fragment() {
 
             cursor?.use {
                 val titleIndex = it.getColumnIndex(ContactsContract.Groups.TITLE)
-                val countIndex = it.getColumnIndex(ContactsContract.Groups.COUNT)
 
                 while (it.moveToNext()) {
                     val title = it.getString(titleIndex)
-                    val count = it.getInt(countIndex)
                     
-                    // Only show groups with contacts
-                    if (!title.isNullOrBlank() && count > 0) {
-                        groups.add(ContactGroup(title, count))
+                    // Only show non-empty groups
+                    if (!title.isNullOrBlank()) {
+                        // Count contacts in this group
+                        val contactCount = getGroupContactCount(requireContext(), title)
+                        if (contactCount > 0) {
+                            groups.add(ContactGroup(title, contactCount))
+                        }
                     }
                 }
             }
@@ -125,25 +118,34 @@ class ContactGroupsFragment : Fragment() {
             groupAdapter.submitList(groups)
         }
     }
+
+    private fun getGroupContactCount(context: Context, groupName: String): Int {
+        var cursor: Cursor? = null
+        try {
+            cursor = context.contentResolver.query(
+                ContactsContract.Data.CONTENT_URI,
+                arrayOf(ContactsContract.Data.RAW_CONTACT_ID),
+                "${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.CommonDataKinds.GroupMembership.GROUP_ROW_ID} IN " +
+                    "(SELECT ${ContactsContract.Groups._ID} FROM ${ContactsContract.Groups.CONTENT_URI} WHERE ${ContactsContract.Groups.TITLE} = ?)",
+                arrayOf(ContactsContract.CommonDataKinds.GroupMembership.CONTENT_ITEM_TYPE, groupName),
+                null
+            )
+            return cursor?.count ?: 0
+        } catch (e: Exception) {
+            return 0
+        } finally {
+            cursor?.close()
+        }
+    }
 }
 
 data class ContactGroup(val name: String, val count: Int)
 
-class GroupAdapter(private val onItemClick: (ContactGroup) -> Unit) : androidx.recyclerview.widget.ListAdapter<ContactGroup, GroupAdapter.GroupViewHolder>(GroupDiffCallback()) {
+class GroupAdapter : androidx.recyclerview.widget.ListAdapter<ContactGroup, GroupAdapter.GroupViewHolder>(GroupDiffCallback()) {
 
     class GroupViewHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         val groupName: TextView = itemView.findViewById(android.R.id.text1)
         val groupCount: TextView = itemView.findViewById(android.R.id.text2)
-        
-        init {
-            itemView.setOnClickListener {
-                val position = bindingAdapterPosition
-                if (position != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
-                    val group = getItem(position)
-                    // Pass group info to callback
-                }
-            }
-        }
     }
 
     class GroupDiffCallback : androidx.recyclerview.widget.DiffUtil.ItemCallback<ContactGroup>() {
@@ -166,9 +168,5 @@ class GroupAdapter(private val onItemClick: (ContactGroup) -> Unit) : androidx.r
         val group = getItem(position)
         holder.groupName.text = group.name
         holder.groupCount.text = "${group.count} contacts"
-        
-        holder.itemView.setOnClickListener {
-            onItemClick(group)
-        }
     }
 }
