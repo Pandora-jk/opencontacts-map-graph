@@ -1,8 +1,8 @@
 {
-  "runs": 154,
+  "runs": 157,
   "cursor": 1,
   "progress": {
-    "**Run security audit:** Check for open ports, SSH config, failed logins.": 64,
+    "**Run security audit:** Check for open ports, SSH config, failed logins.": 67,
     "**Monitor disk usage:** Alert if >80%.": 90
   }
 }

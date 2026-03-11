@@ -21,13 +21,19 @@ LOCAL_LISTENER_PREFIXES = (
 AUTH_SUSPICIOUS_PATTERN = re.compile(r'(failed|invalid user|authentication failure|error: pam)', re.IGNORECASE)
 AUTH_SOURCE_PATTERNS = (
     re.compile(r'\bfrom\s+([0-9A-Fa-f:.]+)\b'),
-    re.compile(r'\bconnection closed by invalid user\s+\S+\s+([0-9A-Fa-f:.]+)\s+port\b', re.IGNORECASE),
+    re.compile(
+        r'\b(?:connection closed by|disconnected from)\s+invalid user(?:\s+\S+)?\s+([0-9A-Fa-f:.]+)\s+port\b',
+        re.IGNORECASE,
+    ),
 )
 AUTH_INVALID_USER_PATTERNS = (
     re.compile(r'\binvalid user\s+(\S+)\s+from\b', re.IGNORECASE),
     re.compile(r'\bfailed password for invalid user\s+(\S+)\s+from\b', re.IGNORECASE),
     re.compile(r'\bfailed password for\s+(\S+)\s+from\b', re.IGNORECASE),
-    re.compile(r'\bconnection closed by invalid user\s+(\S+)\s+[0-9A-Fa-f:.]+\s+port\b', re.IGNORECASE),
+    re.compile(
+        r'\b(?:connection closed by|disconnected from)\s+invalid user\s+(\S+)\s+[0-9A-Fa-f:.]+\s+port\b',
+        re.IGNORECASE,
+    ),
 )
 
 

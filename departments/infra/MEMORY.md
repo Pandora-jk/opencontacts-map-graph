@@ -7,6 +7,15 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-11 17:32 UTC:**
+  - Reconfirmed from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh owned runs 155-156 that `Run security audit` remains the top infra task; the latest status now shows `5` suspicious auth lines with no unexpected external listeners, so the active risk has shifted to recurring SSH probe sources plus blocked `ufw` visibility.
+  - Hardened the shared auth-source parser so security-audit output no longer drops common SSH disconnect formats:
+    - `tools/infra_audit_common.py` now extracts source IPs from both `Connection closed by invalid user ... <ip> port ...` and `Disconnected from invalid user ... <ip> port ...` lines, including cases where the username field is blank
+    - username extraction now covers the same disconnect formats when a username is present, keeping source/user summaries aligned
+  - Added regression coverage in `tests/test_infra_audit_common.py` and `tests/test_infra_status.py` for disconnect-line parsing and blank-username cases.
+  - Verification passed: `python3 -m unittest tests.test_infra_audit_common tests.test_infra_status tests.test_infra_autopilot`, `python3 -m py_compile tools/infra_audit_common.py tools/infra-status.py tools/infra-autopilot.py tests/test_infra_audit_common.py tests/test_infra_status.py tests/test_infra_autopilot.py`, `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260311T173237Z-infra-status.md` and `20260311T173238Z-r156-run-security-audit-check-for-open-ports-ssh-config-faile.md`.
+  - Result: live auth-source summaries now attribute all 5 sampled suspicious events to `192.109.200.220 x3 (users: admin, support)` and `115.190.119.177 x2`, with no omitted-source note; the remaining follow-up is host-level firewall visibility/blocking outside this session's privileges.
 - **2026-03-11 15:37 UTC:**
   - Reconfirmed from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh owned runs 150-152 that `Run security audit` remains the top infra task because live status still shows external `udp/58627`, blocked `ufw` visibility, and 8 suspicious auth lines.
   - Hardened the shared auth-audit path so security-audit artifacts now summarize the top suspicious SSH/auth sources with repeated IP counts, usernames when visible, and concrete hardening follow-ups:

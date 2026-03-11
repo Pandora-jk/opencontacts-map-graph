@@ -105,6 +105,23 @@ class InfraAuditCommonTests(unittest.TestCase):
             result,
         )
 
+    def test_summarize_auth_event_sources_handles_disconnect_lines_without_omitting_sources(self) -> None:
+        log_text = "\n".join(
+            [
+                "Mar 11 02:05:44 host sshd[1]: Invalid user  from 115.190.119.177 port 42040",
+                "Mar 11 02:05:45 host sshd[1]: Connection closed by invalid user  115.190.119.177 port 42040 [preauth]",
+                "Mar 11 02:06:44 host sshd[1]: Invalid user admin from 192.109.200.220 port 30272",
+                "Mar 11 02:06:45 host sshd[1]: Disconnected from invalid user admin 192.109.200.220 port 30272 [preauth]",
+                "Mar 11 02:07:44 host sshd[1]: Invalid user support from 192.109.200.220 port 20450",
+            ]
+        )
+
+        result = infra_audit_common.summarize_auth_event_sources(log_text)
+
+        self.assertIn("115.190.119.177 x2", result)
+        self.assertIn("192.109.200.220 x3 (users: admin, support)", result)
+        self.assertNotIn("lacked a parseable source", result)
+
 
 if __name__ == "__main__":
     unittest.main()
