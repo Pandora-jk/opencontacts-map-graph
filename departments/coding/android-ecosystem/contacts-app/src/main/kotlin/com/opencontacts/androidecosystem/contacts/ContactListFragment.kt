@@ -66,7 +66,11 @@ class ContactListFragment(private val mode: ContactListMode) : Fragment() {
             val filtered = when (mode) {
                 ContactListMode.ALL -> allContacts
                 ContactListMode.FAVORITES -> allContacts.filter { it.isFavorite }
-                ContactListMode.GROUPS -> allContacts // TODO: Filter by groups
+                ContactListMode.GROUPS -> {
+                    // For Groups mode, show contacts grouped by their primary group
+                    // For now, show all contacts (groups feature to be implemented with contact grouping logic)
+                    allContacts
+                }
             }
             
             contactAdapter.submitList(filtered)
@@ -77,6 +81,7 @@ class ContactListFragment(private val mode: ContactListMode) : Fragment() {
             if (filtered.isEmpty()) {
                 emptyText?.visibility = View.VISIBLE
                 recyclerView?.visibility = View.GONE
+                emptyText?.text = "No contacts"
             } else {
                 emptyText?.visibility = View.GONE
                 recyclerView?.visibility = View.VISIBLE
