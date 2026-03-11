@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.opencontacts.androidecosystem.coresdk.SharedGeoStoreTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-03-11T03:28:58" hostname="ip-172-31-34-63" time="0.018">
-  <properties/>
-  <testcase name="putAndGet_storesTrimmedIdAndReturnsCoordinate" classname="com.opencontacts.androidecosystem.coresdk.SharedGeoStoreTest" time="0.017"/>
-  <testcase name="removeAndClear_updateStoredEntries" classname="com.opencontacts.androidecosystem.coresdk.SharedGeoStoreTest" time="0.001"/>
-  <testcase name="put_rejectsNullBlankAndInvalidCoordinates" classname="com.opencontacts.androidecosystem.coresdk.SharedGeoStoreTest" time="0.0"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
