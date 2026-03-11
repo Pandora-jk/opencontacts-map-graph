@@ -1,20 +1,29 @@
-# Coding Department - TODO Queue
+# Coding Department - TODO
 
-## 🔴 User Blocking
-- [ ] **Approve auto-deploy** for critical security patches (optional policy decision).
-- [ ] **Explicit GO for FOSS/open-source work** (required before any bounty or external OSS contribution).
+## Active Sprint
+- [ ] **Android Contacts App - Nightly Improvement Sprint** (Priority: CRITICAL)
+  - [ ] Conduct competitive analysis (Google Contacts, Samsung Contacts, iOS Contacts)
+  - [ ] Identify missing basic features compared to industry standard
+  - [ ] Implement core improvements overnight
+  - [ ] Test on device, verify all flows work
+  - [ ] Document changes and feature decisions
 
-## 🟢 Autonomous Queue
-- [ ] **Process Telegram ideas inbox:** convert new ideas into Kanban cards + branch names.
-- [ ] **Create feature branch per active coding task** before implementation.
-- [ ] **Run tests on every change** and log command + result in task notes.
-- [ ] **Refactor scripts** to add `try/except` blocks (5 scripts identified).
-- [ ] **Replace remaining hardcoded paths** with `$HOME` or env vars (12 instances).
-- [ ] **Write unit tests** for `pdf_to_csv.py`.
-- [ ] **Audit dependencies** (`requirements.txt`) for vulnerabilities.
-- [ ] **Maintain project Kanban boards** in `departments/coding/kanban/`.
+## Backlog
+- [ ] GitHub Actions CI for Android builds
+- [ ] Unit test coverage improvement (target 80%)
 
-## [OK] Completed
-- [x] Fix `fix-edit-issues.py` syntax error.
-- [x] Deploy assets to GitHub repos.
-- [x] Configure Bitwarden CLI integration.
+## Completed
+- [x] Initial Android project scaffolding
+- [x] Real contacts loading from device
+- [x] 4-tab bottom navigation (All, Favorites, Groups, Map)
+- [x] Groups from Android system
+- [x] Favorites from starred contacts
+- [x] Contact details Activity with all fields
+- [x] Call/Message action buttons
+- [x] Fixed navigation overlay bugs
+- [x] Fixed contact tap crash
+
+## Notes
+- Project path: `/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/`
+- Package: `com.opencontacts.androidecosystem.contacts`
+- Bug report: `/departments/coding/android-ecosystem/BUGFIX_PLAN.md`

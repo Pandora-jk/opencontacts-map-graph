@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from collections.abc import Callable
 
+AUTH_LOG_SAMPLE_LIMIT = 400
+AUTH_LOG_SAMPLE_MAX_CHARS = 12000
 EXPECTED_EXTERNAL_PORTS = {'tcp': {22}, 'udp': {68}}
 LOCAL_LISTENER_PREFIXES = (
     '127.',
@@ -17,6 +19,14 @@ LOCAL_LISTENER_PREFIXES = (
 def one_line(value: str, max_len: int = 140) -> str:
     txt = re.sub(r'\s+', ' ', (value or '').strip())
     return (txt[: max_len - 1] + '…') if len(txt) > max_len else txt
+
+
+def auth_log_tail_command(limit: int = AUTH_LOG_SAMPLE_LIMIT) -> list[str]:
+    return ['bash', '-lc', f'tail -n {limit} /var/log/auth.log 2>/dev/null']
+
+
+def journalctl_ssh_tail_command(limit: int = AUTH_LOG_SAMPLE_LIMIT) -> list[str]:
+    return ['bash', '-lc', f"journalctl -u ssh --since '24 hours ago' --no-pager 2>/dev/null | tail -n {limit}"]
 
 
 def is_local_listener(address: str) -> bool:

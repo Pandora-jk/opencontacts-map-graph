@@ -44,6 +44,20 @@ class InfraStatusTests(unittest.TestCase):
         self.assertIn("ufw: active", result)
         self.assertNotIn("WARN: ufw unavailable on host", result)
 
+    def test_check_failed_logins_uses_full_auth_sample_budget(self) -> None:
+        observed: dict[str, int] = {}
+
+        def fake_run_cmd(cmd: list[str], max_chars: int = 800) -> str:
+            observed["max_chars"] = max_chars
+            return "Invalid user admin"
+
+        with mock.patch.object(infra_status.Path, "exists", return_value=True), mock.patch.object(
+            infra_status, "run_cmd", side_effect=fake_run_cmd
+        ):
+            infra_status.check_failed_logins()
+
+        self.assertEqual(infra_status.AUTH_LOG_SAMPLE_MAX_CHARS, observed["max_chars"])
+
     def test_generate_report_uses_raw_port_lines_for_mdns_detection(self) -> None:
         with mock.patch.object(infra_status, "current_port_lines", return_value="udp 0.0.0.0:5353"), mock.patch.object(
             infra_status, "check_system_updates", return_value="No pending updates"

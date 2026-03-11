@@ -7,6 +7,13 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-11 13:36 UTC:**
+  - Reconfirmed from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh runs 141-143 that `Run security audit` remains the top infra task because the live risks are still external `udp/58627`, 2 pending package updates, and recent suspicious auth attempts.
+  - Hardened auth-log sampling so `tools/infra-status.py` and `tools/infra-autopilot.py` now share the same tail window (`400` lines) and capture budget (`12000` chars) via `tools/infra_audit_common.py`, removing status/autopilot drift caused by duplicated sampling settings.
+  - Added regression coverage in `tests/test_infra_audit_common.py` and `tests/test_infra_status.py`.
+  - Verification passed: `python3 -m unittest tests.test_infra_audit_common tests.test_infra_autopilot tests.test_infra_status`, `python3 -m py_compile tools/infra_audit_common.py tools/infra-status.py tools/infra-autopilot.py tests/test_infra_audit_common.py tests/test_infra_status.py`, `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260311T133628Z-infra-status.md` and `20260311T133629Z-r143-run-security-audit-check-for-open-ports-ssh-config-faile.md`.
+  - Result: `infra-status.py` and the owned infra run now agree on auth risk again; the remaining live follow-up is host-level hardening for `udp/58627`, firewall visibility, and package updates outside repo-only guardrails.
 - **2026-03-11 11:33 UTC:**
   - Re-ran the night infra sprint through `python3 tools/department-commands.py run infra` and found the prior top-task selection was stale: fresh disk checks showed `/` at `63%` used, but task scoring was still pinned to a March 10, 2026 `infra-status` artifact that reported `100%`.
   - Hardened `tools/infra-autopilot.py` to ignore stale `*-infra-status.md` artifacts older than `6h` when scoring risk.

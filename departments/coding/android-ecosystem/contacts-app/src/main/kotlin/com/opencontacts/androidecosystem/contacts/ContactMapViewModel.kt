@@ -33,13 +33,14 @@ class ContactMapViewModel : ViewModel() {
                 val nameIndex = contactsCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
                 val hasPhoneIndex = contactsCursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)
                 val starredIndex = contactsCursor.getColumnIndex(ContactsContract.Contacts.STARRED)
-                val contactTypeIndex = contactsCursor.getColumnIndex(ContactsContract.Contacts.CONTACT_PRESENCE)
+                val photoUriIndex = contactsCursor.getColumnIndex(ContactsContract.Contacts.PHOTO_URI)
 
                 while (contactsCursor.moveToNext()) {
-                    val id = contactsCursor.getString(idIndex)
+                    val id = contactsCursor.getString(idIndex) ?: continue
                     val name = contactsCursor.getString(nameIndex)
                     val hasPhone = contactsCursor.getInt(hasPhoneIndex)
                     val isStarred = contactsCursor.getInt(starredIndex) > 0
+                    val photoUri = contactsCursor.getString(photoUriIndex)
 
                     // Get phone numbers
                     val phoneNumbers = mutableListOf<String>()
@@ -54,8 +55,86 @@ class ContactMapViewModel : ViewModel() {
                         phoneCursor?.use { pc ->
                             val phoneIndex = pc.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
                             while (pc.moveToNext()) {
-                                phoneNumbers.add(pc.getString(phoneIndex))
+                                val phone = pc.getString(phoneIndex)
+                                if (!phone.isNullOrBlank()) {
+                                    phoneNumbers.add(phone)
+                                }
                             }
+                        }
+                    }
+
+                    // Get email addresses
+                    val emails = mutableListOf<String>()
+                    val emailCursor = context.contentResolver.query(
+                        ContactsContract.CommonDataKinds.Email.CONTENT_URI,
+                        null,
+                        "${ContactsContract.CommonDataKinds.Email.CONTACT_ID} = ?",
+                        arrayOf(id),
+                        null
+                    )
+                    emailCursor?.use { ec ->
+                        val emailIndex = ec.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)
+                        while (ec.moveToNext()) {
+                            val email = ec.getString(emailIndex)
+                            if (!email.isNullOrBlank()) {
+                                emails.add(email)
+                            }
+                        }
+                    }
+
+                    // Get name components, company, job title
+                    var firstName: String? = null
+                    var lastName: String? = null
+                    var company: String? = null
+                    var jobTitle: String? = null
+                    var address: String? = null
+
+                    val nameCursor = context.contentResolver.query(
+                        ContactsContract.Data.CONTENT_URI,
+                        null,
+                        "${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.Data.RAW_CONTACT_ID} = ?",
+                        arrayOf(ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE, id),
+                        null
+                    )
+                    nameCursor?.use { nc ->
+                        val givenNameIndex = nc.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME)
+                        val familyNameIndex = nc.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME)
+                        while (nc.moveToNext()) {
+                            firstName = nc.getString(givenNameIndex)
+                            lastName = nc.getString(familyNameIndex)
+                        }
+                    }
+
+                    // Get organization (company, title)
+                    val orgCursor = context.contentResolver.query(
+                        ContactsContract.Data.CONTENT_URI,
+                        null,
+                        "${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.Data.RAW_CONTACT_ID} = ?",
+                        arrayOf(ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE, id),
+                        null
+                    )
+                    orgCursor?.use { oc ->
+                        val companyIndex = oc.getColumnIndex(ContactsContract.CommonDataKinds.Organization.COMPANY)
+                        val titleIndex = oc.getColumnIndex(ContactsContract.CommonDataKinds.Organization.TITLE)
+                        while (oc.moveToNext()) {
+                            company = oc.getString(companyIndex)
+                            jobTitle = oc.getString(titleIndex)
+                        }
+                    }
+
+                    // Get address
+                    val addrCursor = context.contentResolver.query(
+                        ContactsContract.Data.CONTENT_URI,
+                        null,
+                        "${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.Data.RAW_CONTACT_ID} = ?",
+                        arrayOf(ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE, id),
+                        null
+                    )
+                    addrCursor?.use { ac ->
+                        val addrIndex = ac.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS)
+                        while (ac.moveToNext()) {
+                            address = ac.getString(addrIndex)
+                            break // Just get first address
                         }
                     }
 
@@ -66,9 +145,16 @@ class ContactMapViewModel : ViewModel() {
                         ContactRecord(
                             id = id,
                             displayName = name,
+                            firstName = firstName,
+                            lastName = lastName,
+                            email = emails.firstOrNull(),
                             phoneNumbers = phoneNumbers,
+                            company = company,
+                            jobTitle = jobTitle,
+                            address = address,
                             isFavorite = isStarred,
-                            groups = groups
+                            groups = groups,
+                            photoUri = photoUri
                         )
                     )
                 }
@@ -85,7 +171,6 @@ class ContactMapViewModel : ViewModel() {
     private fun getContactGroups(context: Context, contactId: String): List<String> {
         val groups = mutableListOf<String>()
         var cursor: Cursor? = null
-        
         try {
             cursor = context.contentResolver.query(
                 ContactsContract.Data.CONTENT_URI,

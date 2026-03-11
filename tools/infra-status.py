@@ -16,6 +16,12 @@ from pathlib import Path
 
 from infra_audit_common import check_firewall_status as common_check_firewall_status
 from infra_audit_common import summarize_external_ports as common_summarize_external_ports
+from infra_audit_common import (
+    AUTH_LOG_SAMPLE_LIMIT,
+    AUTH_LOG_SAMPLE_MAX_CHARS,
+    auth_log_tail_command,
+    journalctl_ssh_tail_command,
+)
 from infra_disk import build_disk_usage_report
 from infra_network import inspect_mdns_exposure
 
@@ -190,12 +196,12 @@ def check_failed_logins() -> str:
     source = ''
 
     if auth_log.exists():
-        sampled = run_cmd(['bash', '-lc', 'tail -n 400 /var/log/auth.log 2>/dev/null'])
+        sampled = run_cmd(auth_log_tail_command(AUTH_LOG_SAMPLE_LIMIT), max_chars=AUTH_LOG_SAMPLE_MAX_CHARS)
         source = 'auth.log'
     else:
         journalctl = shutil.which('journalctl')
         if journalctl:
-            sampled = run_cmd(['bash', '-lc', "journalctl -u ssh --since '24 hours ago' --no-pager 2>/dev/null | tail -n 400"])
+            sampled = run_cmd(journalctl_ssh_tail_command(AUTH_LOG_SAMPLE_LIMIT), max_chars=AUTH_LOG_SAMPLE_MAX_CHARS)
             source = 'journalctl -u ssh'
 
     if not sampled or sampled == 'n/a':

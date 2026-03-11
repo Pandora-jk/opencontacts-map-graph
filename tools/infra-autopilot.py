@@ -16,8 +16,14 @@ from pathlib import Path
 
 from infra_disk import DISK_ALERT_THRESHOLD, DISK_CRITICAL_THRESHOLD, build_disk_usage_report
 from infra_network import inspect_mdns_exposure
-from infra_audit_common import check_firewall_status as common_check_firewall_status
-from infra_audit_common import summarize_external_ports as common_summarize_external_ports
+from infra_audit_common import (
+    AUTH_LOG_SAMPLE_LIMIT,
+    AUTH_LOG_SAMPLE_MAX_CHARS,
+    auth_log_tail_command,
+    check_firewall_status as common_check_firewall_status,
+    journalctl_ssh_tail_command,
+    summarize_external_ports as common_summarize_external_ports,
+)
 
 ROOT = Path('/home/ubuntu/.openclaw/workspace')
 INFRA = ROOT / 'departments' / 'infra'
@@ -102,9 +108,9 @@ def check_firewall_status() -> str:
 
 def get_auth_sample() -> tuple[str, str]:
     if Path('/var/log/auth.log').exists():
-        return run_cmd(['bash', '-lc', 'tail -n 600 /var/log/auth.log 2>/dev/null'], max_chars=12000), 'auth.log'
+        return run_cmd(auth_log_tail_command(AUTH_LOG_SAMPLE_LIMIT), max_chars=AUTH_LOG_SAMPLE_MAX_CHARS), 'auth.log'
     if shutil.which('journalctl'):
-        return run_cmd(['bash', '-lc', "journalctl -u ssh --since '24 hours ago' --no-pager 2>/dev/null | tail -n 600"], max_chars=12000), 'journalctl -u ssh'
+        return run_cmd(journalctl_ssh_tail_command(AUTH_LOG_SAMPLE_LIMIT), max_chars=AUTH_LOG_SAMPLE_MAX_CHARS), 'journalctl -u ssh'
     return 'Auth log source unavailable', 'none'
 
 

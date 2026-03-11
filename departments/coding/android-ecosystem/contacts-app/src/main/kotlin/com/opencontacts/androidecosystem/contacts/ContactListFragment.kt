@@ -22,7 +22,7 @@ class ContactListFragment(
     private lateinit var viewModel: ContactMapViewModel
     private val contactAdapter = ContactAdapter { contact ->
         // Open contact details in a new Activity
-        val intent = ContactDetailsActivity.createIntent(contact)
+        val intent = ContactDetailsActivity.createIntent(requireContext(), contact)
         startActivity(intent)
     }
     private val requestPermissionLauncher = registerForActivityResult(
