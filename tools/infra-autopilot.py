@@ -21,6 +21,7 @@ from infra_audit_common import (
     AUTH_LOG_SAMPLE_MAX_CHARS,
     auth_log_tail_command,
     check_firewall_status as common_check_firewall_status,
+    inspect_unexpected_listeners as common_inspect_unexpected_listeners,
     journalctl_ssh_tail_command,
     summarize_external_ports as common_summarize_external_ports,
 )
@@ -104,6 +105,10 @@ def summarize_external_ports(port_lines: str) -> str:
 
 def check_firewall_status() -> str:
     return common_check_firewall_status(run_cmd, which=shutil.which, render_one_line=one_line)
+
+
+def inspect_unexpected_listener_details(port_lines: str) -> str:
+    return common_inspect_unexpected_listeners(run_cmd, port_lines)
 
 
 def get_auth_sample() -> tuple[str, str]:
@@ -211,6 +216,8 @@ def score_task_from_artifact(task: str, artifact: Path | None) -> tuple[int, str
 
     for line in text.splitlines():
         clean = clean_text(line)
+        if clean.startswith('ALERT: Detailed inspection for unexpected listeners'):
+            continue
         if line.startswith('CRITICAL:'):
             score += 100
             reasons.append(clean)
@@ -346,6 +353,9 @@ def execute_task(task: str, run_id: int) -> tuple[Path, str]:
         lines.append('')
         lines.append('## External Listener Assessment')
         lines.append(summarize_external_ports(port_lines))
+        lines.append('')
+        lines.append('## Unexpected Listener Details')
+        lines.append(inspect_unexpected_listener_details(port_lines))
         lines.append('')
         lines.append('## Multicast DNS Exposure')
         lines.append(inspect_mdns_exposure(port_lines))

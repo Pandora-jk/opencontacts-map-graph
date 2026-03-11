@@ -7,6 +7,18 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-11 14:36 UTC:**
+  - Reconfirmed from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh owned runs 145-148 that `Run security audit` remains the top infra task because live status still shows external `udp/58627` and 8 suspicious auth lines.
+  - Hardened the shared security-audit path so unexpected external listeners are now inspected with actionable follow-up detail:
+    - `tools/infra_audit_common.py` now identifies unexpected listeners separately from the allowlist and can inspect them with process-aware `ss` queries
+    - `tools/infra-status.py` and `tools/infra-autopilot.py` now include an `Unexpected Listener Details` section in fresh security-audit output
+    - when process visibility is blocked by current capabilities, the artifact now prints the exact unrestricted-shell follow-up command, e.g. `ss -H -ulpn 'sport = :58627' 2>/dev/null | sed -n '1,10p'`
+  - Hardened firewall visibility messaging so sandbox-blocked `sudo ufw status verbose` is reported as `WARN: ufw installed but status visibility is blocked by current privileges` with a host-shell verification step, instead of reading like tool absence.
+  - Prevented the new listener-detail heading from inflating task scoring by teaching `tools/infra-autopilot.py` to ignore `ALERT: Detailed inspection for unexpected listeners ...` when scoring prior artifacts.
+  - Added regression coverage in `tests/test_infra_audit_common.py`, `tests/test_infra_status.py`, and `tests/test_infra_autopilot.py`.
+  - Verification passed: `python3 -m unittest tests.test_infra_audit_common tests.test_infra_status tests.test_infra_autopilot`, `python3 -m py_compile tools/infra_audit_common.py tools/infra-status.py tools/infra-autopilot.py tests/test_infra_audit_common.py tests/test_infra_status.py tests/test_infra_autopilot.py`, `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260311T143613Z-infra-status.md` and `20260311T143614Z-r148-run-security-audit-check-for-open-ports-ssh-config-faile.md`.
+  - Result: the current top autonomous infra task is still correctly `Run security audit`, but the artifact is now materially more actionable for the remaining live blocker on `udp/58627`.
 - **2026-03-11 13:36 UTC:**
   - Reconfirmed from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh runs 141-143 that `Run security audit` remains the top infra task because the live risks are still external `udp/58627`, 2 pending package updates, and recent suspicious auth attempts.
   - Hardened auth-log sampling so `tools/infra-status.py` and `tools/infra-autopilot.py` now share the same tail window (`400` lines) and capture budget (`12000` chars) via `tools/infra_audit_common.py`, removing status/autopilot drift caused by duplicated sampling settings.

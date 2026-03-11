@@ -45,6 +45,44 @@ class InfraAuditCommonTests(unittest.TestCase):
         self.assertEqual(infra_status.auth_log_tail_command(), infra_autopilot.auth_log_tail_command())
         self.assertEqual(infra_status.journalctl_ssh_tail_command(), infra_autopilot.journalctl_ssh_tail_command())
 
+    def test_inspect_unexpected_listeners_reports_scope_owner_and_hardening(self) -> None:
+        observed: list[list[str]] = []
+
+        def fake_run_cmd(cmd: list[str], max_chars: int = 800) -> str:
+            observed.append(cmd)
+            if "sport = :58627" in cmd[-1]:
+                return 'udp UNCONN 0 0 *:58627 *:* users:(("openclaw-gateway",pid=4242,fd=9))'
+            return 'n/a'
+
+        result = infra_audit_common.inspect_unexpected_listeners(
+            fake_run_cmd,
+            "tcp [::ffff:127.0.0.1]:17564\nudp *:58627\ntcp 0.0.0.0:22",
+        )
+
+        self.assertIn("ALERT: Detailed inspection for unexpected listeners (1): udp/58627", result)
+        self.assertIn("udp/58627 scope: *:58627", result)
+        self.assertIn("udp/58627 owner(s): openclaw-gateway", result)
+        self.assertIn("udp/58627 pid(s): 4242", result)
+        self.assertIn("HARDENING: inspect the owning process with `ps -fp 4242`", result)
+        self.assertEqual([['bash', '-lc', "ss -H -ulpn 'sport = :58627' 2>/dev/null | sed -n '1,10p'"]], observed)
+
+    def test_check_firewall_status_reports_ufw_privilege_block(self) -> None:
+        def fake_run_cmd(cmd: list[str], max_chars: int = 800) -> str:
+            shell_cmd = cmd[-1]
+            if 'command -v ufw' in shell_cmd:
+                return '/usr/sbin/ufw'
+            if 'sudo ufw status verbose' in shell_cmd:
+                return 'sudo: The "no new privileges" flag is set, which prevents sudo from running as root.'
+            return 'n/a'
+
+        result = infra_audit_common.check_firewall_status(
+            fake_run_cmd,
+            which=lambda _: None,
+        )
+
+        self.assertIn('WARN: ufw installed but status visibility is blocked by current privileges', result)
+        self.assertIn('HARDENING: verify `sudo ufw status verbose` from an unrestricted host shell', result)
+
 
 if __name__ == "__main__":
     unittest.main()

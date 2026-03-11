@@ -27,6 +27,20 @@ class InfraStatusTests(unittest.TestCase):
         self.assertIn("ALERT: Unexpected externally exposed listeners (1): udp/58627", result)
         self.assertNotIn("tcp/17564", result)
 
+    def test_check_unexpected_listener_details_uses_supplied_raw_port_lines(self) -> None:
+        def fake_run_cmd(cmd: list[str], max_chars: int = 800) -> str:
+            if "sport = :58627" in cmd[-1]:
+                return 'udp UNCONN 0 0 *:58627 *:* users:(("openclaw-gateway",pid=4242,fd=9))'
+            return 'n/a'
+
+        with mock.patch.object(infra_status, "run_cmd", side_effect=fake_run_cmd):
+            result = infra_status.check_unexpected_listener_details(
+                "tcp [::ffff:127.0.0.1]:17564\nudp *:58627\ntcp 0.0.0.0:22"
+            )
+
+        self.assertIn("udp/58627 owner(s): openclaw-gateway", result)
+        self.assertNotIn("tcp/17564", result)
+
     def test_check_firewall_status_detects_ufw_outside_default_path(self) -> None:
         def fake_run_cmd(cmd: list[str], max_chars: int = 800) -> str:
             shell_cmd = cmd[-1]
@@ -64,6 +78,8 @@ class InfraStatusTests(unittest.TestCase):
         ), mock.patch.object(
             infra_status, "check_disk_usage", return_value="Disk usage nominal"
         ), mock.patch.object(
+            infra_status, "check_unexpected_listener_details", return_value="No unexpected listener details to inspect"
+        ), mock.patch.object(
             infra_status, "check_firewall_status", return_value="Firewall nominal"
         ), mock.patch.object(
             infra_status, "check_ssh_config", return_value="SSH nominal"
@@ -81,6 +97,7 @@ class InfraStatusTests(unittest.TestCase):
             md_content, summary_lines = infra_status.generate_report()
 
         self.assertIn("## Multicast DNS Exposure", md_content)
+        self.assertIn("## Unexpected Listener Details", md_content)
         self.assertIn("ALERT: External mDNS listener detected on udp/5353", md_content)
         self.assertTrue(
             any("mDNS: ALERT: External mDNS listener detected on udp/5353" in line for line in summary_lines)

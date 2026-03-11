@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-11T13:46:43Z
-- Run count: 219
-- Primary task: Scan GitHub bounties in Ansible, Linux, DevOps, and automation as side cash only
-- Primary task progress count: 13
-- Last artifact: departments/finance/artifacts/bounties/bounty-scan-20260311-r219.md
+- Last run (UTC): 2026-03-11T14:56:53Z
+- Run count: 222
+- Primary task: Test unsubscribe flow end-to-end
+- Primary task progress count: 14
+- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260311-r222.md
 - Blocking items: 0
 - Autonomous queue items: 15
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Scan GitHub bounties in Ansible, Linux, DevOps, and automation as side cash only
+Test unsubscribe flow end-to-end
 
 ## Blocking
 - None

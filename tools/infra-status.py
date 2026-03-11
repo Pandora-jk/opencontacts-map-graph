@@ -15,6 +15,7 @@ import subprocess
 from pathlib import Path
 
 from infra_audit_common import check_firewall_status as common_check_firewall_status
+from infra_audit_common import inspect_unexpected_listeners as common_inspect_unexpected_listeners
 from infra_audit_common import summarize_external_ports as common_summarize_external_ports
 from infra_audit_common import (
     AUTH_LOG_SAMPLE_LIMIT,
@@ -75,6 +76,12 @@ def check_open_ports(port_lines: str | None = None) -> str:
     """Check for externally exposed listening ports."""
     output = port_lines if port_lines is not None else current_port_lines()
     return common_summarize_external_ports(output)
+
+
+def check_unexpected_listener_details(port_lines: str | None = None) -> str:
+    """Inspect unexpected externally exposed listeners with process-aware detail when visible."""
+    output = port_lines if port_lines is not None else current_port_lines()
+    return common_inspect_unexpected_listeners(run_cmd, output)
 
 
 def check_firewall_status() -> str:
@@ -296,6 +303,11 @@ def generate_report() -> tuple[str, list[str]]:
         'result': check_open_ports(port_lines)
     }
 
+    findings['checks']['unexpected_listener_details'] = {
+        'status': 'checked',
+        'result': check_unexpected_listener_details(port_lines)
+    }
+
     findings['checks']['mdns_exposure'] = {
         'status': 'checked',
         'result': inspect_mdns_exposure(port_lines)
@@ -380,6 +392,10 @@ def generate_report() -> tuple[str, list[str]]:
         '',
         f"```\n{findings['checks']['open_ports']['result']}\n```",
         '',
+        '## Unexpected Listener Details',
+        '',
+        f"```\n{findings['checks']['unexpected_listener_details']['result']}\n```",
+        '',
         '## Multicast DNS Exposure',
         '',
         f"```\n{findings['checks']['mdns_exposure']['result']}\n```",
@@ -429,6 +445,7 @@ def generate_report() -> tuple[str, list[str]]:
         f"Updates: {one_line(findings['checks']['system_updates']['result'])}",
         f"Disk: {one_line(findings['checks']['disk_usage']['result'])}",
         f"Open Ports: {one_line(findings['checks']['open_ports']['result'])}",
+        f"Unexpected Listener Detail: {one_line(findings['checks']['unexpected_listener_details']['result'])}",
         f"mDNS: {one_line(findings['checks']['mdns_exposure']['result'])}",
         f"Firewall: {one_line(findings['checks']['firewall_status']['result'])}",
         f"SSH: {one_line(findings['checks']['ssh_config']['result'])}",

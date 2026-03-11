@@ -6,6 +6,7 @@ from collections.abc import Callable
 AUTH_LOG_SAMPLE_LIMIT = 400
 AUTH_LOG_SAMPLE_MAX_CHARS = 12000
 EXPECTED_EXTERNAL_PORTS = {'tcp': {22}, 'udp': {68}}
+UNEXPECTED_LISTENER_DETAIL_LIMIT = 5
 LOCAL_LISTENER_PREFIXES = (
     '127.',
     'localhost:',
@@ -64,6 +65,21 @@ def explain_unexpected_listener(entry: str) -> str | None:
     return None
 
 
+def unexpected_external_listeners(
+    port_lines: str,
+    expected_external_ports: dict[str, set[int]] | None = None,
+) -> list[str]:
+    external, _ = classify_external_ports(port_lines)
+    expected = expected_external_ports or EXPECTED_EXTERNAL_PORTS
+    unexpected: list[str] = []
+    for entry in sorted(external):
+        proto, value = entry.split('/', 1)
+        if value.isdigit() and int(value) in expected.get(proto, set()):
+            continue
+        unexpected.append(entry)
+    return unexpected
+
+
 def summarize_external_ports(port_lines: str, expected_external_ports: dict[str, set[int]] | None = None) -> str:
     if not port_lines or port_lines == 'n/a':
         return 'No externally exposed listening ports found'
@@ -74,13 +90,7 @@ def summarize_external_ports(port_lines: str, expected_external_ports: dict[str,
     if not external:
         return f'No externally exposed listening ports (local-only listeners only: {local_only_count})'
 
-    expected = expected_external_ports or EXPECTED_EXTERNAL_PORTS
-    unexpected = []
-    for entry in sorted(external):
-        proto, value = entry.split('/', 1)
-        if value.isdigit() and int(value) in expected.get(proto, set()):
-            continue
-        unexpected.append(entry)
+    unexpected = unexpected_external_listeners(port_lines, expected_external_ports)
 
     preview = ', '.join(external[:8])
     if len(external) > 8:
@@ -98,6 +108,118 @@ def summarize_external_ports(port_lines: str, expected_external_ports: dict[str,
         return '\n'.join(lines)
 
     return f'Externally exposed listeners match allowlist ({len(external)}): {preview}'
+
+
+def _listener_query(entry: str) -> list[str]:
+    proto, value = entry.split('/', 1)
+    if value.isdigit():
+        ss_flags = '-ulpn' if proto == 'udp' else '-tlpn'
+        shell = f"ss -H {ss_flags} 'sport = :{value}' 2>/dev/null | sed -n '1,10p'"
+    else:
+        ss_flags = '-ulpn' if proto == 'udp' else '-tlpn'
+        shell = f"ss -H {ss_flags} 2>/dev/null | grep -F -- '{value}' | sed -n '1,10p'"
+    return ['bash', '-lc', shell]
+
+
+def _listener_shell_hint(entry: str) -> str:
+    return _listener_query(entry)[-1]
+
+
+def _listener_scope(listener_detail: str) -> str | None:
+    addresses: set[str] = set()
+    lines = [line for line in listener_detail.splitlines() if line.strip()]
+    if not lines:
+        return None
+    for raw in lines:
+        parts = raw.split()
+        if len(parts) >= 5:
+            addresses.add(parts[4])
+    if not addresses:
+        return None
+    return ', '.join(sorted(addresses))
+
+
+def _listener_processes(listener_detail: str) -> list[tuple[str, str | None]]:
+    processes: list[tuple[str, str | None]] = []
+    for raw in listener_detail.splitlines():
+        match = re.search(r'users:\(\("([^"]+)",pid=(\d+)', raw)
+        if match:
+            processes.append((match.group(1), match.group(2)))
+            continue
+        match = re.search(r'users:\(\("([^"]+)"', raw)
+        if match:
+            processes.append((match.group(1), None))
+    return list(dict.fromkeys(processes))
+
+
+def inspect_unexpected_listeners(
+    run_cmd: Callable[[list[str], int], str],
+    port_lines: str,
+    *,
+    expected_external_ports: dict[str, set[int]] | None = None,
+) -> str:
+    if not port_lines or port_lines == 'n/a':
+        return 'No unexpected listener details to inspect'
+    if port_lines.startswith('Error:'):
+        return port_lines
+
+    unexpected = unexpected_external_listeners(port_lines, expected_external_ports)
+    if not unexpected:
+        return 'No unexpected listener details to inspect'
+
+    preview = ', '.join(unexpected[:8])
+    if len(unexpected) > 8:
+        preview += ', ...'
+
+    lines = [f'ALERT: Detailed inspection for unexpected listeners ({len(unexpected)}): {preview}']
+    for entry in unexpected[:UNEXPECTED_LISTENER_DETAIL_LIMIT]:
+        detail = run_cmd(_listener_query(entry), max_chars=1200)
+        if detail.startswith('Error:'):
+            lines.append(f'{entry} detail error: {one_line(detail, 180)}')
+            lines.append(
+                f"HARDENING: inspect {entry} from an unrestricted shell with "
+                f"`{_listener_shell_hint(entry)}`"
+            )
+            continue
+        if detail in {'n/a', ''}:
+            lines.append(f'{entry} owner not visible from current permissions/capabilities')
+            lines.append(
+                f"HARDENING: inspect {entry} from an unrestricted shell with "
+                f"`{_listener_shell_hint(entry)}`"
+            )
+            continue
+
+        scope = _listener_scope(detail)
+        if scope:
+            lines.append(f'{entry} scope: {scope}')
+        processes = _listener_processes(detail)
+        owners = [owner for owner, _ in processes]
+        if owners:
+            lines.append(f"{entry} owner(s): {', '.join(owners)}")
+        else:
+            lines.append(f'{entry} owner not visible from current permissions/capabilities')
+            lines.append(
+                f"HARDENING: inspect {entry} from an unrestricted shell with "
+                f"`{_listener_shell_hint(entry)}`"
+            )
+        pids = [pid for _, pid in processes if pid]
+        if pids:
+            lines.append(f"{entry} pid(s): {', '.join(pids)}")
+            lines.append(f"HARDENING: inspect the owning process with `ps -fp {' '.join(pids)}`")
+        else:
+            lines.append(
+                f'HARDENING: inspect/reconfigure the owning service before allowing external exposure on {entry}'
+            )
+        lines.append(
+            f'HARDENING: if {entry} is not required publicly, bind it to loopback/internal interfaces only '
+            'or block it with host/cloud firewall policy'
+        )
+
+    if len(unexpected) > UNEXPECTED_LISTENER_DETAIL_LIMIT:
+        remaining = len(unexpected) - UNEXPECTED_LISTENER_DETAIL_LIMIT
+        lines.append(f'HARDENING: {remaining} additional unexpected listener(s) omitted from detail view')
+
+    return '\n'.join(lines)
 
 
 def check_firewall_status(
@@ -126,6 +248,10 @@ def check_firewall_status(
             lines.append('ufw: active')
         elif re.search(r'^Status:\s+inactive\b', status, re.IGNORECASE | re.MULTILINE):
             lines.append('ALERT: ufw installed but inactive')
+        elif 'no new privileges' in status.lower() or 'permission denied' in status.lower():
+            lines.append('WARN: ufw installed but status visibility is blocked by current privileges')
+            lines.append(f'ufw: {render_one_line(status, 180)}')
+            lines.append('HARDENING: verify `sudo ufw status verbose` from an unrestricted host shell')
         else:
             lines.append(f'ufw: {render_one_line(status, 180)}')
     else:
