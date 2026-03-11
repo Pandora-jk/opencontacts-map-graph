@@ -189,19 +189,21 @@ class EditContactActivity : AppCompatActivity() {
     }
 
     private fun createNewContact(firstName: String, lastName: String, phone: String, email: String, company: String, jobTitle: String, address: String) {
-        val values = ContentValues()
-        values.put(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
-        values.put(ContactsContract.RawContacts.ACCOUNT_NAME, null)
-        val rawContactUri = contentResolver.insert(ContactsContract.RawContacts.CONTENT_URI, values)
-        val rawContactId = rawContactUri?.lastPathSegment
+        val rawContactValues = ContentValues().apply {
+            putNull(ContactsContract.RawContacts.ACCOUNT_TYPE)
+            putNull(ContactsContract.RawContacts.ACCOUNT_NAME)
+        }
+        val rawContactUri = contentResolver.insert(ContactsContract.RawContacts.CONTENT_URI, rawContactValues)
+        val rawContactId: String? = rawContactUri?.lastPathSegment
 
         if (rawContactId != null) {
             // Add name
-            val nameValues = ContentValues()
-            nameValues.put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
-            nameValues.put(ContactsContract.Data.MIMETYPE, CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
-            nameValues.put(CommonDataKinds.StructuredName.GIVEN_NAME, firstName)
-            nameValues.put(CommonDataKinds.StructuredName.FAMILY_NAME, lastName)
+            val nameValues = ContentValues().apply {
+                put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
+                put(ContactsContract.Data.MIMETYPE, CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                put(CommonDataKinds.StructuredName.GIVEN_NAME, firstName)
+                put(CommonDataKinds.StructuredName.FAMILY_NAME, lastName)
+            }
             contentResolver.insert(ContactsContract.Data.CONTENT_URI, nameValues)
 
             // Add phone

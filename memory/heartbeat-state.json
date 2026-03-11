@@ -3,10 +3,10 @@
     "email": 1741514280,
     "projects": 1741514280,
     "memory": 1741514280,
-    "heartbeat": 1741605240,
-    "disk": 1741605240
+    "heartbeat": 1741608180,
+    "disk": 1741608180
   },
-  "lastUpdate": "2026-03-11T21:04:00Z",
+  "lastUpdate": "2026-03-11T21:43:00Z",
   "proactiveOutreachSent": true,
-  "notable": "Security audit improved: firewall now active, unexpected listeners gone. Still 10 suspicious auth attempts from 3 IPs. Coding run 465 completed on pdftocsv.py unit tests (progress 409). Finance made significant progress through queue (run 236)."
+  "notable": "Security audit found 2 new exposed UDP listeners (47706, 47857) owned by java. 12 suspicious auth attempts from 4 IPs. Coding run 469 completed on pdftocsv.py unit tests (progress 413). Finance moved to unsubscribe flow testing."
 }

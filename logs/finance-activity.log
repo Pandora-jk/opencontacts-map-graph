@@ -178,3 +178,8 @@
 [2026-03-11 18:52:28 UTC] run=230 primary='Prepare the first outreach batch with personalized first lines for the first 20 qualified companies' artifact='departments/finance/artifacts/outreach/outreach-draft-20260311-r230.md' blocking=0 queue=15
 [2026-03-11 18:56:50 UTC] run=231 primary='Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate' artifact='departments/finance/artifacts/offers/core-service-offer-20260311-r231.md' blocking=0 queue=15
 [2026-03-11 19:25:05 UTC] run=232 primary='Prepare the 15-minute demo script around 3 sample agency prospects' artifact='departments/finance/artifacts/demos/demo-script-20260311-r232.md' blocking=0 queue=15
+[2026-03-11 19:57:29 UTC] run=233 primary='Define the initial delivery checklist for the first paying client' artifact='departments/finance/artifacts/delivery/first-client-checklist-20260311-r233.md' blocking=0 queue=15
+[2026-03-11 20:27:30 UTC] run=234 primary='Scan GitHub bounties in Ansible, Linux, DevOps, and automation as side cash only' artifact='departments/finance/artifacts/bounties/bounty-scan-20260311-r234.md' blocking=0 queue=15
+[2026-03-11 20:56:50 UTC] run=235 primary='Review cold email templates for GDPR/CAN-SPAM compliance' artifact='departments/finance/artifacts/compliance/compliance-check-20260311-r235.md' blocking=0 queue=15
+[2026-03-11 20:57:28 UTC] run=236 primary='Verify email footer includes address + unsubscribe link' artifact='departments/finance/artifacts/compliance/compliance-check-20260311-r236.md' blocking=0 queue=15
+[2026-03-11 21:27:28 UTC] run=237 primary='Test unsubscribe flow end-to-end' artifact='departments/finance/artifacts/compliance/compliance-check-20260311-r237.md' blocking=0 queue=15
