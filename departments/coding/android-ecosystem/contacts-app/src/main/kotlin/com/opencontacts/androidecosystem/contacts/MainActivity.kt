@@ -1,25 +1,33 @@
 package com.opencontacts.androidecosystem.contacts
 
 import android.os.Bundle
+import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.opencontacts.androidecosystem.contacts.databinding.ActivityContactsMapBinding
+import com.opencontacts.androidecosystem.contacts.R
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityContactsMapBinding
     private lateinit var viewModel: ContactMapViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityContactsMapBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_contacts_map)
 
         viewModel = ViewModelProvider(this)[ContactMapViewModel::class.java]
 
         // Initialize UI components
-        binding.statusText.text = "Contacts App Ready"
-        binding.refreshButton.setOnClickListener {
+        val statusText = findViewById<TextView>(R.id.status_text)
+        val refreshButton = findViewById<Button>(R.id.refresh_button)
+
+        statusText.text = "Contacts App Ready"
+        refreshButton.setOnClickListener {
             viewModel.refreshContacts()
+            statusText.text = "Contacts refreshed: ${viewModel.contacts.size} contacts"
         }
+
+        // Load initial contacts
+        viewModel.refreshContacts()
+        statusText.text = "Loaded ${viewModel.contacts.size} contacts"
     }
 }
