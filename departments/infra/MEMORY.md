@@ -7,6 +7,16 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-11 15:37 UTC:**
+  - Reconfirmed from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh owned runs 150-152 that `Run security audit` remains the top infra task because live status still shows external `udp/58627`, blocked `ufw` visibility, and 8 suspicious auth lines.
+  - Hardened the shared auth-audit path so security-audit artifacts now summarize the top suspicious SSH/auth sources with repeated IP counts, usernames when visible, and concrete hardening follow-ups:
+    - `tools/infra_audit_common.py` now centralizes suspicious auth-line filtering plus source/username extraction for `Invalid user ... from ...` and `Connection closed by invalid user ... <ip> port ...` patterns
+    - `tools/infra-status.py` now includes an `Auth Source Summary` section in status artifacts and summary output
+    - `tools/infra-autopilot.py` now includes the same `Auth Source Summary` section in owned security-audit artifacts so status and autopilot stay aligned
+  - Added regression coverage in `tests/test_infra_audit_common.py`, `tests/test_infra_status.py`, and `tests/test_infra_autopilot.py`.
+  - Verification passed: `python3 -m unittest tests.test_infra_audit_common tests.test_infra_status tests.test_infra_autopilot`, `python3 -m py_compile tools/infra_audit_common.py tools/infra-status.py tools/infra-autopilot.py tests/test_infra_audit_common.py tests/test_infra_status.py tests/test_infra_autopilot.py`, `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260311T153655Z-infra-status.md` and `20260311T153655Z-r152-run-security-audit-check-for-open-ports-ssh-config-faile.md`.
+  - Result: the current top autonomous infra task is still correctly `Run security audit`, but the artifact now highlights repeated auth probes from `64.225.75.83` and `164.92.146.128` alongside the unresolved `udp/58627` listener.
 - **2026-03-11 14:36 UTC:**
   - Reconfirmed from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh owned runs 145-148 that `Run security audit` remains the top infra task because live status still shows external `udp/58627` and 8 suspicious auth lines.
   - Hardened the shared security-audit path so unexpected external listeners are now inspected with actionable follow-up detail:

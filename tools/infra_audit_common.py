@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import re
+from collections import Counter
 from collections.abc import Callable
 
 AUTH_LOG_SAMPLE_LIMIT = 400
 AUTH_LOG_SAMPLE_MAX_CHARS = 12000
+AUTH_SUSPICIOUS_ALERT_THRESHOLD = 5
+AUTH_SOURCE_SUMMARY_LIMIT = 5
 EXPECTED_EXTERNAL_PORTS = {'tcp': {22}, 'udp': {68}}
 UNEXPECTED_LISTENER_DETAIL_LIMIT = 5
 LOCAL_LISTENER_PREFIXES = (
@@ -14,6 +17,17 @@ LOCAL_LISTENER_PREFIXES = (
     '127.0.0.54:',
     '[::1]',
     '[::ffff:127.',
+)
+AUTH_SUSPICIOUS_PATTERN = re.compile(r'(failed|invalid user|authentication failure|error: pam)', re.IGNORECASE)
+AUTH_SOURCE_PATTERNS = (
+    re.compile(r'\bfrom\s+([0-9A-Fa-f:.]+)\b'),
+    re.compile(r'\bconnection closed by invalid user\s+\S+\s+([0-9A-Fa-f:.]+)\s+port\b', re.IGNORECASE),
+)
+AUTH_INVALID_USER_PATTERNS = (
+    re.compile(r'\binvalid user\s+(\S+)\s+from\b', re.IGNORECASE),
+    re.compile(r'\bfailed password for invalid user\s+(\S+)\s+from\b', re.IGNORECASE),
+    re.compile(r'\bfailed password for\s+(\S+)\s+from\b', re.IGNORECASE),
+    re.compile(r'\bconnection closed by invalid user\s+(\S+)\s+[0-9A-Fa-f:.]+\s+port\b', re.IGNORECASE),
 )
 
 
@@ -28,6 +42,100 @@ def auth_log_tail_command(limit: int = AUTH_LOG_SAMPLE_LIMIT) -> list[str]:
 
 def journalctl_ssh_tail_command(limit: int = AUTH_LOG_SAMPLE_LIMIT) -> list[str]:
     return ['bash', '-lc', f"journalctl -u ssh --since '24 hours ago' --no-pager 2>/dev/null | tail -n {limit}"]
+
+
+def is_self_generated_auth_audit_line(line: str) -> bool:
+    lowered = line.lower()
+    if 'sudo:' not in lowered or 'command=' not in lowered:
+        return False
+    if '/var/log/auth.log' in lowered and any(tool in lowered for tool in ('grep', 'awk', 'sed', 'tail', 'cat')):
+        return True
+    if 'journalctl' in lowered and any(token in lowered for token in ('-u ssh', '-u sshd', ' ssh.service', ' sshd.service')):
+        return True
+    return False
+
+
+def filtered_auth_lines(log_text: str, pattern: re.Pattern[str]) -> list[str]:
+    return [
+        line
+        for line in log_text.splitlines()
+        if not is_self_generated_auth_audit_line(line) and pattern.search(line)
+    ]
+
+
+def _extract_auth_source(line: str) -> str | None:
+    for pattern in AUTH_SOURCE_PATTERNS:
+        match = pattern.search(line)
+        if match:
+            return match.group(1)
+    return None
+
+
+def _extract_auth_username(line: str) -> str | None:
+    for pattern in AUTH_INVALID_USER_PATTERNS:
+        match = pattern.search(line)
+        if match:
+            return match.group(1)
+    return None
+
+
+def summarize_auth_event_sources(
+    log_text: str,
+    *,
+    suspicious_pattern: re.Pattern[str] = AUTH_SUSPICIOUS_PATTERN,
+    alert_threshold: int = AUTH_SUSPICIOUS_ALERT_THRESHOLD,
+    detail_limit: int = AUTH_SOURCE_SUMMARY_LIMIT,
+) -> str:
+    suspicious_lines = filtered_auth_lines(log_text, suspicious_pattern)
+    if not suspicious_lines:
+        return 'No suspicious auth-event source summary available'
+
+    counts: Counter[str] = Counter()
+    users: dict[str, set[str]] = {}
+    omitted_without_source = 0
+    for line in suspicious_lines:
+        source = _extract_auth_source(line)
+        if not source:
+            omitted_without_source += 1
+            continue
+        counts[source] += 1
+        username = _extract_auth_username(line)
+        if username:
+            users.setdefault(source, set()).add(username)
+
+    if not counts:
+        return (
+            f'Auth-event source summary unavailable '
+            f'({len(suspicious_lines)} suspicious line(s) lacked a parseable source)'
+        )
+
+    top_sources = sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+    rendered_sources: list[str] = []
+    for source, count in top_sources[:detail_limit]:
+        usernames = sorted(users.get(source, set()))
+        if usernames:
+            preview = ', '.join(usernames[:3])
+            if len(usernames) > 3:
+                preview += ', ...'
+            rendered_sources.append(f'{source} x{count} (users: {preview})')
+        else:
+            rendered_sources.append(f'{source} x{count}')
+
+    level = 'ALERT' if len(suspicious_lines) >= alert_threshold else 'INFO'
+    lines = [
+        f"{level}: Auth event sources in sampled logs ({len(suspicious_lines)} events / {len(counts)} source(s)): "
+        + '; '.join(rendered_sources)
+    ]
+    if omitted_without_source:
+        lines.append(
+            f'Note: {omitted_without_source} suspicious auth line(s) lacked a parseable source and were omitted from the source summary'
+        )
+    if len(top_sources) > detail_limit:
+        lines.append(f'HARDENING: {len(top_sources) - detail_limit} additional auth-event source(s) omitted from detail view')
+    if len(suspicious_lines) >= alert_threshold:
+        lines.append('HARDENING: review recurring auth-event sources for host/cloud firewall blocking or access-list restrictions')
+        lines.append('HARDENING: if these probes recur, consider SSH ban/rate-limit tooling such as fail2ban or sshguard')
+    return '\n'.join(lines)
 
 
 def is_local_listener(address: str) -> bool:

@@ -19,10 +19,15 @@ from infra_network import inspect_mdns_exposure
 from infra_audit_common import (
     AUTH_LOG_SAMPLE_LIMIT,
     AUTH_LOG_SAMPLE_MAX_CHARS,
+    AUTH_SUSPICIOUS_ALERT_THRESHOLD,
+    AUTH_SUSPICIOUS_PATTERN,
     auth_log_tail_command,
     check_firewall_status as common_check_firewall_status,
+    filtered_auth_lines as common_filtered_auth_lines,
     inspect_unexpected_listeners as common_inspect_unexpected_listeners,
+    is_self_generated_auth_audit_line as common_is_self_generated_auth_audit_line,
     journalctl_ssh_tail_command,
+    summarize_auth_event_sources as common_summarize_auth_event_sources,
     summarize_external_ports as common_summarize_external_ports,
 )
 
@@ -34,12 +39,10 @@ STATE_FILE = ROOT / 'memory' / 'infra-autopilot-state.json'
 ACTIVITY_LOG = ROOT / 'logs' / 'infra-activity.log'
 ART_DIR = INFRA / 'artifacts'
 BACKUP_VERIFY_SCRIPT = ROOT / 'scripts' / 'verify-backup-integrity.sh'
-AUTH_SUSPICIOUS_ALERT_THRESHOLD = 5
 AUTH_SIGNAL_PATTERN = re.compile(
     r'(failed|invalid user|authentication failure|accepted|error: pam|connection closed by invalid user)',
     re.IGNORECASE,
 )
-AUTH_SUSPICIOUS_PATTERN = re.compile(r'(failed|invalid user|authentication failure|error: pam)', re.IGNORECASE)
 ARTIFACT_GLOBS = {
     'security': '*-run-security-audit-*.md',
     'disk': '*-monitor-disk-usage-*.md',
@@ -120,22 +123,11 @@ def get_auth_sample() -> tuple[str, str]:
 
 
 def is_self_generated_auth_audit_line(line: str) -> bool:
-    lowered = line.lower()
-    if 'sudo:' not in lowered or 'command=' not in lowered:
-        return False
-    if '/var/log/auth.log' in lowered and any(tool in lowered for tool in ('grep', 'awk', 'sed', 'tail', 'cat')):
-        return True
-    if 'journalctl' in lowered and any(token in lowered for token in ('-u ssh', '-u sshd', ' ssh.service', ' sshd.service')):
-        return True
-    return False
+    return common_is_self_generated_auth_audit_line(line)
 
 
 def filtered_auth_lines(log_text: str, pattern: re.Pattern[str]) -> list[str]:
-    return [
-        line
-        for line in log_text.splitlines()
-        if not is_self_generated_auth_audit_line(line) and pattern.search(line)
-    ]
+    return common_filtered_auth_lines(log_text, pattern)
 
 
 def extract_recent_auth_findings(log_text: str) -> list[str]:
@@ -379,6 +371,9 @@ def execute_task(task: str, run_id: int) -> tuple[Path, str]:
         lines.append('')
         lines.append('## Auth Risk Assessment')
         lines.append(summarize_auth_risk(auth_sample, source))
+        lines.append('')
+        lines.append('## Auth Source Summary')
+        lines.append(common_summarize_auth_event_sources(auth_sample, suspicious_pattern=AUTH_SUSPICIOUS_PATTERN))
     elif 'backup integrity' in tl:
         lines.append('## Backup Integrity Check')
         if BACKUP_VERIFY_SCRIPT.exists():

@@ -1,7 +1,7 @@
 {
-  "runs": 222,
-  "last_primary_task": "Test unsubscribe flow end-to-end",
-  "task_cursor": 3,
+  "runs": 224,
+  "last_primary_task": "Document approved public B2B data sources",
+  "task_cursor": 5,
   "task_progress": {
     "**Daily cash task:** close one short-cycle offer (lead pack, template pack, quick script fix).": 1,
     "**Recurring income task:** build/iterate one monthly-retainer style product offer.": 1,
@@ -10,8 +10,8 @@
     "Review cold email templates for GDPR/CAN-SPAM compliance": 14,
     "Verify email footer includes address + unsubscribe link": 14,
     "Test unsubscribe flow end-to-end": 14,
-    "Confirm suppression list is operational": 13,
-    "Document approved public B2B data sources": 13,
+    "Confirm suppression list is operational": 14,
+    "Document approved public B2B data sources": 14,
     "Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies": 13,
     "Write the one-line sales promise for the core service offer": 13,
     "Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md": 13,

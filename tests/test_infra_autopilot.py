@@ -70,6 +70,7 @@ class InfraAutopilotTests(unittest.TestCase):
 
         self.assertIn("## Unexpected Listener Details", content)
         self.assertIn("udp/58627 owner(s): openclaw-gateway", content)
+        self.assertIn("## Auth Source Summary", content)
 
     def test_score_task_from_status_ignores_stale_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

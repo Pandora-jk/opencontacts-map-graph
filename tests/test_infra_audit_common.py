@@ -83,6 +83,28 @@ class InfraAuditCommonTests(unittest.TestCase):
         self.assertIn('WARN: ufw installed but status visibility is blocked by current privileges', result)
         self.assertIn('HARDENING: verify `sudo ufw status verbose` from an unrestricted host shell', result)
 
+    def test_summarize_auth_event_sources_ranks_ips_and_usernames(self) -> None:
+        log_text = "\n".join(
+            [
+                "Mar 11 02:05:44 host sshd[1]: Invalid user sol from 64.225.75.83 port 42040",
+                "Mar 11 02:05:45 host sshd[1]: Connection closed by invalid user sol 64.225.75.83 port 42040 [preauth]",
+                "Mar 11 02:06:44 host sshd[1]: Invalid user solana from 64.225.75.83 port 42041",
+                "Mar 11 02:06:45 host sshd[1]: Connection closed by invalid user solana 64.225.75.83 port 42041 [preauth]",
+                "Mar 11 02:07:44 host sshd[1]: Invalid user admin from 164.92.146.128 port 33130",
+            ]
+        )
+
+        result = infra_audit_common.summarize_auth_event_sources(log_text)
+
+        self.assertIn(
+            "ALERT: Auth event sources in sampled logs (5 events / 2 source(s)): 64.225.75.83 x4 (users: sol, solana); 164.92.146.128 x1 (users: admin)",
+            result,
+        )
+        self.assertIn(
+            "HARDENING: review recurring auth-event sources for host/cloud firewall blocking or access-list restrictions",
+            result,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

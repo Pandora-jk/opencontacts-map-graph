@@ -15,11 +15,16 @@ import subprocess
 from pathlib import Path
 
 from infra_audit_common import check_firewall_status as common_check_firewall_status
+from infra_audit_common import filtered_auth_lines as common_filtered_auth_lines
 from infra_audit_common import inspect_unexpected_listeners as common_inspect_unexpected_listeners
+from infra_audit_common import is_self_generated_auth_audit_line as common_is_self_generated_auth_audit_line
+from infra_audit_common import summarize_auth_event_sources as common_summarize_auth_event_sources
 from infra_audit_common import summarize_external_ports as common_summarize_external_ports
 from infra_audit_common import (
     AUTH_LOG_SAMPLE_LIMIT,
     AUTH_LOG_SAMPLE_MAX_CHARS,
+    AUTH_SUSPICIOUS_ALERT_THRESHOLD,
+    AUTH_SUSPICIOUS_PATTERN,
     auth_log_tail_command,
     journalctl_ssh_tail_command,
 )
@@ -32,8 +37,6 @@ ART_DIR = INFRA / 'artifacts' / 'checks'
 LOG_DIR = ROOT / 'logs'
 ACTIVITY_LOG = LOG_DIR / 'infra-activity.log'
 BACKUP_VERIFY_SCRIPT = ROOT / 'scripts' / 'verify-backup-integrity.sh'
-AUTH_SUSPICIOUS_ALERT_THRESHOLD = 5
-AUTH_SUSPICIOUS_PATTERN = re.compile(r'(failed|invalid user|authentication failure|error: pam)', re.IGNORECASE)
 
 
 def run_cmd(cmd: list[str], max_chars: int = 800) -> str:
@@ -165,22 +168,11 @@ def check_ssh_config() -> str:
 
 
 def is_self_generated_auth_audit_line(line: str) -> bool:
-    lowered = line.lower()
-    if 'sudo:' not in lowered or 'command=' not in lowered:
-        return False
-    if '/var/log/auth.log' in lowered and any(tool in lowered for tool in ('grep', 'awk', 'sed', 'tail', 'cat')):
-        return True
-    if 'journalctl' in lowered and any(token in lowered for token in ('-u ssh', '-u sshd', ' ssh.service', ' sshd.service')):
-        return True
-    return False
+    return common_is_self_generated_auth_audit_line(line)
 
 
 def suspicious_auth_lines(log_text: str) -> list[str]:
-    return [
-        line
-        for line in log_text.splitlines()
-        if not is_self_generated_auth_audit_line(line) and AUTH_SUSPICIOUS_PATTERN.search(line)
-    ]
+    return common_filtered_auth_lines(log_text, AUTH_SUSPICIOUS_PATTERN)
 
 
 def count_failed_auth_attempts(log_text: str) -> int:
@@ -196,20 +188,19 @@ def summarize_failed_auth(log_text: str) -> str:
     return f'{count} suspicious auth lines found in sampled logs'
 
 
+def get_auth_sample() -> tuple[str, str]:
+    auth_log = Path('/var/log/auth.log')
+    if auth_log.exists():
+        return run_cmd(auth_log_tail_command(AUTH_LOG_SAMPLE_LIMIT), max_chars=AUTH_LOG_SAMPLE_MAX_CHARS), 'auth.log'
+    journalctl = shutil.which('journalctl')
+    if journalctl:
+        return run_cmd(journalctl_ssh_tail_command(AUTH_LOG_SAMPLE_LIMIT), max_chars=AUTH_LOG_SAMPLE_MAX_CHARS), 'journalctl -u ssh'
+    return '', ''
+
+
 def check_failed_logins() -> str:
     """Check for recent failed SSH/auth attempts."""
-    auth_log = Path('/var/log/auth.log')
-    sampled = ''
-    source = ''
-
-    if auth_log.exists():
-        sampled = run_cmd(auth_log_tail_command(AUTH_LOG_SAMPLE_LIMIT), max_chars=AUTH_LOG_SAMPLE_MAX_CHARS)
-        source = 'auth.log'
-    else:
-        journalctl = shutil.which('journalctl')
-        if journalctl:
-            sampled = run_cmd(journalctl_ssh_tail_command(AUTH_LOG_SAMPLE_LIMIT), max_chars=AUTH_LOG_SAMPLE_MAX_CHARS)
-            source = 'journalctl -u ssh'
+    sampled, source = get_auth_sample()
 
     if not sampled or sampled == 'n/a':
         return 'No auth log source available'
@@ -217,6 +208,18 @@ def check_failed_logins() -> str:
         return sampled
 
     return f"{summarize_failed_auth(sampled)} ({source})"
+
+
+def check_auth_source_summary() -> str:
+    sampled, source = get_auth_sample()
+    if not sampled or sampled == 'n/a':
+        return 'No auth log source available'
+    if sampled.startswith('Error:'):
+        return sampled
+    summary = common_summarize_auth_event_sources(sampled, suspicious_pattern=AUTH_SUSPICIOUS_PATTERN)
+    if summary.startswith('No suspicious auth-event source summary'):
+        return f'{summary} ({source})'
+    return f'{summary}\nSource: {source}'
 
 
 def check_backup_integrity() -> str:
@@ -328,6 +331,11 @@ def generate_report() -> tuple[str, list[str]]:
         'result': check_failed_logins()
     }
 
+    findings['checks']['auth_source_summary'] = {
+        'status': 'checked',
+        'result': check_auth_source_summary()
+    }
+
     findings['checks']['backup_integrity'] = {
         'status': 'checked',
         'result': check_backup_integrity()
@@ -412,6 +420,10 @@ def generate_report() -> tuple[str, list[str]]:
         '',
         f"```\n{findings['checks']['failed_logins']['result']}\n```",
         '',
+        '## Auth Source Summary',
+        '',
+        f"```\n{findings['checks']['auth_source_summary']['result']}\n```",
+        '',
         '## Backup Integrity',
         '',
         f"```\n{findings['checks']['backup_integrity']['result']}\n```",
@@ -450,6 +462,7 @@ def generate_report() -> tuple[str, list[str]]:
         f"Firewall: {one_line(findings['checks']['firewall_status']['result'])}",
         f"SSH: {one_line(findings['checks']['ssh_config']['result'])}",
         f"Failed Logins: {one_line(findings['checks']['failed_logins']['result'])}",
+        f"Auth Sources: {one_line(findings['checks']['auth_source_summary']['result'])}",
         f"Backup: {one_line(findings['checks']['backup_integrity']['result'])}",
         f"Services: {one_line(findings['checks']['service_health']['result'])}",
     ]

@@ -1,9 +1,9 @@
 # Travel Status
 
-- Last run (UTC): 2026-03-11T13:44:47Z
-- Run count: 54
-- Active task: **Build day-by-day itinerary:** 70-day plan balancing driving, hiking, surfing, diving, rest.
+- Last run (UTC): 2026-03-11T15:28:29Z
+- Run count: 55
+- Active task: **Weather monitoring:** Cyclone season (north QLD), fire danger (NSW).
 - Task progress count: 7
-- Last artifact: departments/travel/artifacts/plans/20260311T134447Z-r54-build-day-by-day-itinerary-70-day-plan-balancing-driving.md
+- Last artifact: departments/travel/artifacts/plans/20260311T152829Z-r55-weather-monitoring-cyclone-season-north-qld-fire-danger-.md
 - Autonomous open queue: 8
 
