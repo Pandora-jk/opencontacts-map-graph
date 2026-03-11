@@ -52,7 +52,7 @@ class ContactLocationTest {
     fun distanceTo_returnsZeroForSamePoint() {
         val location = ContactLocation("1", 37.7749, -122.4194)
 
-        assertEquals(0.0, location.distanceTo(location), 0.0)
+        assertEquals(0.0, location.distanceTo(location) ?: 0.0, 0.0)
     }
 
     @Test

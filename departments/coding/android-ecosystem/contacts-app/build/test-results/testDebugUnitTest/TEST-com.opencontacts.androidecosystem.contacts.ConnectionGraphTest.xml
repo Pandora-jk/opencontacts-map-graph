@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-03-11T03:29:45" hostname="ip-172-31-34-63" time="0.27">
+  <properties/>
+  <testcase name="neighbors_returnsEmptySetForUnknownNode" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.055"/>
+  <testcase name="clusters_returnsSingleNodeClustersForDisconnectedNodes" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.184"/>
+  <testcase name="addEdge_createsMissingNodesAutomatically" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.012"/>
+  <testcase name="edgeCount_countsUndirectedEdgesOnce" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.003"/>
+  <testcase name="addEdge_addsBidirectionalNeighbors" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.001"/>
+  <testcase name="addNode_addsTrimmedNodeId" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.0"/>
+  <testcase name="addEdge_rejectsSelfEdges" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.0"/>
+  <testcase name="removeEdge_removesBothDirections" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.001"/>
+  <testcase name="addNode_rejectsNullIds" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.0"/>
+  <testcase name="removeEdge_returnsFalseWhenMissing" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.0"/>
+  <testcase name="fromAdjacency_ignoresBlankNodesAndSelfEdges" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.0"/>
+  <testcase name="removeNode_returnsFalseForUnknownNode" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.0"/>
+  <testcase name="addEdge_returnsFalseWhenEdgeAlreadyExists" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.0"/>
+  <testcase name="addNode_returnsFalseForDuplicateNode" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.0"/>
+  <testcase name="addEdge_rejectsBlankEndpoints" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.0"/>
+  <testcase name="addNode_rejectsBlankIds" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.001"/>
+  <testcase name="clusters_groupsConnectedComponents" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.007"/>
+  <testcase name="removeNode_removesIncidentEdges" classname="com.opencontacts.androidecosystem.contacts.ConnectionGraphTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

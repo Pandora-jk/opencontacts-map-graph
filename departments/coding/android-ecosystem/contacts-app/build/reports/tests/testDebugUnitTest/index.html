@@ -20,13 +20,13 @@
 <tr>
 <td>
 <div class="infoBox" id="tests">
-<div class="counter">35</div>
+<div class="counter">141</div>
 <p>tests</p>
 </div>
 </td>
 <td>
 <div class="infoBox" id="failures">
-<div class="counter">0</div>
+<div class="counter">1</div>
 <p>failures</p>
 </div>
 </td>
@@ -38,7 +38,7 @@
 </td>
 <td>
 <div class="infoBox" id="duration">
-<div class="counter">13.012s</div>
+<div class="counter">12.157s</div>
 <p>duration</p>
 </div>
 </td>
@@ -47,8 +47,8 @@
 </div>
 </td>
 <td>
-<div class="infoBox success" id="successRate">
-<div class="percent">100%</div>
+<div class="infoBox failures" id="successRate">
+<div class="percent">99%</div>
 <p>successful</p>
 </div>
 </td>
@@ -58,13 +58,25 @@
 <div id="tabs">
 <ul class="tabLinks">
 <li>
-<a href="#tab0">Packages</a>
+<a href="#tab0">Failed tests</a>
 </li>
 <li>
-<a href="#tab1">Classes</a>
+<a href="#tab1">Packages</a>
+</li>
+<li>
+<a href="#tab2">Classes</a>
 </li>
 </ul>
 <div id="tab0" class="tab">
+<h2>Failed tests</h2>
+<ul class="linkList">
+<li>
+<a href="classes/com.opencontacts.androidecosystem.contacts.GraphAlgorithmTest.html">GraphAlgorithmTest</a>.
+<a href="classes/com.opencontacts.androidecosystem.contacts.GraphAlgorithmTest.html#connectionStrength_returnsPathWeightForIndirectConnectionsWithoutSharedNeighbors">connectionStrength_returnsPathWeightForIndirectConnectionsWithoutSharedNeighbors</a>
+</li>
+</ul>
+</div>
+<div id="tab1" class="tab">
 <h2>Packages</h2>
 <table>
 <thead>
@@ -79,14 +91,14 @@
 </thead>
 <tbody>
 <tr>
-<td class="success">
+<td class="failures">
 <a href="packages/com.opencontacts.androidecosystem.contacts.html">com.opencontacts.androidecosystem.contacts</a>
 </td>
-<td>9</td>
+<td>115</td>
+<td>1</td>
 <td>0</td>
-<td>0</td>
-<td>0.032s</td>
-<td class="success">100%</td>
+<td>3.325s</td>
+<td class="failures">99%</td>
 </tr>
 <tr>
 <td class="success">
@@ -95,13 +107,13 @@
 <td>26</td>
 <td>0</td>
 <td>0</td>
-<td>12.980s</td>
+<td>8.832s</td>
 <td class="success">100%</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div id="tab1" class="tab">
+<div id="tab2" class="tab">
 <h2>Classes</h2>
 <table>
 <thead>
@@ -117,22 +129,82 @@
 <tbody>
 <tr>
 <td class="success">
+<a href="classes/com.opencontacts.androidecosystem.contacts.ConnectionGraphTest.html">com.opencontacts.androidecosystem.contacts.ConnectionGraphTest</a>
+</td>
+<td>18</td>
+<td>0</td>
+<td>0</td>
+<td>0.265s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">
 <a href="classes/com.opencontacts.androidecosystem.contacts.ContactGraphBuilderTest.html">com.opencontacts.androidecosystem.contacts.ContactGraphBuilderTest</a>
 </td>
-<td>3</td>
+<td>7</td>
 <td>0</td>
 <td>0</td>
-<td>0.021s</td>
+<td>0.008s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="classes/com.opencontacts.androidecosystem.contacts.ContactListItemTest.html">com.opencontacts.androidecosystem.contacts.ContactListItemTest</a>
+</td>
+<td>6</td>
+<td>0</td>
+<td>0</td>
+<td>2.858s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="classes/com.opencontacts.androidecosystem.contacts.ContactLocationTest.html">com.opencontacts.androidecosystem.contacts.ContactLocationTest</a>
+</td>
+<td>12</td>
+<td>0</td>
+<td>0</td>
+<td>0.015s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="classes/com.opencontacts.androidecosystem.contacts.ContactMapViewModelTest.html">com.opencontacts.androidecosystem.contacts.ContactMapViewModelTest</a>
+</td>
+<td>15</td>
+<td>0</td>
+<td>0</td>
+<td>0.017s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="classes/com.opencontacts.androidecosystem.contacts.ContactMarkerInfoWindowTest.html">com.opencontacts.androidecosystem.contacts.ContactMarkerInfoWindowTest</a>
+</td>
+<td>5</td>
+<td>0</td>
+<td>0</td>
+<td>0.015s</td>
 <td class="success">100%</td>
 </tr>
 <tr>
 <td class="success">
 <a href="classes/com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest.html">com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest</a>
 </td>
-<td>3</td>
+<td>15</td>
 <td>0</td>
 <td>0</td>
-<td>0.005s</td>
+<td>0.014s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="classes/com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest.html">com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest</a>
+</td>
+<td>13</td>
+<td>0</td>
+<td>0</td>
+<td>0.095s</td>
 <td class="success">100%</td>
 </tr>
 <tr>
@@ -142,7 +214,27 @@
 <td>3</td>
 <td>0</td>
 <td>0</td>
-<td>0.006s</td>
+<td>0.002s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="failures">
+<a href="classes/com.opencontacts.androidecosystem.contacts.GraphAlgorithmTest.html">com.opencontacts.androidecosystem.contacts.GraphAlgorithmTest</a>
+</td>
+<td>15</td>
+<td>1</td>
+<td>0</td>
+<td>0.022s</td>
+<td class="failures">93%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="classes/com.opencontacts.androidecosystem.contacts.GraphVisualizationViewTest.html">com.opencontacts.androidecosystem.contacts.GraphVisualizationViewTest</a>
+</td>
+<td>6</td>
+<td>0</td>
+<td>0</td>
+<td>0.014s</td>
 <td class="success">100%</td>
 </tr>
 <tr>
@@ -152,7 +244,7 @@
 <td>13</td>
 <td>0</td>
 <td>0</td>
-<td>8.976s</td>
+<td>7.613s</td>
 <td class="success">100%</td>
 </tr>
 <tr>
@@ -162,7 +254,7 @@
 <td>13</td>
 <td>0</td>
 <td>0</td>
-<td>4.004s</td>
+<td>1.219s</td>
 <td class="success">100%</td>
 </tr>
 </tbody>
@@ -176,7 +268,7 @@
 <input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
 </label>
 </div>Generated by 
-<a href="http://www.gradle.org">Gradle 8.7</a> at Mar 10, 2026, 10:28:23 PM</p>
+<a href="http://www.gradle.org">Gradle 8.7</a> at Mar 11, 2026, 3:29:58 AM</p>
 </div>
 </div>
 </body>

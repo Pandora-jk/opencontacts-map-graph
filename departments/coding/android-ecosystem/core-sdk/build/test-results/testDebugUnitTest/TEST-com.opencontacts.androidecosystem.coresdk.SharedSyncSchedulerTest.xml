@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.opencontacts.androidecosystem.coresdk.SharedSyncSchedulerTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-03-11T03:28:58" hostname="ip-172-31-34-63" time="0.089">
+  <properties/>
+  <testcase name="schedule_ordersJobsByPriorityThenScheduledTime" classname="com.opencontacts.androidecosystem.coresdk.SharedSyncSchedulerTest" time="0.08"/>
+  <testcase name="schedule_deduplicatesJobsAndSupportsCompletion" classname="com.opencontacts.androidecosystem.coresdk.SharedSyncSchedulerTest" time="0.001"/>
+  <testcase name="schedule_rejectsNullAndBlankIds" classname="com.opencontacts.androidecosystem.coresdk.SharedSyncSchedulerTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

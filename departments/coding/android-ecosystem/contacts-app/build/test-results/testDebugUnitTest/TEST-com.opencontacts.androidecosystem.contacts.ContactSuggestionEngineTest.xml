@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-03-11T03:29:49" hostname="ip-172-31-34-63" time="0.098">
+  <properties/>
+  <testcase name="suggest_usesRecencyOnlyWhenOriginIsInvalid" classname="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" time="0.081"/>
+  <testcase name="suggest_breaksScoreTiesAlphabeticallyByTitle" classname="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" time="0.001"/>
+  <testcase name="suggest_returnsEmptyForNonPositiveLimit" classname="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" time="0.001"/>
+  <testcase name="suggest_appliesCategoryFilterCaseInsensitively" classname="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" time="0.0"/>
+  <testcase name="suggest_deduplicatesByNormalizedContactIdKeepingHighestScore" classname="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" time="0.0"/>
+  <testcase name="suggest_setsReasonToNearbyAndRecentWhenBothSignalsExist" classname="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" time="0.003"/>
+  <testcase name="suggest_returnsEmptyForNullContacts" classname="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" time="0.001"/>
+  <testcase name="suggest_usesRecencyWeightingToBoostRecentContacts" classname="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" time="0.002"/>
+  <testcase name="suggest_appliesFavoriteBoost" classname="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" time="0.001"/>
+  <testcase name="suggest_ordersContactsByProximity" classname="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" time="0.001"/>
+  <testcase name="suggest_limitsResultCount" classname="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" time="0.001"/>
+  <testcase name="suggest_usesInteractionCountToBreakTies" classname="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" time="0.002"/>
+  <testcase name="suggest_skipsContactsWithoutValidLocationWhenOriginIsValid" classname="com.opencontacts.androidecosystem.contacts.ContactSuggestionEngineTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

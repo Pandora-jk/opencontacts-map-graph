@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-03-10T22:28:19" hostname="ip-172-31-34-63" time="0.007">
+<testsuite name="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-03-11T03:29:49" hostname="ip-172-31-34-63" time="0.017">
   <properties/>
-  <testcase name="filter_combinesFavoriteAndCompanyFilters" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.005"/>
-  <testcase name="filter_matchesQueryAcrossSearchableFields_caseInsensitively" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.0"/>
-  <testcase name="filter_handlesNullListsAndBlankQueries" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.0"/>
+  <testcase name="filter_returnsEmptyListForNullContacts" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.002"/>
+  <testcase name="filter_matchesEmailCaseInsensitively" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.007"/>
+  <testcase name="filter_ignoresBlankCompanyFilter" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.001"/>
+  <testcase name="filter_combinesQueryFavoriteAndCompanyFilters" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.0"/>
+  <testcase name="filter_returnsEmptyWhenQueryDoesNotMatchAnyField" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.0"/>
+  <testcase name="filter_filtersByCompanyWithTrimmedCaseInsensitiveValue" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.0"/>
+  <testcase name="filter_filtersFavoritesOnly" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.0"/>
+  <testcase name="filter_matchesCompanyCaseInsensitively" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.001"/>
+  <testcase name="filter_matchesDisplayNameCaseInsensitively" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.001"/>
+  <testcase name="filter_ignoresBlankQuery" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.0"/>
+  <testcase name="filter_preservesDuplicateContactsInResults" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.001"/>
+  <testcase name="filter_returnsOriginalContactsForNullQueryAndNoFilters" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.0"/>
+  <testcase name="filter_handlesContactsWithNullFieldsWithoutCrashing" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.0"/>
+  <testcase name="filter_matchesPhoneNumbersUsingDigitNormalization" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.0"/>
+  <testcase name="filter_matchesTagsCaseInsensitively" classname="com.opencontacts.androidecosystem.contacts.ContactSearchFilterTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
