@@ -156,3 +156,4 @@
 [2026-03-11 08:46:12 UTC] run=208 primary='Confirm suppression list is operational' artifact='departments/finance/artifacts/compliance/compliance-check-20260311-r208.md' blocking=0 queue=15
 [2026-03-11 08:56:51 UTC] run=209 primary='Document approved public B2B data sources' artifact='departments/finance/artifacts/compliance/compliance-check-20260311-r209.md' blocking=0 queue=15
 [2026-03-11 09:17:34 UTC] run=210 primary='Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies' artifact='departments/finance/artifacts/icp/primary-icp-20260311-r210.md' blocking=0 queue=15
+[2026-03-11 09:46:32 UTC] run=211 primary='Write the one-line sales promise for the core service offer' artifact='departments/finance/artifacts/offers/core-service-offer-20260311-r211.md' blocking=0 queue=15
