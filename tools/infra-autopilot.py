@@ -16,6 +16,8 @@ from pathlib import Path
 
 from infra_disk import DISK_ALERT_THRESHOLD, DISK_CRITICAL_THRESHOLD, build_disk_usage_report
 from infra_network import inspect_mdns_exposure
+from infra_audit_common import check_firewall_status as common_check_firewall_status
+from infra_audit_common import summarize_external_ports as common_summarize_external_ports
 
 ROOT = Path('/home/ubuntu/.openclaw/workspace')
 INFRA = ROOT / 'departments' / 'infra'
@@ -25,7 +27,6 @@ STATE_FILE = ROOT / 'memory' / 'infra-autopilot-state.json'
 ACTIVITY_LOG = ROOT / 'logs' / 'infra-activity.log'
 ART_DIR = INFRA / 'artifacts'
 BACKUP_VERIFY_SCRIPT = ROOT / 'scripts' / 'verify-backup-integrity.sh'
-EXPECTED_EXTERNAL_PORTS = {'tcp': {22}, 'udp': {68}}
 AUTH_SUSPICIOUS_ALERT_THRESHOLD = 5
 AUTH_SIGNAL_PATTERN = re.compile(
     r'(failed|invalid user|authentication failure|accepted|error: pam|connection closed by invalid user)',
@@ -78,9 +79,12 @@ def parse_autonomous_tasks(text: str) -> list[str]:
 
 
 def run_cmd(cmd: list[str], max_chars: int = 800) -> str:
-    p = subprocess.run(cmd, capture_output=True, text=True)
-    txt = (p.stdout or p.stderr).strip()
-    return txt[:max_chars] if txt else 'n/a'
+    try:
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        txt = (p.stdout or p.stderr).strip()
+        return txt[:max_chars] if txt else 'n/a'
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as exc:
+        return f'Error: {str(exc)[:200]}'
 
 
 def one_line(value: str, max_len: int = 140) -> str:
@@ -88,94 +92,12 @@ def one_line(value: str, max_len: int = 140) -> str:
     return (txt[: max_len - 1] + '…') if len(txt) > max_len else txt
 
 
-def classify_external_ports(port_lines: str) -> tuple[list[str], int]:
-    external: set[str] = set()
-    local_only_count = 0
-    for raw in port_lines.splitlines():
-        parts = raw.split()
-        if len(parts) != 2:
-            continue
-        proto, address = parts
-        is_local = (
-            address.startswith('127.')
-            or address.startswith('[::1]')
-            or address.startswith('localhost:')
-            or address.startswith('127.0.0.53:')
-            or address.startswith('127.0.0.54:')
-        )
-        if is_local:
-            local_only_count += 1
-            continue
-        if ':' not in address:
-            external.add(f'{proto.lower()}/{address}')
-            continue
-        port = address.rsplit(':', 1)[-1]
-        if port.isdigit():
-            external.add(f'{proto.lower()}/{port}')
-        else:
-            external.add(f'{proto.lower()}/{address}')
-    return sorted(external), local_only_count
-
-
-def explain_unexpected_listener(entry: str) -> str | None:
-    if entry == 'udp/5353':
-        return (
-            'RISK: udp/5353 is mDNS/MulticastDNS; public/cloud hosts usually do not need it. '
-            'Consider disabling MulticastDNS/LLMNR or blocking it with host/cloud firewall policy.'
-        )
-    return None
-
-
 def summarize_external_ports(port_lines: str) -> str:
-    if not port_lines or port_lines == 'n/a':
-        return 'No externally exposed listening ports found'
-
-    external, local_only_count = classify_external_ports(port_lines)
-    if not external:
-        return f'No externally exposed listening ports (local-only listeners only: {local_only_count})'
-
-    unexpected = []
-    for entry in sorted(external):
-        proto, value = entry.split('/', 1)
-        if value.isdigit() and int(value) in EXPECTED_EXTERNAL_PORTS.get(proto, set()):
-            continue
-        unexpected.append(entry)
-
-    if unexpected:
-        lines = [f"ALERT: Unexpected externally exposed listeners ({len(unexpected)}): {', '.join(unexpected[:8])}"]
-        for entry in unexpected:
-            hint = explain_unexpected_listener(entry)
-            if hint and hint not in lines:
-                lines.append(hint)
-        return '\n'.join(lines)
-    return f"Externally exposed listeners match allowlist ({len(external)}): {', '.join(sorted(external)[:8])}"
+    return common_summarize_external_ports(port_lines)
 
 
 def check_firewall_status() -> str:
-    lines: list[str] = []
-    ufw = shutil.which('ufw')
-    nft = shutil.which('nft')
-    iptables = shutil.which('iptables')
-
-    if ufw:
-        status = run_cmd(['bash', '-lc', 'ufw status verbose 2>&1 | sed -n "1,20p"'], max_chars=1200)
-        if re.search(r'^Status:\s+active\b', status, re.IGNORECASE | re.MULTILINE):
-            lines.append('ufw: active')
-        elif re.search(r'^Status:\s+inactive\b', status, re.IGNORECASE | re.MULTILINE):
-            lines.append('ALERT: ufw installed but inactive')
-        else:
-            lines.append(f'ufw: {one_line(status, 180)}')
-    else:
-        lines.append('WARN: ufw unavailable on host')
-
-    other_tools = [name for name, found in (('nft', nft), ('iptables', iptables)) if found]
-    if other_tools:
-        lines.append(f"Other firewall tooling detected: {', '.join(other_tools)}")
-    elif not ufw:
-        lines.append('RISK: No host firewall tool detected (ufw/nft/iptables unavailable)')
-
-    lines.append('Note: upstream cloud firewalls/security groups are not visible from this host check')
-    return '\n'.join(lines)
+    return common_check_firewall_status(run_cmd, which=shutil.which, render_one_line=one_line)
 
 
 def get_auth_sample() -> tuple[str, str]:

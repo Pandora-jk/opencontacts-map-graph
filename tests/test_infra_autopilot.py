@@ -17,6 +17,31 @@ SPEC.loader.exec_module(infra_autopilot)
 
 
 class InfraAutopilotTests(unittest.TestCase):
+    def test_summarize_external_ports_treats_ipv4_mapped_loopback_as_local_only(self) -> None:
+        result = infra_autopilot.summarize_external_ports(
+            "tcp [::ffff:127.0.0.1]:17564\nudp *:58627\ntcp 0.0.0.0:22"
+        )
+
+        self.assertIn("ALERT: Unexpected externally exposed listeners (1): udp/58627", result)
+        self.assertNotIn("tcp/17564", result)
+
+    def test_check_firewall_status_detects_ufw_outside_default_path(self) -> None:
+        def fake_run_cmd(cmd: list[str], max_chars: int = 800) -> str:
+            shell_cmd = cmd[-1]
+            if 'command -v ufw' in shell_cmd:
+                return '/usr/sbin/ufw'
+            if 'sudo ufw status verbose' in shell_cmd:
+                return 'Status: active'
+            return 'n/a'
+
+        with mock.patch.object(infra_autopilot, "run_cmd", side_effect=fake_run_cmd), mock.patch.object(
+            infra_autopilot.shutil, "which", return_value=None
+        ):
+            result = infra_autopilot.check_firewall_status()
+
+        self.assertIn("ufw: active", result)
+        self.assertNotIn("WARN: ufw unavailable on host", result)
+
     def test_score_task_from_status_ignores_stale_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             artifact = Path(tmpdir) / "20260310T153953Z-infra-status.md"

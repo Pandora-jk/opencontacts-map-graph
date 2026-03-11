@@ -19,17 +19,18 @@ import android.provider.ContactsContract
 
 /**
  * Fragment that displays actual Android contact groups.
- * Clicking a group shows contacts in that group.
+ * Clicking a group navigates to filtered contact list.
  */
 class ContactGroupsFragment : Fragment() {
 
     private lateinit var viewModel: ContactMapViewModel
     private val groupAdapter = GroupAdapter { group ->
-        // Navigate to contacts filtered by this group
+        // Replace current fragment with filtered contact list
+        // This keeps the bottom nav intact
         val fragment = ContactListFragment(ContactListMode.ALL, groupName = group.name)
         parentFragmentManager.beginTransaction()
-            .replace(android.R.id.content, fragment)
-            .addToBackStack(null)
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack("group_${group.name}")
             .commit()
     }
     private val requestPermissionLauncher = registerForActivityResult(
