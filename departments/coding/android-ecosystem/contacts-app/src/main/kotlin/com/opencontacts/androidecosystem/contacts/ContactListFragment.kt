@@ -21,7 +21,10 @@ class ContactListFragment(
 ) : Fragment() {
 
     private lateinit var viewModel: ContactMapViewModel
-    private val contactAdapter = ContactAdapter()
+    private val contactAdapter = ContactAdapter { contact ->
+        // Show contact details (TODO: implement detail view)
+        showContactDetails(contact)
+    }
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -100,6 +103,13 @@ class ContactListFragment(
                 recyclerView?.visibility = View.VISIBLE
             }
         }
+    }
+
+    private fun showContactDetails(contact: ContactRecord) {
+        // TODO: Show contact details in a bottom sheet or new fragment
+        // For now, just show a simple message
+        val message = "${contact.displayName}\n${contact.phoneNumbers.joinToString(", ")}"
+        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()
     }
 }
 

@@ -1,7 +1,7 @@
 package com.opencontacts.androidecosystem.contacts
 
-import android.content.Context
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.os.Bundle
@@ -24,7 +24,14 @@ import android.provider.ContactsContract
 class ContactGroupsFragment : Fragment() {
 
     private lateinit var viewModel: ContactMapViewModel
-    private val groupAdapter = GroupAdapter()
+    private val groupAdapter = GroupAdapter { group ->
+        // Navigate to contacts filtered by this group
+        val fragment = ContactListFragment(ContactListMode.ALL, groupName = group.name)
+        parentFragmentManager.beginTransaction()
+            .replace(android.R.id.content, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -143,7 +150,7 @@ class ContactGroupsFragment : Fragment() {
 
 data class ContactGroup(val name: String, val count: Int)
 
-class GroupAdapter : androidx.recyclerview.widget.ListAdapter<ContactGroup, GroupAdapter.GroupViewHolder>(GroupDiffCallback()) {
+class GroupAdapter(private val onItemClick: (ContactGroup) -> Unit) : androidx.recyclerview.widget.ListAdapter<ContactGroup, GroupAdapter.GroupViewHolder>(GroupDiffCallback()) {
 
     class GroupViewHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         val groupName: TextView = itemView.findViewById(android.R.id.text1)
@@ -170,5 +177,9 @@ class GroupAdapter : androidx.recyclerview.widget.ListAdapter<ContactGroup, Grou
         val group = getItem(position)
         holder.groupName.text = group.name
         holder.groupCount.text = "${group.count} contacts"
+        
+        holder.itemView.setOnClickListener {
+            onItemClick(group)
+        }
     }
 }

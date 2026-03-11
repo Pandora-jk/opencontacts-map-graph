@@ -8,11 +8,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
-class ContactAdapter : ListAdapter<ContactRecord, ContactAdapter.ContactViewHolder>(ContactDiffCallback()) {
+class ContactAdapter(
+    private val onItemClick: ((ContactRecord) -> Unit)? = null
+) : ListAdapter<ContactRecord, ContactAdapter.ContactViewHolder>(ContactDiffCallback()) {
 
     class ContactViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val nameText: TextView = itemView.findViewById(android.R.id.text1)
-        val phoneText: TextView = itemView.findViewById(android.R.id.text2)
+        val nameText: TextView = itemView.findViewById<TextView>(android.R.id.text1)
+        val phoneText: TextView = itemView.findViewById<TextView>(android.R.id.text2)
     }
 
     class ContactDiffCallback : DiffUtil.ItemCallback<ContactRecord>() {
@@ -35,5 +37,9 @@ class ContactAdapter : ListAdapter<ContactRecord, ContactAdapter.ContactViewHold
         val contact = getItem(position)
         holder.nameText.text = contact.displayName ?: "Unknown"
         holder.phoneText.text = contact.phoneNumbers.firstOrNull() ?: ""
+        
+        holder.itemView.setOnClickListener {
+            onItemClick?.invoke(contact)
+        }
     }
 }
