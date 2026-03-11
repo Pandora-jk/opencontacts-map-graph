@@ -14,6 +14,7 @@ data class ContactRecord(
     val locationCategory: String? = null,
     val lastContactedAtEpochMillis: Long? = null,
     val interactionCount: Int = 0,
+    val groups: List<String> = emptyList(),
 )
 
 data class MapMarker(

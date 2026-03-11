@@ -1,12 +1,12 @@
 # Coding Status
 
-- Last run (UTC): 2026-03-11T11:50:06Z
-- Run count: 433
+- Last run (UTC): 2026-03-11T12:00:32Z
+- Run count: 434
 - Ready cards: 2
 - Active card: Write unit tests for pdftocsv.py core conversion path
 - Active mode: review_needed
 - Board: departments/coding/kanban/automation-scripts.md
-- Progress count (card): 377
-- Last artifact: departments/coding/artifacts/feedback/20260311T115006Z-r433-feature-automation-scripts-unit-tests-core-conve.md
+- Progress count (card): 378
+- Last artifact: departments/coding/artifacts/feedback/20260311T120032Z-r434-feature-automation-scripts-unit-tests-core-conve.md
 - Feedback loop: feedback_loop: unmerged=31 merge_ready=0 review_needed=11 coding_needed=20
 

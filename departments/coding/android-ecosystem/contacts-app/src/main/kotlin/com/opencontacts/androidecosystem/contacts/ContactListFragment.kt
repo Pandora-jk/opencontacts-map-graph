@@ -13,8 +13,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import android.provider.ContactsContract
 
-class ContactListFragment(private val mode: ContactListMode) : Fragment() {
+class ContactListFragment(
+    private val mode: ContactListMode,
+    private val groupName: String? = null
+) : Fragment() {
 
     private lateinit var viewModel: ContactMapViewModel
     private val contactAdapter = ContactAdapter()
@@ -67,9 +71,14 @@ class ContactListFragment(private val mode: ContactListMode) : Fragment() {
                 ContactListMode.ALL -> allContacts
                 ContactListMode.FAVORITES -> allContacts.filter { it.isFavorite }
                 ContactListMode.GROUPS -> {
-                    // For Groups mode, show contacts grouped by their primary group
-                    // For now, show all contacts (groups feature to be implemented with contact grouping logic)
-                    allContacts
+                    // Filter by group name if specified
+                    if (groupName != null) {
+                        allContacts.filter { contact ->
+                            contact.groups.contains(groupName)
+                        }
+                    } else {
+                        allContacts
+                    }
                 }
             }
             
@@ -81,7 +90,11 @@ class ContactListFragment(private val mode: ContactListMode) : Fragment() {
             if (filtered.isEmpty()) {
                 emptyText?.visibility = View.VISIBLE
                 recyclerView?.visibility = View.GONE
-                emptyText?.text = "No contacts"
+                emptyText?.text = when {
+                    mode == ContactListMode.FAVORITES -> "No favorite contacts"
+                    groupName != null -> "No contacts in '$groupName'"
+                    else -> "No contacts"
+                }
             } else {
                 emptyText?.visibility = View.GONE
                 recyclerView?.visibility = View.VISIBLE
@@ -89,3 +102,5 @@ class ContactListFragment(private val mode: ContactListMode) : Fragment() {
         }
     }
 }
+
+enum class ContactListMode { ALL, FAVORITES, GROUPS }

@@ -2,6 +2,8 @@ package com.opencontacts.androidecosystem.contacts
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,15 +15,23 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import android.provider.ContactsContract
 
 /**
- * Fragment that displays contact groups (e.g., Family, Work, Friends).
- * Each group can be clicked to show contacts in that group.
+ * Fragment that displays actual Android contact groups.
+ * Clicking a group shows contacts in that group.
  */
 class ContactGroupsFragment : Fragment() {
 
     private lateinit var viewModel: ContactMapViewModel
-    private val groupAdapter = GroupAdapter()
+    private val groupAdapter = GroupAdapter { group ->
+        // Navigate to contacts filtered by this group
+        val fragment = ContactListFragment(ContactListMode.ALL, groupName = group.name)
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -64,45 +74,76 @@ class ContactGroupsFragment : Fragment() {
     private fun loadGroups() {
         viewModel.loadContacts(requireContext())
         
-        viewModel.contacts.observe(viewLifecycleOwner) { allContacts ->
-            // Extract unique groups from contacts
-            // For now, Android contacts don't have explicit groups in the simple query
-            // We'll use a placeholder approach or extract from contact categories if available
-            
-            val groups = mutableMapOf<String, Int>()
-            
-            // For demonstration, we'll create groups based on contact name patterns
-            // or use a default "All Contacts" group
-            allContacts.forEach { contact ->
-                // Simple heuristic: use first letter as a "group" for demo
-                val firstLetter = contact.displayName?.firstOrNull()?.uppercase() ?: "#"
-                groups[firstLetter] = groups.getOrDefault(firstLetter, 0) + 1
+        val groups = mutableListOf<ContactGroup>()
+        var cursor: Cursor? = null
+        
+        try {
+            // Query Android contact groups
+            cursor = requireContext().contentResolver.query(
+                ContactsContract.Groups.CONTENT_URI,
+                arrayOf(
+                    ContactsContract.Groups._ID,
+                    ContactsContract.Groups.TITLE,
+                    ContactsContract.Groups.COUNT
+                ),
+                null,
+                null,
+                "${ContactsContract.Groups.TITLE} ASC"
+            )
+
+            cursor?.use {
+                val titleIndex = it.getColumnIndex(ContactsContract.Groups.TITLE)
+                val countIndex = it.getColumnIndex(ContactsContract.Groups.COUNT)
+
+                while (it.moveToNext()) {
+                    val title = it.getString(titleIndex)
+                    val count = it.getInt(countIndex)
+                    
+                    // Only show groups with contacts
+                    if (!title.isNullOrBlank() && count > 0) {
+                        groups.add(ContactGroup(title, count))
+                    }
+                }
             }
-            
-            val groupList = groups.map { (name, count) -> ContactGroup(name, count) }
-            groupAdapter.submitList(groupList)
-            
-            val emptyTextView = view?.findViewById<TextView>(R.id.empty_text)
-            val recyclerView = view?.findViewById<RecyclerView>(R.id.recycler_view)
-            
-            if (groupList.isEmpty()) {
-                emptyTextView?.visibility = View.VISIBLE
-                recyclerView?.visibility = View.GONE
-            } else {
-                emptyTextView?.visibility = View.GONE
-                recyclerView?.visibility = View.VISIBLE
-            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            cursor?.close()
+        }
+
+        // If no groups found, show a message
+        val emptyText = view?.findViewById<TextView>(R.id.empty_text)
+        val recyclerView = view?.findViewById<RecyclerView>(R.id.recycler_view)
+        
+        if (groups.isEmpty()) {
+            emptyText?.visibility = View.VISIBLE
+            emptyText?.text = "No contact groups found.\nGroups are created in your phone's Contacts app."
+            recyclerView?.visibility = View.GONE
+        } else {
+            emptyText?.visibility = View.GONE
+            recyclerView?.visibility = View.VISIBLE
+            groupAdapter.submitList(groups)
         }
     }
 }
 
 data class ContactGroup(val name: String, val count: Int)
 
-class GroupAdapter : androidx.recyclerview.widget.ListAdapter<ContactGroup, GroupAdapter.GroupViewHolder>(GroupDiffCallback()) {
+class GroupAdapter(private val onItemClick: (ContactGroup) -> Unit) : androidx.recyclerview.widget.ListAdapter<ContactGroup, GroupAdapter.GroupViewHolder>(GroupDiffCallback()) {
 
     class GroupViewHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         val groupName: TextView = itemView.findViewById(android.R.id.text1)
         val groupCount: TextView = itemView.findViewById(android.R.id.text2)
+        
+        init {
+            itemView.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
+                    val group = getItem(position)
+                    // Pass group info to callback
+                }
+            }
+        }
     }
 
     class GroupDiffCallback : androidx.recyclerview.widget.DiffUtil.ItemCallback<ContactGroup>() {
@@ -125,5 +166,9 @@ class GroupAdapter : androidx.recyclerview.widget.ListAdapter<ContactGroup, Grou
         val group = getItem(position)
         holder.groupName.text = group.name
         holder.groupCount.text = "${group.count} contacts"
+        
+        holder.itemView.setOnClickListener {
+            onItemClick(group)
+        }
     }
 }
