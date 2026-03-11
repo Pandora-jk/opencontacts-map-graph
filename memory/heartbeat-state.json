@@ -3,10 +3,10 @@
     "email": 1741514280,
     "projects": 1741514280,
     "memory": 1741514280,
-    "heartbeat": 1741581180,
-    "disk": 1741581180
+    "heartbeat": 1741580580,
+    "disk": 1741580580
   },
-  "lastUpdate": "2026-03-11T05:13:00Z",
+  "lastUpdate": "2026-03-11T05:43:00Z",
   "proactiveOutreachSent": true,
-  "notable": "Disk improved from 100% to 94% (1.2G free) - now within safe threshold. Backup archive created and verified: /tmp/latest-workspace-backup.tar.gz (20M, SHA256: cd2d7e15e08f6890232819e3e004c245b4626ebdde92bdc7e26292c61c5a74af). Finance autopilot has 15 items in autonomous queue for cold email compliance review."
+  "notable": "Disk pressure remains CRITICAL at 100% used. Infra autopilot can't fully resolve it from this sandbox due to write restrictions on home caches. Finance autopilot run 200 completed with outreach draft for first 20-company batch. Coding autopilot run 395 completed on pdftocsv.py unit tests. Travel autopilot run 48 completed on resupply planning."
 }
