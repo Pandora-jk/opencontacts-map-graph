@@ -3,10 +3,10 @@
     "email": 1741514280,
     "projects": 1741514280,
     "memory": 1741514280,
-    "heartbeat": 1741581180,
-    "disk": 1741581180
+    "heartbeat": 1741581780,
+    "disk": 1741581780
   },
-  "lastUpdate": "2026-03-11T05:53:00Z",
+  "lastUpdate": "2026-03-11T06:03:00Z",
   "proactiveOutreachSent": true,
-  "notable": "Finance run 201 created core service offer draft ($300 Starter, $500 Growth). Coding run 396 completed pdftocsv.py unit tests with review needed (merge conflicts, behind main). Infra still on disk monitoring (100% CRITICAL). Travel on resupply planning."
+  "notable": "Disk improved from 100% to 97% (18G/18G, 655M available) in last few hours. Infra run 126 completed with reclaim candidates identified. Coding run 397 completed on pdftocsv.py unit tests. Finance still on Week 1 KPI chain setup."
 }
