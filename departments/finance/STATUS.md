@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-11T17:30:30Z
-- Run count: 228
-- Primary task: Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes
+- Last run (UTC): 2026-03-11T18:56:50Z
+- Run count: 231
+- Primary task: Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate
 - Primary task progress count: 14
-- Last artifact: departments/finance/artifacts/pipeline/founder-led-agencies-first-20-20260311-r228.csv
+- Last artifact: departments/finance/artifacts/offers/core-service-offer-20260311-r231.md
 - Blocking items: 0
 - Autonomous queue items: 15
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes
+Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate
 
 ## Blocking
 - None
