@@ -1,8 +1,8 @@
 {
-  "runs": 480,
+  "runs": 482,
   "cursor": 1,
   "progress": {
     "**Build first monetizable report outline from existing income tracks**": 56,
-    "**Write unit tests for `pdf_to_csv.py` core conversion path**": 424
+    "**Write unit tests for `pdf_to_csv.py` core conversion path**": 426
   }
 }
