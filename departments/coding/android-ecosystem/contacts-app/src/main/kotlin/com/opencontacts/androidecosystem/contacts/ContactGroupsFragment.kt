@@ -1,5 +1,6 @@
 package com.opencontacts.androidecosystem.contacts
 
+import android.content.Context
 import android.Manifest
 import android.content.pm.PackageManager
 import android.database.Cursor
@@ -66,7 +67,7 @@ class ContactGroupsFragment : Fragment() {
     private fun loadGroups() {
         viewModel.loadContacts(requireContext())
         
-        val groups = mutableListOf<ContactGroup>()
+        val groups = mutableMapOf<String, Int>()
         var cursor: Cursor? = null
         
         try {
@@ -82,18 +83,19 @@ class ContactGroupsFragment : Fragment() {
                 "${ContactsContract.Groups.TITLE} ASC"
             )
 
-            cursor?.use {
-                val titleIndex = it.getColumnIndex(ContactsContract.Groups.TITLE)
+            cursor?.use { groupCursor ->
+                val idIndex = groupCursor.getColumnIndex(ContactsContract.Groups._ID)
+                val titleIndex = groupCursor.getColumnIndex(ContactsContract.Groups.TITLE)
 
-                while (it.moveToNext()) {
-                    val title = it.getString(titleIndex)
+                while (groupCursor.moveToNext()) {
+                    val groupId = groupCursor.getString(idIndex)
+                    val title = groupCursor.getString(titleIndex)
                     
-                    // Only show non-empty groups
                     if (!title.isNullOrBlank()) {
                         // Count contacts in this group
-                        val contactCount = getGroupContactCount(requireContext(), title)
+                        val contactCount = getGroupContactCount(requireContext(), groupId)
                         if (contactCount > 0) {
-                            groups.add(ContactGroup(title, contactCount))
+                            groups[title] = contactCount
                         }
                     }
                 }
@@ -104,30 +106,30 @@ class ContactGroupsFragment : Fragment() {
             cursor?.close()
         }
 
-        // If no groups found, show a message
+        val groupList = groups.map { (name, count) -> ContactGroup(name, count) }
+        
         val emptyText = view?.findViewById<TextView>(R.id.empty_text)
         val recyclerView = view?.findViewById<RecyclerView>(R.id.recycler_view)
         
-        if (groups.isEmpty()) {
+        if (groupList.isEmpty()) {
             emptyText?.visibility = View.VISIBLE
             emptyText?.text = "No contact groups found.\nGroups are created in your phone's Contacts app."
             recyclerView?.visibility = View.GONE
         } else {
             emptyText?.visibility = View.GONE
             recyclerView?.visibility = View.VISIBLE
-            groupAdapter.submitList(groups)
+            groupAdapter.submitList(groupList)
         }
     }
 
-    private fun getGroupContactCount(context: Context, groupName: String): Int {
+    private fun getGroupContactCount(context: Context, groupId: String): Int {
         var cursor: Cursor? = null
         try {
             cursor = context.contentResolver.query(
                 ContactsContract.Data.CONTENT_URI,
                 arrayOf(ContactsContract.Data.RAW_CONTACT_ID),
-                "${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.CommonDataKinds.GroupMembership.GROUP_ROW_ID} IN " +
-                    "(SELECT ${ContactsContract.Groups._ID} FROM ${ContactsContract.Groups.CONTENT_URI} WHERE ${ContactsContract.Groups.TITLE} = ?)",
-                arrayOf(ContactsContract.CommonDataKinds.GroupMembership.CONTENT_ITEM_TYPE, groupName),
+                "${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.CommonDataKinds.GroupMembership.GROUP_ROW_ID} = ?",
+                arrayOf(ContactsContract.CommonDataKinds.GroupMembership.CONTENT_ITEM_TYPE, groupId),
                 null
             )
             return cursor?.count ?: 0

@@ -71,5 +71,3 @@ class ContactPagerAdapter(activity: AppCompatActivity) : FragmentStateAdapter(ac
         }
     }
 }
-
-enum class ContactListMode { ALL, FAVORITES, GROUPS }
