@@ -183,3 +183,4 @@
 [2026-03-11 20:56:50 UTC] run=235 primary='Review cold email templates for GDPR/CAN-SPAM compliance' artifact='departments/finance/artifacts/compliance/compliance-check-20260311-r235.md' blocking=0 queue=15
 [2026-03-11 20:57:28 UTC] run=236 primary='Verify email footer includes address + unsubscribe link' artifact='departments/finance/artifacts/compliance/compliance-check-20260311-r236.md' blocking=0 queue=15
 [2026-03-11 21:27:28 UTC] run=237 primary='Test unsubscribe flow end-to-end' artifact='departments/finance/artifacts/compliance/compliance-check-20260311-r237.md' blocking=0 queue=15
+[2026-03-11 21:57:37 UTC] run=238 primary='Confirm suppression list is operational' artifact='departments/finance/artifacts/compliance/compliance-check-20260311-r238.md' blocking=0 queue=15
