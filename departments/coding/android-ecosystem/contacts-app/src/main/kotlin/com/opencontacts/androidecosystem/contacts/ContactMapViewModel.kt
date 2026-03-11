@@ -14,7 +14,7 @@ class ContactMapViewModel : ViewModel() {
             ContactRecord(
                 id = "1",
                 displayName = "Sample Contact",
-                phone = "555-0100",
+                phoneNumbers = listOf("555-0100"),
                 email = "sample@example.com"
             )
         )

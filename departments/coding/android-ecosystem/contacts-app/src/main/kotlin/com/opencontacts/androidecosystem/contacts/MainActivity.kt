@@ -5,7 +5,6 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.opencontacts.androidecosystem.contacts.R
 
 class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: ContactMapViewModel

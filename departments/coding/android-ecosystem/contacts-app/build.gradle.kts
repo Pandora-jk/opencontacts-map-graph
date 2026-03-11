@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.openclaw.androidecosystem.contacts"
+    namespace = "com.opencontacts.androidecosystem.contacts"
     compileSdk = 34
 
     defaultConfig {
