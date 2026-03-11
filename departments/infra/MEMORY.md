@@ -7,6 +7,14 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-11 11:33 UTC:**
+  - Re-ran the night infra sprint through `python3 tools/department-commands.py run infra` and found the prior top-task selection was stale: fresh disk checks showed `/` at `63%` used, but task scoring was still pinned to a March 10, 2026 `infra-status` artifact that reported `100%`.
+  - Hardened `tools/infra-autopilot.py` to ignore stale `*-infra-status.md` artifacts older than `6h` when scoring risk.
+  - Hardened `tools/department-commands.py` so on-demand `run infra` refreshes `infra-status.py` first and no longer passes the unsupported `--emit-telegram` flag to it.
+  - Added regression coverage in `tests/test_infra_autopilot.py` and `tests/test_department_commands.py`.
+  - Verification passed: `python3 -m unittest tests.test_department_commands tests.test_infra_autopilot tests.test_infra_disk tests.test_infra_status`, `python3 -m py_compile tools/department-commands.py tools/infra-autopilot.py tests/test_department_commands.py tests/test_infra_autopilot.py`, `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260311T113334Z-infra-status.md` and `20260311T113335Z-r135-run-security-audit-check-for-open-ports-ssh-config-faile.md`.
+  - Result: the current top autonomous infra task is back to `Run security audit` because the remaining live risks are external listeners, missing firewall visibility, and pending updates, not disk pressure.
 - **2026-03-09 15:40 UTC:**
   - Reconfirmed `Monitor disk usage` is still the top infra task from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh runs 63-64 because `infra-status` still reports `/` at `100%` used.
   - Hardened the disk-pressure guidance so critical reports now distinguish immediate safe relief from full alert recovery:

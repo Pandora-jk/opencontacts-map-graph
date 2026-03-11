@@ -132,8 +132,10 @@ def run_finance() -> str:
     return out.stdout.strip()
 
 
-def run_script(script_name: str) -> str:
-    cmd = ["python3", str(ROOT / "tools" / script_name), "--emit-telegram"]
+def run_script(script_name: str, *, emit_telegram: bool = True) -> str:
+    cmd = ["python3", str(ROOT / "tools" / script_name)]
+    if emit_telegram:
+        cmd.append("--emit-telegram")
     out = subprocess.run(cmd, capture_output=True, text=True)
     text = (out.stdout.strip() or out.stderr.strip()).strip()
     if out.returncode == 0:
@@ -160,8 +162,12 @@ def run_department(dept: str) -> str:
             return run_night_delegate("coding")
         return run_script("coding-autopilot.py")
     if dept == "infra":
-        # Always available: deterministic infra autopilot (night delegation remains on cron).
-        return run_script("infra-autopilot.py")
+        # Refresh live status first so on-demand infra runs do not score stale artifacts.
+        status_output = run_script("infra-status.py", emit_telegram=False)
+        autopilot_output = run_script("infra-autopilot.py")
+        if status_output.startswith("infra-status.py: run failed"):
+            return f"{autopilot_output}\nStatus refresh: {status_output}"
+        return autopilot_output
     if dept == "travel":
         return run_script("travel-autopilot.py")
     return f"{dept}: unsupported"

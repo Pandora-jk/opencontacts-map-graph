@@ -39,6 +39,7 @@ ARTIFACT_GLOBS = {
     'updates': '*-check-for-system-updates-*.md',
 }
 STATUS_ARTIFACT_GLOB = '*-infra-status.md'
+STATUS_ARTIFACT_MAX_AGE = dt.timedelta(hours=6)
 
 
 def load_state() -> dict:
@@ -251,6 +252,27 @@ def latest_status_artifact() -> Path | None:
     return matches[0] if matches else None
 
 
+def artifact_age(now: dt.datetime, artifact: Path) -> dt.timedelta | None:
+    try:
+        modified_at = dt.datetime.fromtimestamp(artifact.stat().st_mtime, tz=dt.UTC)
+    except OSError:
+        return None
+    return now - modified_at
+
+
+def is_status_artifact_stale(
+    artifact: Path,
+    *,
+    now: dt.datetime | None = None,
+    max_age: dt.timedelta = STATUS_ARTIFACT_MAX_AGE,
+) -> bool:
+    reference_now = now or dt.datetime.now(dt.UTC)
+    age = artifact_age(reference_now, artifact)
+    if age is None:
+        return True
+    return age > max_age
+
+
 def score_task_from_artifact(task: str, artifact: Path | None) -> tuple[int, str]:
     if artifact is None:
         return 0, 'no prior artifact; bootstrap coverage'
@@ -302,6 +324,11 @@ def score_task_from_artifact(task: str, artifact: Path | None) -> tuple[int, str
 def score_task_from_status(task: str, artifact: Path | None) -> tuple[int, str]:
     if artifact is None:
         return 0, 'no infra-status artifact available yet'
+    if is_status_artifact_stale(artifact):
+        age = artifact_age(dt.datetime.now(dt.UTC), artifact)
+        if age is None:
+            return 0, f'latest infra-status artifact {artifact.name} is unavailable for freshness checks'
+        return 0, f'latest infra-status artifact {artifact.name} is stale ({int(age.total_seconds() // 3600)}h old)'
 
     text = artifact.read_text(encoding='utf-8', errors='ignore')
     reasons: list[str] = []
