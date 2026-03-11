@@ -12,7 +12,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.openclaw.androidecosystem.contacts"
+        applicationId = "com.opencontacts.androidecosystem.contacts"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

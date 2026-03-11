@@ -3,10 +3,10 @@
     "email": 1741514280,
     "projects": 1741514280,
     "memory": 1741514280,
-    "heartbeat": 1741609640,
-    "disk": 1741609640
+    "heartbeat": 1741610320,
+    "disk": 1741610320
   },
-  "lastUpdate": "2026-03-11T11:04:00Z",
+  "lastUpdate": "2026-03-11T11:12:00Z",
   "proactiveOutreachSent": true,
-  "notable": "Finance run 213 extracting company data (name, website, segment, decision-maker, title, work email, LinkedIn URL, fit notes). Coding runs 427-428 completed on pdftocsv.py unit tests (progress 372)."
+  "notable": "Coding run 429 completed on pdftocsv.py unit tests (progress 373). Finance still extracting company data. Infra healthy at 63% disk (6.9G available)."
 }
