@@ -1,8 +1,9 @@
 {
-  "runs": 167,
-  "cursor": 2,
+  "runs": 168,
+  "cursor": 3,
   "progress": {
     "**Run security audit:** Check for open ports, SSH config, failed logins.": 76,
-    "**Monitor disk usage:** Alert if >80%.": 91
+    "**Monitor disk usage:** Alert if >80%.": 91,
+    "**Verify backup integrity:** Test restore of `INCOME-ENGINE.md` weekly.": 1
   }
 }
