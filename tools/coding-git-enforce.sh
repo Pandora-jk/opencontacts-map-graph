@@ -9,6 +9,7 @@ COMMIT_MSG=""
 EXCLUDE_PATHS=(
   ":(exclude,glob)logs/**"
   ":(exclude,glob)memory/SESSION-SUMMARY-*"
+  ":(exclude,glob)memory/heartbeat-state.json"
   ":(exclude,glob)system/*.bak-*"
   ":(exclude,glob)**/__pycache__/**"
   ":(exclude,glob)**/*.pyc"
