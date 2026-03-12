@@ -58,7 +58,7 @@ class ContactDetailsActivity : AppCompatActivity() {
             displayName = contactName,
             firstName = contactFirstName,
             lastName = contactLastName,
-            phoneNumbers = listOfNotNull(contactPhone),
+            phoneNumbers = contactPhone?.let { mutableListOf(it) } ?: mutableListOf(),
             isFavorite = isFavorite,
             groups = contactGroups ?: emptyList(),
             email = contactEmail,

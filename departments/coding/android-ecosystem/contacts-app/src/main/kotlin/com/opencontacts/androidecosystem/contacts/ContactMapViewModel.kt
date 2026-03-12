@@ -97,7 +97,7 @@ class ContactMapViewModel : ViewModel() {
                         firstName = null,
                         lastName = null,
                         email = null,
-                        phoneNumbers = emptyList(),
+                        phoneNumbers = mutableListOf(),
                         company = null,
                         jobTitle = null,
                         address = null,
