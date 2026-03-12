@@ -210,3 +210,5 @@
 [2026-03-12 08:36:15 UTC] run=262 primary='Prepare the 15-minute demo script around 3 sample agency prospects' artifact='departments/finance/artifacts/demos/demo-script-20260312-r262.md' blocking=0 queue=15
 [2026-03-12 08:56:56 UTC] run=263 primary='Define the initial delivery checklist for the first paying client' artifact='departments/finance/artifacts/delivery/first-client-checklist-20260312-r263.md' blocking=0 queue=15
 [2026-03-12 09:06:33 UTC] run=264 primary='Scan GitHub bounties in Ansible, Linux, DevOps, and automation as side cash only' artifact='departments/finance/artifacts/bounties/bounty-scan-20260312-r264.md' blocking=0 queue=15
+[2026-03-12 09:38:08 UTC] run=265 primary='Review cold email templates for GDPR/CAN-SPAM compliance' artifact='departments/finance/artifacts/compliance/compliance-check-20260312-r265.md' blocking=0 queue=15
+[2026-03-12 10:08:24 UTC] run=266 primary='Verify email footer includes address + unsubscribe link' artifact='departments/finance/artifacts/compliance/compliance-check-20260312-r266.md' blocking=0 queue=15
