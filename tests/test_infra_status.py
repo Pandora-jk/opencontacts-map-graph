@@ -205,6 +205,37 @@ class InfraStatusTests(unittest.TestCase):
 
         self.assertEqual({"passwordauthentication": "no"}, cfg)
 
+    def test_generate_report_risk_summary_includes_ssh_warn_first_line(self) -> None:
+        with mock.patch.object(infra_status, "current_port_lines", return_value="tcp 0.0.0.0:22"), mock.patch.object(
+            infra_status, "check_system_updates", return_value="No pending updates"
+        ), mock.patch.object(
+            infra_status, "check_disk_usage", return_value="Disk usage nominal"
+        ), mock.patch.object(
+            infra_status, "check_unexpected_listener_details", return_value="No unexpected listener details to inspect"
+        ), mock.patch.object(
+            infra_status, "check_firewall_status", return_value="Firewall nominal"
+        ), mock.patch.object(
+            infra_status, "check_ssh_config",
+            return_value=(
+                "WARN: effective SSH hardening is only partially visible; some key settings are not explicitly set\n"
+                "HARDENING: preview a managed sshd drop-in with `python3 tools/infra_sshd_hardening.py --stdout`"
+            ),
+        ), mock.patch.object(
+            infra_status, "check_failed_logins", return_value="No failed authentication attempts found in sampled logs"
+        ), mock.patch.object(
+            infra_status, "check_auth_source_summary", return_value="No suspicious auth-event source summary available (auth.log)"
+        ), mock.patch.object(
+            infra_status, "check_backup_integrity", return_value="Backup nominal"
+        ), mock.patch.object(
+            infra_status, "check_service_health", return_value="service-manager: unavailable"
+        ):
+            md_content, _ = infra_status.generate_report()
+
+        self.assertIn(
+            "- RISK: WARN: effective SSH hardening is only partially visible; some key settings are not explicitly set",
+            md_content,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

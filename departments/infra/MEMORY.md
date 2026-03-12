@@ -7,6 +7,16 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-12 16:37 UTC:**
+  - Reconfirmed from `departments/infra/TODO.md`, fresh `infra-status`, and run 191 that the top infra reliability/security task should still be `Run security audit`, but the scorer was underweighting blocked `ufw` visibility and incomplete SSH hardening visibility relative to pending updates.
+  - Hardened the shared firewall and SSH audit path so the task selection stays aligned with the actual security posture:
+    - `tools/infra_audit_common.py` now reads `/etc/ufw/ufw.conf` when `sudo ufw status verbose` is privilege-blocked and adds `INFO: ufw boot config ENABLED=yes (...)` when visible
+    - `tools/infra-status.py` now bubbles the first SSH `WARN:` line into `Risk Summary`, so partial SSH hardening is visible in the top-level status output
+    - `tools/infra-autopilot.py` now scores both blocked `ufw` visibility and incomplete SSH hardening visibility as security-task signals
+  - Added regression coverage in `tests/test_infra_audit_common.py`, `tests/test_infra_status.py`, and `tests/test_infra_autopilot.py`.
+  - Verification passed: `python3 -m unittest tests.test_infra_audit_common tests.test_infra_status tests.test_infra_autopilot`, `python3 -m py_compile tools/infra_audit_common.py tools/infra-status.py tools/infra-autopilot.py tests/test_infra_audit_common.py tests/test_infra_status.py tests/test_infra_autopilot.py`, `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260312T163744Z-infra-status.md` and `20260312T163744Z-r192-run-security-audit-check-for-open-ports-ssh-config-faile.md`.
+  - Result: the latest owned infra run is back on `Run security audit` for the intended reasons (`blocked ufw visibility` + `incomplete SSH hardening visibility`), while the status artifact now shows the `ufw` boot-config fallback and the SSH warning in `Risk Summary`.
 - **2026-03-12 15:33 UTC:**
   - Reconfirmed from `departments/infra/TODO.md`, fresh run 187, and `infra-status` that `Run security audit` remained the top infra task because the live host still exposes unexpected `udp/44346`; SSH probe volume had dropped to 2 sampled lines, so listener attribution was the sharper current gap.
   - Hardened `tools/infra_audit_common.py` so unexpected-listener output can reuse the most recent artifact attribution for the same listener when current `ss -p` visibility falls back to `owner not visible`.

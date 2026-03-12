@@ -107,6 +107,38 @@ class InfraAutopilotTests(unittest.TestCase):
         self.assertEqual(60, score)
         self.assertEqual("ALERT: Unexpected externally exposed listeners (1): udp/58627", reason)
 
+    def test_score_task_from_status_counts_partial_ssh_hardening_visibility_for_security(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "infra-status.md"
+            artifact.write_text(
+                "WARN: effective SSH hardening is only partially visible; some key settings are not explicitly set\n",
+                encoding="utf-8",
+            )
+
+            score, reason = infra_autopilot.score_task_from_status(
+                "Run security audit: Check for open ports, SSH config, failed logins.",
+                artifact,
+            )
+
+        self.assertEqual(20, score)
+        self.assertIn("latest infra-status shows incomplete SSH hardening visibility", reason)
+
+    def test_score_task_from_status_counts_blocked_ufw_visibility_for_security(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "infra-status.md"
+            artifact.write_text(
+                "WARN: ufw installed but status visibility is blocked by current privileges\n",
+                encoding="utf-8",
+            )
+
+            score, reason = infra_autopilot.score_task_from_status(
+                "Run security audit: Check for open ports, SSH config, failed logins.",
+                artifact,
+            )
+
+        self.assertEqual(40, score)
+        self.assertIn("latest infra-status shows blocked ufw visibility", reason)
+
     def test_select_task_prefers_non_stale_security_risk_over_stale_disk_status(self) -> None:
         tasks = [
             "Run security audit: Check for open ports, SSH config, failed logins.",

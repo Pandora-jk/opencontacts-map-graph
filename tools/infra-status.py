@@ -429,6 +429,10 @@ def generate_report() -> tuple[str, list[str]]:
         risk_summary.append('CRITICAL: unsafe SSH settings detected')
     elif 'RISK:' in ssh_result:
         risk_summary.append('RISK: SSH hardening recommendations present')
+    else:
+        ssh_warn = re.search(r'^WARN: .+$', ssh_result, re.MULTILINE)
+        if ssh_warn:
+            risk_summary.append(f'RISK: {ssh_warn.group(0)}')
 
     updates_result = findings['checks']['system_updates']['result']
     update_match = re.search(r'(\d+)\s+pending updates', updates_result)

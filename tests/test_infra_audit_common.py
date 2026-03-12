@@ -84,6 +84,27 @@ class InfraAuditCommonTests(unittest.TestCase):
         self.assertIn('WARN: ufw installed but status visibility is blocked by current privileges', result)
         self.assertIn('HARDENING: verify `sudo ufw status verbose` from an unrestricted host shell', result)
 
+    def test_check_firewall_status_reports_ufw_boot_config_when_live_status_blocked(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            ufw_conf = Path(tmpdir) / "ufw.conf"
+            ufw_conf.write_text("ENABLED=yes\n", encoding="utf-8")
+
+            def fake_run_cmd(cmd: list[str], max_chars: int = 800) -> str:
+                shell_cmd = cmd[-1]
+                if 'command -v ufw' in shell_cmd:
+                    return '/usr/sbin/ufw'
+                if 'sudo ufw status verbose' in shell_cmd:
+                    return 'sudo: The "no new privileges" flag is set, which prevents sudo from running as root.'
+                return 'n/a'
+
+            result = infra_audit_common.check_firewall_status(
+                fake_run_cmd,
+                which=lambda _: None,
+                ufw_config_path=ufw_conf,
+            )
+
+        self.assertIn(f'INFO: ufw boot config ENABLED=yes ({ufw_conf})', result)
+
     def test_inspect_unexpected_listeners_reuses_recent_artifact_attribution_when_owner_hidden(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             artifact_dir = Path(tmpdir)

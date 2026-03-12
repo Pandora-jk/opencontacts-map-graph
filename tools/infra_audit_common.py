@@ -46,6 +46,26 @@ def one_line(value: str, max_len: int = 140) -> str:
     return (txt[: max_len - 1] + '…') if len(txt) > max_len else txt
 
 
+def ufw_boot_config_status(ufw_config_path: Path = Path('/etc/ufw/ufw.conf')) -> str | None:
+    try:
+        text = ufw_config_path.read_text(encoding='utf-8', errors='ignore')
+    except OSError:
+        return None
+
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        key, value = line.split('=', 1)
+        if key.strip().upper() != 'ENABLED':
+            continue
+        enabled = value.strip().strip('"\'')
+        if not enabled:
+            return None
+        return f'INFO: ufw boot config ENABLED={enabled} ({ufw_config_path})'
+    return None
+
+
 def auth_log_tail_command(limit: int = AUTH_LOG_SAMPLE_LIMIT) -> list[str]:
     return ['bash', '-lc', f'tail -n {limit} /var/log/auth.log 2>/dev/null']
 
@@ -443,6 +463,7 @@ def check_firewall_status(
     *,
     which: Callable[[str], str | None],
     render_one_line: Callable[[str, int], str] = one_line,
+    ufw_config_path: Path = Path('/etc/ufw/ufw.conf'),
 ) -> str:
     lines: list[str] = []
     ufw_lookup = run_cmd(
@@ -467,6 +488,9 @@ def check_firewall_status(
         elif 'no new privileges' in status.lower() or 'permission denied' in status.lower():
             lines.append('WARN: ufw installed but status visibility is blocked by current privileges')
             lines.append(f'ufw: {render_one_line(status, 180)}')
+            boot_config = ufw_boot_config_status(ufw_config_path)
+            if boot_config:
+                lines.append(boot_config)
             lines.append('HARDENING: verify `sudo ufw status verbose` from an unrestricted host shell')
         else:
             lines.append(f'ufw: {render_one_line(status, 180)}')

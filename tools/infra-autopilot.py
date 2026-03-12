@@ -278,6 +278,12 @@ def score_task_from_status(task: str, artifact: Path | None) -> tuple[int, str]:
         if 'ufw unavailable on host' in text:
             score += 40
             reasons.append('latest infra-status shows missing ufw visibility')
+        elif 'WARN: ufw installed but status visibility is blocked by current privileges' in text:
+            score += 40
+            reasons.append('latest infra-status shows blocked ufw visibility')
+        if 'WARN: effective SSH hardening is only partially visible' in text:
+            score += 20
+            reasons.append('latest infra-status shows incomplete SSH hardening visibility')
         auth = re.search(r'ALERT: (\d+) suspicious auth lines found', text)
         if auth:
             score += 60
