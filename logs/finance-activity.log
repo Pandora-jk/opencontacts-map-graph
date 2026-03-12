@@ -215,3 +215,4 @@
 [2026-03-12 10:39:04 UTC] run=267 primary='Test unsubscribe flow end-to-end' artifact='departments/finance/artifacts/compliance/compliance-check-20260312-r267.md' blocking=0 queue=15
 [2026-03-12 10:56:57 UTC] run=268 primary='Confirm suppression list is operational' artifact='departments/finance/artifacts/compliance/compliance-check-20260312-r268.md' blocking=0 queue=15
 [2026-03-12 11:15:33 UTC] run=269 primary='Document approved public B2B data sources' artifact='departments/finance/artifacts/compliance/compliance-check-20260312-r269.md' blocking=0 queue=15
+[2026-03-12 11:45:57 UTC] run=270 primary='Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies' artifact='departments/finance/artifacts/icp/primary-icp-20260312-r270.md' blocking=0 queue=15
