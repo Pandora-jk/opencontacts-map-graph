@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-12T07:59:26Z
-- Run count: 261
-- Primary task: Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate
+- Last run (UTC): 2026-03-12T08:36:15Z
+- Run count: 262
+- Primary task: Prepare the 15-minute demo script around 3 sample agency prospects
 - Primary task progress count: 16
-- Last artifact: departments/finance/artifacts/offers/core-service-offer-20260312-r261.md
+- Last artifact: departments/finance/artifacts/demos/demo-script-20260312-r262.md
 - Blocking items: 0
 - Autonomous queue items: 15
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate
+Prepare the 15-minute demo script around 3 sample agency prospects
 
 ## Blocking
 - None
