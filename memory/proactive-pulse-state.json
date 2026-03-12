@@ -1,9 +1,9 @@
 {
-  "last_checked_at": "2026-03-12T09:25:47Z",
+  "last_checked_at": "2026-03-12T10:21:10Z",
   "last_candidate": "cron_failure",
   "last_candidate_fingerprint": "cron:Provider Quota Check",
   "last_fingerprint": "cron:Provider Quota Check",
   "last_kind": "cron_failure",
-  "last_sent_at": "2026-03-12T07:30:43Z",
+  "last_sent_at": "2026-03-12T10:21:10Z",
   "last_message": "[PROACTIVE] Automation issue: Provider Quota Check need attention. Next step: inspect the latest cron run before changing more config."
 }
