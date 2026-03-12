@@ -1,9 +1,9 @@
 {
-  "last_checked_at": "2026-03-12T06:25:08Z",
+  "last_checked_at": "2026-03-12T07:30:43Z",
   "last_candidate": "cron_failure",
-  "last_candidate_fingerprint": "cron:Finance Status Push",
-  "last_fingerprint": "cron:Finance Status Push",
+  "last_candidate_fingerprint": "cron:Provider Quota Check",
+  "last_fingerprint": "cron:Provider Quota Check",
   "last_kind": "cron_failure",
-  "last_sent_at": "2026-03-12T05:24:59Z",
-  "last_message": "[PROACTIVE] Automation issue: Finance Status Push need attention. Next step: inspect the latest cron run before changing more config."
+  "last_sent_at": "2026-03-12T07:30:43Z",
+  "last_message": "[PROACTIVE] Automation issue: Provider Quota Check need attention. Next step: inspect the latest cron run before changing more config."
 }
