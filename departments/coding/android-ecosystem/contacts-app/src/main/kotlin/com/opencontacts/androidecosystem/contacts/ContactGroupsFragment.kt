@@ -129,15 +129,21 @@ class ContactGroupsFragment : Fragment() {
     private fun getGroupContactCount(context: Context, groupId: String): Int {
         var cursor: Cursor? = null
         try {
+            // Query contacts that belong to this group
+            // Group membership is stored in Data table with MIMETYPE = GroupMembership
             cursor = context.contentResolver.query(
                 ContactsContract.Data.CONTENT_URI,
-                arrayOf(ContactsContract.Data.RAW_CONTACT_ID),
+                arrayOf(
+                    ContactsContract.Data.RAW_CONTACT_ID,
+                    ContactsContract.CommonDataKinds.GroupMembership.GROUP_ROW_ID
+                ),
                 "${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.CommonDataKinds.GroupMembership.GROUP_ROW_ID} = ?",
                 arrayOf(ContactsContract.CommonDataKinds.GroupMembership.CONTENT_ITEM_TYPE, groupId),
                 null
             )
             return cursor?.count ?: 0
         } catch (e: Exception) {
+            e.printStackTrace()
             return 0
         } finally {
             cursor?.close()

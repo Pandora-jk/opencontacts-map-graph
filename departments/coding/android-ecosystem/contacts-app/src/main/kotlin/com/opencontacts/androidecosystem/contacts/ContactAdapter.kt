@@ -77,6 +77,9 @@ class ContactAdapter(
             is HeaderViewHolder -> {
                 if (item is ContactListItem.HeaderItem) {
                     holder.headerText.text = item.letter
+                    // Make header more visible with styling
+                    holder.headerText.setPadding(16, 32, 16, 8)
+                    holder.headerText.textSize = 14f
                 }
             }
             is ContactViewHolder -> {
