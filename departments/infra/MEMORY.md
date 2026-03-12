@@ -7,6 +7,14 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-12 17:35 UTC:**
+  - Reconfirmed from `departments/infra/TODO.md`, fresh `infra-status`, and logs/runs 194-195 that `Run security audit` remains the top infra reliability/security task because the remaining live gaps are blocked `ufw` visibility and incomplete live SSH-hardening visibility.
+  - Hardened `tools/infra-status.py` so repo-side audit output is more actionable without requiring host privileges:
+    - the SSH section now names the specific live settings that are still implicit and shows when the managed workspace drop-in already covers them
+    - `Risk Summary` now collapses multi-line firewall and other check output to a single headline signal, preventing broken markdown bullets and buried warnings
+  - Added regression coverage in `tests/test_infra_status.py` for managed SSH drop-in coverage reporting and multi-line firewall warning summarization.
+  - Verification passed: `python3 -m unittest tests.test_infra_audit_common tests.test_infra_status tests.test_infra_autopilot tests.test_infra_sshd_hardening`, `python3 -m py_compile tools/infra-status.py tests/test_infra_status.py`, `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260312T173435Z-infra-status.md` and `20260312T173459Z-r195-run-security-audit-check-for-open-ports-ssh-config-faile.md`.
 - **2026-03-12 16:37 UTC:**
   - Reconfirmed from `departments/infra/TODO.md`, fresh `infra-status`, and run 191 that the top infra reliability/security task should still be `Run security audit`, but the scorer was underweighting blocked `ufw` visibility and incomplete SSH hardening visibility relative to pending updates.
   - Hardened the shared firewall and SSH audit path so the task selection stays aligned with the actual security posture:

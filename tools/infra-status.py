@@ -38,6 +38,7 @@ ART_DIR = INFRA / 'artifacts' / 'checks'
 LOG_DIR = ROOT / 'logs'
 ACTIVITY_LOG = LOG_DIR / 'infra-activity.log'
 BACKUP_VERIFY_SCRIPT = ROOT / 'scripts' / 'verify-backup-integrity.sh'
+MANAGED_SSHD_CONFIG = ROOT / 'ssh' / '99-openclaw-hardening.conf'
 SSH_CONFIG_KEYS = {
     'permitrootlogin',
     'passwordauthentication',
@@ -49,6 +50,26 @@ SSH_CONFIG_KEYS = {
     'allowtcpforwarding',
     'allowagentforwarding',
 }
+SSH_KEY_LABELS = {
+    'permitrootlogin': 'PermitRootLogin',
+    'passwordauthentication': 'PasswordAuthentication',
+    'x11forwarding': 'X11Forwarding',
+    'permitemptypasswords': 'PermitEmptyPasswords',
+    'maxauthtries': 'MaxAuthTries',
+    'maxstartups': 'MaxStartups',
+    'logingracetime': 'LoginGraceTime',
+    'allowtcpforwarding': 'AllowTcpForwarding',
+    'allowagentforwarding': 'AllowAgentForwarding',
+}
+SSH_VISIBILITY_KEYS = (
+    'permitrootlogin',
+    'permitemptypasswords',
+    'maxauthtries',
+    'maxstartups',
+    'logingracetime',
+    'allowtcpforwarding',
+    'allowagentforwarding',
+)
 KNOWN_SSHD_PATHS = (
     Path('/usr/sbin/sshd'),
     Path('/usr/local/sbin/sshd'),
@@ -161,6 +182,12 @@ def read_sshd_config(path: Path = Path('/etc/ssh/sshd_config')) -> dict[str, str
     return parse_sshd_kv(load_sshd_config_lines(path))
 
 
+def read_flat_sshd_config(path: Path) -> dict[str, str]:
+    if not path.exists():
+        return {}
+    return parse_sshd_kv(path.read_text(encoding='utf-8', errors='ignore').splitlines())
+
+
 def find_sshd_binary() -> str | None:
     binary = shutil.which('sshd')
     if binary:
@@ -184,7 +211,15 @@ def get_effective_ssh_config() -> dict[str, str]:
     return read_sshd_config()
 
 
-def score_ssh_risk(cfg: dict[str, str]) -> tuple[list[str], list[str]]:
+def missing_ssh_visibility_keys(cfg: dict[str, str]) -> list[str]:
+    return [key for key in SSH_VISIBILITY_KEYS if cfg.get(key, 'not_set') == 'not_set']
+
+
+def render_ssh_key_labels(keys: list[str]) -> str:
+    return ', '.join(SSH_KEY_LABELS.get(key, key) for key in keys)
+
+
+def score_ssh_risk(cfg: dict[str, str], managed_cfg: dict[str, str] | None = None) -> tuple[list[str], list[str]]:
     """Return informational lines and risk findings for SSH settings."""
     info = []
     risks = []
@@ -222,7 +257,13 @@ def score_ssh_risk(cfg: dict[str, str]) -> tuple[list[str], list[str]]:
     if max_auth_tries.isdigit() and int(max_auth_tries) > 4:
         risks.append(f'WARN: MaxAuthTries is high ({max_auth_tries})')
 
-    if any(value == 'not_set' for value in (permit_root_login, password_auth, max_auth_tries, login_grace_time)):
+    missing_visibility = missing_ssh_visibility_keys(cfg)
+    if missing_visibility:
+        info.append(f'INFO: live SSH view does not explicitly show: {render_ssh_key_labels(missing_visibility)}')
+        if managed_cfg:
+            covered = [key for key in missing_visibility if managed_cfg.get(key, 'not_set') != 'not_set']
+            if covered:
+                info.append(f'INFO: managed workspace sshd drop-in explicitly sets: {render_ssh_key_labels(covered)}')
         risks.append('WARN: effective SSH hardening is only partially visible; some key settings are not explicitly set')
         risks.append('HARDENING: preview a managed sshd drop-in with `python3 tools/infra_sshd_hardening.py --stdout`')
         risks.append('HARDENING: sync the managed workspace sshd config with `python3 tools/infra_sshd_hardening.py --write-managed-config`')
@@ -239,7 +280,7 @@ def check_ssh_config() -> str:
     cfg = get_effective_ssh_config()
     if not cfg:
         return 'SSH config unavailable'
-    info, risks = score_ssh_risk(cfg)
+    info, risks = score_ssh_risk(cfg, managed_cfg=read_flat_sshd_config(MANAGED_SSHD_CONFIG))
     lines = info + risks
     return '\n'.join(lines)
 
@@ -316,6 +357,14 @@ def check_backup_integrity() -> str:
 def one_line(value: str, max_len: int = 140) -> str:
     txt = re.sub(r'\s+', ' ', (value or '').strip())
     return (txt[: max_len - 1] + '…') if len(txt) > max_len else txt
+
+
+def first_signal_line(value: str) -> str:
+    for raw in (value or '').splitlines():
+        line = raw.strip()
+        if line.startswith(('CRITICAL:', 'ALERT:', 'RISK:', 'WARN:', 'FAIL:', 'HARDENING:')):
+            return line
+    return one_line(value)
 
 
 def check_service_health() -> str:
@@ -441,27 +490,27 @@ def generate_report() -> tuple[str, list[str]]:
 
     disk_result = findings['checks']['disk_usage']['result']
     if re.search(r'^(ALERT|CRITICAL):', disk_result, re.MULTILINE):
-        risk_summary.append(f'RISK: {disk_result}')
+        risk_summary.append(f'RISK: {first_signal_line(disk_result)}')
 
     ports_result = findings['checks']['open_ports']['result']
     if ports_result.startswith('ALERT:'):
-        risk_summary.append(f'RISK: {ports_result}')
+        risk_summary.append(f'RISK: {first_signal_line(ports_result)}')
 
     mdns_result = findings['checks']['mdns_exposure']['result']
     if re.search(r'^(ALERT|RISK|WARN|HARDENING):', mdns_result, re.MULTILINE):
-        risk_summary.append(f'RISK: {mdns_result}')
+        risk_summary.append(f'RISK: {first_signal_line(mdns_result)}')
 
     firewall_result = findings['checks']['firewall_status']['result']
     if re.search(r'^(ALERT|RISK|WARN):', firewall_result, re.MULTILINE):
-        risk_summary.append(f'RISK: {firewall_result}')
+        risk_summary.append(f'RISK: {first_signal_line(firewall_result)}')
 
     failed_result = findings['checks']['failed_logins']['result']
     if failed_result.startswith('ALERT:'):
-        risk_summary.append(f'RISK: {failed_result}')
+        risk_summary.append(f'RISK: {first_signal_line(failed_result)}')
 
     backup_result = findings['checks']['backup_integrity']['result']
     if re.search(r'^(ALERT|FAIL|RISK|WARN):', backup_result, re.MULTILINE):
-        risk_summary.append(f'RISK: {backup_result}')
+        risk_summary.append(f'RISK: {first_signal_line(backup_result)}')
 
     md_lines = [
         f"# Infra Status Check (Run {run_id})",

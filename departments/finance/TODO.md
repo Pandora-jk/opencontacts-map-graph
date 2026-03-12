@@ -25,7 +25,7 @@ Reference: `departments/finance/CORE-OFFER.md`
 - [ ] Test unsubscribe flow end-to-end
 - [ ] Confirm suppression list is operational
 - [ ] Document approved public B2B data sources
-- [ ] Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies
+- [x] Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies
 - [ ] Write the one-line sales promise for the core service offer
 - [ ] Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md
 - [ ] Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes

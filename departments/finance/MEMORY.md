@@ -50,3 +50,11 @@
   - founder-led agency outreach playbook
   - updated draft generator that waits for real contacts and real footer fields
 - Old broad "AI lead qualification" campaign claims should not be treated as current operating truth anymore.
+
+## 2026-03-12 17:57 UTC - Primary ICP locked (run 285)
+- Primary ICP locked: founder-led B2B agencies with 5-30 employees
+- Priority segments: SEO, paid ads, web/dev, automation, and RevOps agencies
+- Primary task progress count: 18
+- Blocking items: 0
+- Autonomous queue items: 15
+- Last artifact: departments/finance/artifacts/icp/primary-icp-20260312-r285.md
