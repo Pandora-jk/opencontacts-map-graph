@@ -127,6 +127,13 @@ By morning, the app should:
 6. ✅ Display photos and all contact fields
 7. ✅ Support favorites toggling
 8. ✅ Work reliably on device
+9. ✅ **All changes reviewed and approved** (see REVIEW_PROCESS.md)
+
+## Review Requirements
+- **All PRs must be reviewed** by an independent developer before merging
+- Critical bugs (crash fixes) require security review
+- Performance changes require profiler verification
+- Run: `python3 ../tools/assign-reviewer.py <PR#> <author>` to assign reviewer
 
 ## Files to Modify
 - `ContactListFragment.kt` - Add search, quick actions

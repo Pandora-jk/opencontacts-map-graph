@@ -18,12 +18,27 @@ class InfraSshdHardeningTests(unittest.TestCase):
         content = Path(infra_sshd_hardening.MANAGED_SSHD_CONFIG).read_text(encoding="utf-8")
         self.assertEqual(infra_sshd_hardening.SSHD_HARDENING_CONFIG, content)
 
+    def test_managed_config_disables_forwarding(self) -> None:
+        self.assertIn("AllowTcpForwarding no\n", infra_sshd_hardening.SSHD_HARDENING_CONFIG)
+        self.assertIn("AllowAgentForwarding no\n", infra_sshd_hardening.SSHD_HARDENING_CONFIG)
+
     def test_validate_install_target_blocks_live_path_without_explicit_override(self) -> None:
         with self.assertRaisesRegex(ValueError, "matches the live sshd path"):
             infra_sshd_hardening.validate_install_target(
                 infra_sshd_hardening.LIVE_SSHD_CONFIG,
                 allow_live_install=False,
             )
+
+    def test_validation_main_config_targets_staged_artifacts(self) -> None:
+        stage_dir = Path("/tmp/openclaw-sshd-stage-test")
+        self.assertEqual(
+            (
+                f"HostKey {stage_dir / 'ssh_host_ed25519_key'}\n"
+                f"PidFile {stage_dir / 'sshd.pid'}\n"
+                f"Include {stage_dir}/*.conf\n"
+            ),
+            infra_sshd_hardening.validation_main_config(stage_dir),
+        )
 
     def test_staged_validation_reports_ready(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

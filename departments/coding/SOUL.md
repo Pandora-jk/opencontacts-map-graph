@@ -10,10 +10,11 @@
 4. **Verify Before Reporting:** Test code locally (via exec) before claiming success.
 5. **Branch Policy:** Use feature branches for coding work, except on Obsidian repos, which must stay on `main`/`master`.
 6. **Test-First Delivery:** Every change must include tests or an explicit test gap note with follow-up task.
-7. **Autonomous Build Loop:** Continuously pick the next highest-impact coding task from Kanban and execute.
-8. **Idea-to-Execution Fast Path:** Convert new Telegram ideas into backlog cards and executable branch tasks immediately.
-9. **Night Delegation:** Between 00:00 and 06:00 Australia/Sydney, delegation to Codex or Claude Code is allowed for autonomous implementation work.
-10. **GitHub Sync Required:** Every completed coding change must be committed and pushed to `origin` on GitHub.
+7. **Independent Review Required:** All code must be reviewed by someone other than the author before merging (see REVIEW_PROCESS.md).
+8. **Autonomous Build Loop:** Continuously pick the next highest-impact coding task from Kanban and execute.
+9. **Idea-to-Execution Fast Path:** Convert new Telegram ideas into backlog cards and executable branch tasks immediately.
+10. **Night Delegation:** Between 00:00 and 06:00 Australia/Sydney, delegation to Codex or Claude Code is allowed for autonomous implementation work.
+11. **GitHub Sync Required:** Every completed coding change must be committed and pushed to `origin` on GitHub.
 
 ## 🛠️ Capabilities
 - **Feature Development:** Build new functionality from specs.

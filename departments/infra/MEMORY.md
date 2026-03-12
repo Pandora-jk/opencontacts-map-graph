@@ -7,6 +7,14 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-12 13:41 UTC:**
+  - Reconfirmed from `departments/infra/TODO.md`, `departments/infra/STATUS.md`, and fresh run 182 that `Run security audit` remained the top infra task because suspicious SSH probe lines persisted and the live host still exposes unexpected `udp/44346`.
+  - Hardened the repo-side SSH remediation workflow with a safer staged validation path:
+    - expanded `ssh/99-openclaw-hardening.conf` and `tools/infra_sshd_hardening.py` to explicitly disable `AllowTcpForwarding` and `AllowAgentForwarding` in the managed drop-in
+    - upgraded staged validation to generate a temporary host key and run `sshd -t -f` against a staged config, so syntax issues fail before any live `/etc` install
+  - Added regression coverage in `tests/test_infra_sshd_hardening.py` for the new forwarding restrictions and staged validation config scaffolding.
+  - Verification passed: `python3 -m unittest tests.test_infra_sshd_hardening tests.test_infra_audit_common tests.test_infra_status`, `python3 -m py_compile tools/infra_sshd_hardening.py tools/infra-status.py tools/infra_audit_common.py tests/test_infra_sshd_hardening.py`, `python3 tools/infra_sshd_hardening.py --stage-dir /tmp/openclaw-sshd-stage --validate-live`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifact: `departments/infra/artifacts/checks/20260312T134054Z-r183-run-security-audit-check-for-open-ports-ssh-config-faile.md`.
 - **2026-03-12 11:34 UTC:**
   - Reconfirmed `Run security audit` remained the top infra task from TODO + latest logs/artifacts because suspicious SSH probe lines were still active while external listeners had returned to the allowlist.
   - Hardened the repo-side SSH probe response path with a staged `fail2ban` workflow:

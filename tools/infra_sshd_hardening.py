@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -14,6 +16,8 @@ SSHD_HARDENING_CONFIG = (
     "PermitEmptyPasswords no\n"
     "KbdInteractiveAuthentication no\n"
     "X11Forwarding no\n"
+    "AllowTcpForwarding no\n"
+    "AllowAgentForwarding no\n"
     "MaxAuthTries 3\n"
     "LoginGraceTime 30\n"
     "MaxStartups 10:30:60\n"
@@ -22,6 +26,15 @@ WORKSPACE_ROOT = Path('/home/ubuntu/.openclaw/workspace')
 MANAGED_SSHD_CONFIG = WORKSPACE_ROOT / 'ssh' / '99-openclaw-hardening.conf'
 LIVE_SSHD_CONFIG = Path('/etc/ssh/sshd_config.d/99-openclaw-hardening.conf')
 DEFAULT_STAGE_DIR = Path('/tmp/openclaw-sshd-stage')
+KNOWN_SSHD_PATHS = (
+    Path('/usr/sbin/sshd'),
+    Path('/usr/local/sbin/sshd'),
+    Path('/sbin/sshd'),
+)
+KNOWN_SSH_KEYGEN_PATHS = (
+    Path('/usr/bin/ssh-keygen'),
+    Path('/bin/ssh-keygen'),
+)
 
 
 def write_config(path: Path) -> None:
@@ -105,21 +118,94 @@ def staged_config_status(path: Path) -> str:
     return _config_status(path, label='staged', ready_word='installed')
 
 
-def sshd_binary_status() -> str:
-    lookup = run_cmd(
-        [
-            'bash',
-            '-lc',
-            'if command -v sshd >/dev/null 2>&1; then command -v sshd; '
-            'elif test -x /usr/sbin/sshd; then printf "/usr/sbin/sshd\\n"; '
-            'elif test -x /usr/local/sbin/sshd; then printf "/usr/local/sbin/sshd\\n"; '
-            'elif test -x /sbin/sshd; then printf "/sbin/sshd\\n"; fi',
-        ],
-        max_chars=120,
+def find_sshd_binary_path() -> Path | None:
+    sshd = shutil.which('sshd')
+    if sshd:
+        return Path(sshd)
+    for candidate in KNOWN_SSHD_PATHS:
+        if candidate.exists() and os.access(candidate, os.X_OK):
+            return candidate
+    return None
+
+
+def find_ssh_keygen_binary_path() -> Path | None:
+    ssh_keygen = shutil.which('ssh-keygen')
+    if ssh_keygen:
+        return Path(ssh_keygen)
+    for candidate in KNOWN_SSH_KEYGEN_PATHS:
+        if candidate.exists() and os.access(candidate, os.X_OK):
+            return candidate
+    return None
+
+
+def validation_hostkey_path(stage_dir: Path) -> Path:
+    return stage_dir / 'ssh_host_ed25519_key'
+
+
+def validation_config_path(stage_dir: Path) -> Path:
+    return stage_dir / 'sshd_config'
+
+
+def validation_main_config(stage_dir: Path) -> str:
+    hostkey = validation_hostkey_path(stage_dir)
+    pidfile = stage_dir / 'sshd.pid'
+    return f'HostKey {hostkey}\nPidFile {pidfile}\nInclude {stage_dir}/*.conf\n'
+
+
+def _one_line(value: str, max_len: int = 160) -> str:
+    compact = ' '.join((value or '').split())
+    if len(compact) <= max_len:
+        return compact
+    return compact[: max_len - 1] + '…'
+
+
+def stage_sshd_configtest(stage_dir: Path) -> str:
+    sshd = find_sshd_binary_path()
+    if not sshd:
+        return 'WARN: sshd config test unavailable from this shell'
+
+    ssh_keygen = find_ssh_keygen_binary_path()
+    if not ssh_keygen:
+        return 'WARN: ssh-keygen unavailable from this shell; skipped staged sshd config test'
+
+    hostkey = validation_hostkey_path(stage_dir)
+    config_path = validation_config_path(stage_dir)
+    if not hostkey.exists():
+        hostkey.parent.mkdir(parents=True, exist_ok=True)
+        generated = subprocess.run(
+            [str(ssh_keygen), '-q', '-N', '', '-t', 'ed25519', '-f', str(hostkey)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if generated.returncode != 0:
+            details = generated.stderr.strip() or generated.stdout.strip() or 'unknown error'
+            return f'WARN: ssh-keygen failed for staged sshd config test: {_one_line(details)}'
+
+    config_path.write_text(validation_main_config(stage_dir), encoding='utf-8')
+    try:
+        os.chmod(config_path, 0o644)
+    except OSError:
+        pass
+
+    checked = subprocess.run(
+        [str(sshd), '-t', '-f', str(config_path)],
+        capture_output=True,
+        text=True,
+        check=False,
     )
-    if lookup in {'n/a', ''} or lookup.startswith('Error:'):
+    if checked.returncode == 0:
+        return f'sshd config test: syntax ok ({config_path})'
+
+    details = checked.stderr.strip() or checked.stdout.strip() or 'unknown error'
+    return f'ERROR: sshd config test failed for {config_path}: {_one_line(details)}'
+
+
+def sshd_binary_status() -> str:
+    lookup = find_sshd_binary_path()
+    if not lookup:
         return 'WARN: sshd binary not visible from this shell'
-    return f'sshd binary: {lookup.strip()}'
+    return f'sshd binary: {lookup}'
 
 
 def ssh_service_status() -> str:
@@ -256,6 +342,11 @@ def main() -> int:
         else:
             if not applied_status.startswith('staged config installed:'):
                 print('ERROR: staged validation requires the staged config to match the managed content')
+                print('STAGED_VALIDATION_FAILED')
+                return 1
+            config_test_status = stage_sshd_configtest(effective_live_config_dir)
+            print(config_test_status)
+            if config_test_status.startswith('ERROR:'):
                 print('STAGED_VALIDATION_FAILED')
                 return 1
             print('NOTE: staged validation only confirms the managed config content/path; it does not reload the live ssh service.')
