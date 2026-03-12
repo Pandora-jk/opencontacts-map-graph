@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-03-12T13:22:34.943584+00:00",
+  "checked_at": "2026-03-12T19:05:55.507070+00:00",
   "providers": {
     "zai": {
       "type": "zai",
@@ -49,7 +49,7 @@
         }
       ],
       "turns_today": {
-        "agent:main:telegram:direct:156480904": 79,
+        "agent:main:telegram:direct:156480904": 97,
         "agent:main:main": 535
       }
     },
@@ -60,7 +60,7 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:telegram:direct:156480904": 79,
+        "agent:main:telegram:direct:156480904": 97,
         "agent:main:main": 535
       }
     },
@@ -71,7 +71,7 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:telegram:direct:156480904": 79,
+        "agent:main:telegram:direct:156480904": 97,
         "agent:main:main": 535
       }
     },
@@ -82,7 +82,7 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:telegram:direct:156480904": 79,
+        "agent:main:telegram:direct:156480904": 97,
         "agent:main:main": 535
       }
     },
@@ -143,9 +143,9 @@
         {
           "key": "agent:main:telegram:direct:156480904",
           "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 429638,
-          "output_tokens": 3540,
-          "context_used": 45165,
+          "input_tokens": 1002706,
+          "output_tokens": 5451,
+          "context_used": 54870,
           "context_limit": 131072
         },
         {
@@ -278,7 +278,7 @@
         }
       ],
       "turns_today": {
-        "agent:main:telegram:direct:156480904": 79,
+        "agent:main:telegram:direct:156480904": 97,
         "agent:main:main": 535
       }
     }
