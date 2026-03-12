@@ -123,6 +123,26 @@ class InfraAutopilotTests(unittest.TestCase):
         self.assertEqual(20, score)
         self.assertIn("latest infra-status shows incomplete SSH hardening visibility", reason)
 
+    def test_score_task_from_status_counts_explicit_ssh_forwarding_risks_for_security(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "infra-status.md"
+            artifact.write_text(
+                "RISK: AllowTcpForwarding enabled\n"
+                "RISK: AllowAgentForwarding enabled\n"
+                "WARN: MaxAuthTries is high (6)\n",
+                encoding="utf-8",
+            )
+
+            score, reason = infra_autopilot.score_task_from_status(
+                "Run security audit: Check for open ports, SSH config, failed logins.",
+                artifact,
+            )
+
+        self.assertEqual(80, score)
+        self.assertIn("latest infra-status shows SSH tcp forwarding enabled", reason)
+        self.assertIn("latest infra-status shows SSH agent forwarding enabled", reason)
+        self.assertIn("latest infra-status shows high SSH MaxAuthTries", reason)
+
     def test_score_task_from_status_counts_blocked_ufw_visibility_for_security(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             artifact = Path(tmpdir) / "infra-status.md"

@@ -213,11 +213,47 @@ class InfraStatusTests(unittest.TestCase):
         with mock.patch.object(infra_status, "find_sshd_binary", return_value="/usr/sbin/sshd"), mock.patch.object(
             infra_status, "run_cmd", return_value="sshd: no hostkeys available -- exiting."
         ), mock.patch.object(
+            infra_status, "read_effective_sshd_config_with_temp_hostkey", return_value={}
+        ), mock.patch.object(
             infra_status, "read_sshd_config", return_value={"passwordauthentication": "no"}
         ):
             cfg = infra_status.get_effective_ssh_config()
 
         self.assertEqual({"passwordauthentication": "no"}, cfg)
+
+    def test_get_effective_ssh_config_retries_with_temp_hostkey_when_sshd_t_needs_hostkeys(self) -> None:
+        with mock.patch.object(infra_status, "find_sshd_binary", return_value="/usr/sbin/sshd"), mock.patch.object(
+            infra_status, "run_cmd", return_value="sshd: no hostkeys available -- exiting."
+        ), mock.patch.object(
+            infra_status,
+            "read_effective_sshd_config_with_temp_hostkey",
+            return_value={
+                "passwordauthentication": "no",
+                "allowtcpforwarding": "yes",
+                "allowagentforwarding": "yes",
+            },
+        ) as temp_hostkey_fallback, mock.patch.object(
+            infra_status, "read_sshd_config"
+        ) as read_sshd_config:
+            cfg = infra_status.get_effective_ssh_config()
+
+        self.assertEqual("yes", cfg["allowtcpforwarding"])
+        self.assertEqual("yes", cfg["allowagentforwarding"])
+        temp_hostkey_fallback.assert_called_once_with("/usr/sbin/sshd")
+        read_sshd_config.assert_not_called()
+
+    def test_score_ssh_risk_flags_enabled_forwarding(self) -> None:
+        _, risks = infra_status.score_ssh_risk(
+            {
+                "passwordauthentication": "no",
+                "x11forwarding": "no",
+                "allowtcpforwarding": "yes",
+                "allowagentforwarding": "yes",
+            }
+        )
+
+        self.assertIn("RISK: AllowTcpForwarding enabled", risks)
+        self.assertIn("RISK: AllowAgentForwarding enabled", risks)
 
     def test_generate_report_risk_summary_includes_ssh_warn_first_line(self) -> None:
         with mock.patch.object(infra_status, "current_port_lines", return_value="tcp 0.0.0.0:22"), mock.patch.object(

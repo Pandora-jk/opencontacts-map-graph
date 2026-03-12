@@ -13,6 +13,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 from infra_audit_common import check_firewall_status as common_check_firewall_status
@@ -74,6 +75,10 @@ KNOWN_SSHD_PATHS = (
     Path('/usr/sbin/sshd'),
     Path('/usr/local/sbin/sshd'),
     Path('/sbin/sshd'),
+)
+KNOWN_SSH_KEYGEN_PATHS = (
+    Path('/usr/bin/ssh-keygen'),
+    Path('/bin/ssh-keygen'),
 )
 
 
@@ -198,6 +203,57 @@ def find_sshd_binary() -> str | None:
     return None
 
 
+def find_ssh_keygen_binary() -> str | None:
+    binary = shutil.which('ssh-keygen')
+    if binary:
+        return binary
+    for candidate in KNOWN_SSH_KEYGEN_PATHS:
+        if candidate.exists() and os.access(candidate, os.X_OK):
+            return str(candidate)
+    return None
+
+
+def read_effective_sshd_config_with_temp_hostkey(
+    sshd_binary: str,
+    path: Path = Path('/etc/ssh/sshd_config'),
+) -> dict[str, str]:
+    ssh_keygen = find_ssh_keygen_binary()
+    if not ssh_keygen:
+        return {}
+
+    try:
+        with tempfile.TemporaryDirectory(prefix='openclaw-sshd-effective-') as tmpdir:
+            stage_dir = Path(tmpdir)
+            hostkey = stage_dir / 'ssh_host_ed25519_key'
+            config_path = stage_dir / 'sshd_config'
+            generated = subprocess.run(
+                [ssh_keygen, '-q', '-N', '', '-t', 'ed25519', '-f', str(hostkey)],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+            if generated.returncode != 0:
+                return {}
+
+            config_path.write_text(
+                f'HostKey {hostkey}\nPidFile {stage_dir / "sshd.pid"}\nInclude {path}\n',
+                encoding='utf-8',
+            )
+            try:
+                os.chmod(config_path, 0o644)
+            except OSError:
+                pass
+
+            out = run_cmd([sshd_binary, '-T', '-f', str(config_path)], max_chars=12000)
+    except (OSError, subprocess.SubprocessError):
+        return {}
+
+    if not out or out == 'n/a' or out.startswith('Error:'):
+        return {}
+    return parse_sshd_kv(out.splitlines())
+
+
 def get_effective_ssh_config() -> dict[str, str]:
     """Get effective SSH daemon settings, preferring `sshd -T`."""
     sshd = find_sshd_binary()
@@ -207,6 +263,9 @@ def get_effective_ssh_config() -> dict[str, str]:
             parsed = parse_sshd_kv(out.splitlines())
             if parsed:
                 return parsed
+        parsed = read_effective_sshd_config_with_temp_hostkey(sshd)
+        if parsed:
+            return parsed
 
     return read_sshd_config()
 
@@ -254,6 +313,10 @@ def score_ssh_risk(cfg: dict[str, str], managed_cfg: dict[str, str] | None = Non
         risks.append('RISK: X11Forwarding enabled')
     if empty_passwords == 'yes':
         risks.append('CRITICAL: PermitEmptyPasswords enabled')
+    if allow_tcp_forwarding == 'yes':
+        risks.append('RISK: AllowTcpForwarding enabled')
+    if allow_agent_forwarding == 'yes':
+        risks.append('RISK: AllowAgentForwarding enabled')
     if max_auth_tries.isdigit() and int(max_auth_tries) > 4:
         risks.append(f'WARN: MaxAuthTries is high ({max_auth_tries})')
 
@@ -474,14 +537,11 @@ def generate_report() -> tuple[str, list[str]]:
 
     risk_summary = []
     ssh_result = findings['checks']['ssh_config']['result']
-    if 'CRITICAL:' in ssh_result:
-        risk_summary.append('CRITICAL: unsafe SSH settings detected')
-    elif 'RISK:' in ssh_result:
-        risk_summary.append('RISK: SSH hardening recommendations present')
-    else:
-        ssh_warn = re.search(r'^WARN: .+$', ssh_result, re.MULTILINE)
-        if ssh_warn:
-            risk_summary.append(f'RISK: {ssh_warn.group(0)}')
+    ssh_signal = first_signal_line(ssh_result)
+    if ssh_signal.startswith(('CRITICAL:', 'ALERT:', 'RISK:')):
+        risk_summary.append(ssh_signal)
+    elif ssh_signal.startswith(('WARN:', 'FAIL:')):
+        risk_summary.append(f'RISK: {ssh_signal}')
 
     updates_result = findings['checks']['system_updates']['result']
     update_match = re.search(r'(\d+)\s+pending updates', updates_result)

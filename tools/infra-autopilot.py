@@ -281,6 +281,24 @@ def score_task_from_status(task: str, artifact: Path | None) -> tuple[int, str]:
         elif 'WARN: ufw installed but status visibility is blocked by current privileges' in text:
             score += 40
             reasons.append('latest infra-status shows blocked ufw visibility')
+        if 'RISK: PermitRootLogin enabled' in text:
+            score += 45
+            reasons.append('latest infra-status shows PermitRootLogin enabled')
+        if 'RISK: PasswordAuthentication enabled' in text:
+            score += 55
+            reasons.append('latest infra-status shows PasswordAuthentication enabled')
+        if 'CRITICAL: PermitEmptyPasswords enabled' in text:
+            score += 100
+            reasons.append('latest infra-status shows PermitEmptyPasswords enabled')
+        if 'RISK: AllowTcpForwarding enabled' in text:
+            score += 35
+            reasons.append('latest infra-status shows SSH tcp forwarding enabled')
+        if 'RISK: AllowAgentForwarding enabled' in text:
+            score += 30
+            reasons.append('latest infra-status shows SSH agent forwarding enabled')
+        if 'WARN: MaxAuthTries is high' in text:
+            score += 15
+            reasons.append('latest infra-status shows high SSH MaxAuthTries')
         if 'WARN: effective SSH hardening is only partially visible' in text:
             score += 20
             reasons.append('latest infra-status shows incomplete SSH hardening visibility')
