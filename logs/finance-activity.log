@@ -212,3 +212,5 @@
 [2026-03-12 09:06:33 UTC] run=264 primary='Scan GitHub bounties in Ansible, Linux, DevOps, and automation as side cash only' artifact='departments/finance/artifacts/bounties/bounty-scan-20260312-r264.md' blocking=0 queue=15
 [2026-03-12 09:38:08 UTC] run=265 primary='Review cold email templates for GDPR/CAN-SPAM compliance' artifact='departments/finance/artifacts/compliance/compliance-check-20260312-r265.md' blocking=0 queue=15
 [2026-03-12 10:08:24 UTC] run=266 primary='Verify email footer includes address + unsubscribe link' artifact='departments/finance/artifacts/compliance/compliance-check-20260312-r266.md' blocking=0 queue=15
+[2026-03-12 10:39:04 UTC] run=267 primary='Test unsubscribe flow end-to-end' artifact='departments/finance/artifacts/compliance/compliance-check-20260312-r267.md' blocking=0 queue=15
+[2026-03-12 10:56:57 UTC] run=268 primary='Confirm suppression list is operational' artifact='departments/finance/artifacts/compliance/compliance-check-20260312-r268.md' blocking=0 queue=15
