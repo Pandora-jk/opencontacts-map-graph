@@ -1,9 +1,9 @@
 {
-  "last_checked_at": "2026-03-11T23:24:34Z",
-  "last_candidate": "coding_blocker",
-  "last_candidate_fingerprint": "coding:secret-scanning-blocker",
-  "last_fingerprint": "coding:secret-scanning-blocker",
-  "last_kind": "coding_blocker",
-  "last_sent_at": "2026-03-11T21:25:03Z",
-  "last_message": "[PROACTIVE] Coding autonomy is still blocked by GitHub secret scanning on push history. Next step: remove or rewrite the exposed secrets so Coding Day Loop can push unattended."
+  "last_checked_at": "2026-03-12T00:24:52Z",
+  "last_candidate": "cron_failure",
+  "last_candidate_fingerprint": "cron:Finance Autopilot Loop",
+  "last_fingerprint": "cron:Finance Autopilot Loop",
+  "last_kind": "cron_failure",
+  "last_sent_at": "2026-03-12T00:24:52Z",
+  "last_message": "[PROACTIVE] Automation issue: Finance Autopilot Loop need attention. Next step: inspect the latest cron run before changing more config."
 }
