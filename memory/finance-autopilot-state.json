@@ -1,7 +1,7 @@
 {
-  "runs": 253,
-  "last_primary_task": "Confirm suppression list is operational",
-  "task_cursor": 4,
+  "runs": 254,
+  "last_primary_task": "Document approved public B2B data sources",
+  "task_cursor": 5,
   "task_progress": {
     "**Daily cash task:** close one short-cycle offer (lead pack, template pack, quick script fix).": 1,
     "**Recurring income task:** build/iterate one monthly-retainer style product offer.": 1,
@@ -11,7 +11,7 @@
     "Verify email footer includes address + unsubscribe link": 16,
     "Test unsubscribe flow end-to-end": 16,
     "Confirm suppression list is operational": 16,
-    "Document approved public B2B data sources": 15,
+    "Document approved public B2B data sources": 16,
     "Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies": 15,
     "Write the one-line sales promise for the core service offer": 15,
     "Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md": 15,
