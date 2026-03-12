@@ -1,7 +1,7 @@
 {
-  "runs": 289,
-  "last_primary_task": "Prepare the first outreach batch with personalized first lines for the first 20 qualified companies",
-  "task_cursor": 10,
+  "runs": 290,
+  "last_primary_task": "Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate",
+  "task_cursor": 11,
   "task_progress": {
     "**Daily cash task:** close one short-cycle offer (lead pack, template pack, quick script fix).": 1,
     "**Recurring income task:** build/iterate one monthly-retainer style product offer.": 1,
@@ -18,7 +18,7 @@
     "Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes": 18,
     "Filter out personal emails, low-ticket businesses, solo operators, giant agencies, and weak-fit prospects": 18,
     "Prepare the first outreach batch with personalized first lines for the first 20 qualified companies": 18,
-    "Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate": 17,
+    "Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate": 18,
     "Prepare the 15-minute demo script around 3 sample agency prospects": 17,
     "Define the initial delivery checklist for the first paying client": 17,
     "Scan GitHub bounties in Ansible, Linux, DevOps, and automation as side cash only": 17
