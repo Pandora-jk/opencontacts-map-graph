@@ -105,11 +105,19 @@ class InfraAuditCommonTests(unittest.TestCase):
             result,
         )
         self.assertIn(
+            "HARDENING: preview a managed sshd drop-in with `python3 tools/infra_sshd_hardening.py --stdout`",
+            result,
+        )
+        self.assertIn(
             "HARDENING: preview a managed SSH ban config with `python3 tools/infra_ssh_ban_hardening.py --stdout`",
             result,
         )
         self.assertIn(
             "HARDENING: stage/test the install outside /etc with `python3 tools/infra_ssh_ban_hardening.py --stage-dir /tmp/openclaw-fail2ban-stage --validate-live`",
+            result,
+        )
+        self.assertIn(
+            "HARDENING: stage/test the sshd install outside /etc with `python3 tools/infra_sshd_hardening.py --stage-dir /tmp/openclaw-sshd-stage --validate-live`",
             result,
         )
 

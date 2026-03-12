@@ -1,5 +1,6 @@
 import importlib.util
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -139,6 +140,70 @@ class InfraStatusTests(unittest.TestCase):
         self.assertIn("115.190.119.177 x2", result)
         self.assertIn("192.109.200.220 x3 (users: admin, support)", result)
         self.assertNotIn("lacked a parseable source", result)
+
+    def test_read_sshd_config_follows_include_order_with_first_value_wins(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            main = root / "sshd_config"
+            dropins = root / "sshd_config.d"
+            dropins.mkdir()
+            (dropins / "60-cloudimg-settings.conf").write_text(
+                "PasswordAuthentication no\nPermitRootLogin prohibit-password\nMaxAuthTries 3\n",
+                encoding="utf-8",
+            )
+            main.write_text(
+                "\n".join(
+                    [
+                        f"Include {dropins}/*.conf",
+                        "PasswordAuthentication yes",
+                        "X11Forwarding no",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            cfg = infra_status.read_sshd_config(main)
+
+        self.assertEqual("no", cfg["passwordauthentication"])
+        self.assertEqual("prohibit-password", cfg["permitrootlogin"])
+        self.assertEqual("3", cfg["maxauthtries"])
+        self.assertEqual("no", cfg["x11forwarding"])
+
+    def test_score_ssh_risk_treats_key_only_root_login_as_non_risky(self) -> None:
+        info, risks = infra_status.score_ssh_risk(
+            {
+                "permitrootlogin": "prohibit-password",
+                "passwordauthentication": "no",
+                "x11forwarding": "no",
+                "permitemptypasswords": "no",
+                "maxauthtries": "3",
+                "logingracetime": "30",
+            }
+        )
+
+        self.assertIn("INFO: root SSH login is limited to keys", info)
+        self.assertNotIn("RISK: PermitRootLogin enabled", risks)
+
+    def test_score_ssh_risk_adds_managed_dropin_guidance_when_settings_are_not_explicit(self) -> None:
+        _, risks = infra_status.score_ssh_risk({"x11forwarding": "no"})
+
+        combined = "\n".join(risks)
+        self.assertIn("WARN: effective SSH hardening is only partially visible", combined)
+        self.assertIn(
+            "HARDENING: preview a managed sshd drop-in with `python3 tools/infra_sshd_hardening.py --stdout`",
+            combined,
+        )
+
+    def test_get_effective_ssh_config_falls_back_to_files_when_sshd_t_has_no_parseable_keys(self) -> None:
+        with mock.patch.object(infra_status, "find_sshd_binary", return_value="/usr/sbin/sshd"), mock.patch.object(
+            infra_status, "run_cmd", return_value="sshd: no hostkeys available -- exiting."
+        ), mock.patch.object(
+            infra_status, "read_sshd_config", return_value={"passwordauthentication": "no"}
+        ):
+            cfg = infra_status.get_effective_ssh_config()
+
+        self.assertEqual({"passwordauthentication": "no"}, cfg)
 
 
 if __name__ == "__main__":

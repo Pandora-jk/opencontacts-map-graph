@@ -140,6 +140,22 @@ def summarize_auth_event_sources(
         lines.append(f'HARDENING: {len(top_sources) - detail_limit} additional auth-event source(s) omitted from detail view')
     if len(suspicious_lines) >= alert_threshold:
         lines.append('HARDENING: review recurring auth-event sources for host/cloud firewall blocking or access-list restrictions')
+        lines.append('HARDENING: preview a managed sshd drop-in with `python3 tools/infra_sshd_hardening.py --stdout`')
+        lines.append('HARDENING: sync the managed workspace sshd config with `python3 tools/infra_sshd_hardening.py --write-managed-config`')
+        lines.append(
+            'HARDENING: stage/test the sshd install outside /etc with '
+            '`python3 tools/infra_sshd_hardening.py --stage-dir /tmp/openclaw-sshd-stage --validate-live`'
+        )
+        lines.append(
+            'HARDENING: install the managed sshd config with '
+            '`sudo install -D -m 0644 /home/ubuntu/.openclaw/workspace/ssh/99-openclaw-hardening.conf '
+            '/etc/ssh/sshd_config.d/99-openclaw-hardening.conf`'
+        )
+        lines.append(
+            'HARDENING: reload ssh and verify with '
+            '`sudo systemctl reload ssh && python3 tools/infra_sshd_hardening.py --validate-live` '
+            '(expect LIVE_VALIDATION_DONE; LIVE_VALIDATION_FAILED means the managed config is missing/drifted)'
+        )
         lines.append('HARDENING: preview a managed SSH ban config with `python3 tools/infra_ssh_ban_hardening.py --stdout`')
         lines.append('HARDENING: sync the managed workspace fail2ban config with `python3 tools/infra_ssh_ban_hardening.py --write-managed-config`')
         lines.append(

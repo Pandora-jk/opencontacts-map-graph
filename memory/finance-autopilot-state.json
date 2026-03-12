@@ -1,7 +1,7 @@
 {
-  "runs": 270,
-  "last_primary_task": "Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies",
-  "task_cursor": 6,
+  "runs": 271,
+  "last_primary_task": "Write the one-line sales promise for the core service offer",
+  "task_cursor": 7,
   "task_progress": {
     "**Daily cash task:** close one short-cycle offer (lead pack, template pack, quick script fix).": 1,
     "**Recurring income task:** build/iterate one monthly-retainer style product offer.": 1,
@@ -13,7 +13,7 @@
     "Confirm suppression list is operational": 17,
     "Document approved public B2B data sources": 17,
     "Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies": 17,
-    "Write the one-line sales promise for the core service offer": 16,
+    "Write the one-line sales promise for the core service offer": 17,
     "Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md": 16,
     "Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes": 16,
     "Filter out personal emails, low-ticket businesses, solo operators, giant agencies, and weak-fit prospects": 16,

@@ -359,8 +359,8 @@ def execute_task(task: str, run_id: int) -> tuple[Path, str]:
         lines.append(run_cmd([
             'bash',
             '-lc',
-            "(sshd -T 2>/dev/null | grep -Ei '^(permitrootlogin|passwordauthentication|x11forwarding|maxauthtries|permitemptypasswords) ' || "
-            "grep -Ei '^(PermitRootLogin|PasswordAuthentication|X11Forwarding|MaxAuthTries|PermitEmptyPasswords)\\b' /etc/ssh/sshd_config 2>/dev/null || "
+            "(grep -H -Ei '^(PermitRootLogin|PasswordAuthentication|X11Forwarding|MaxAuthTries|PermitEmptyPasswords|MaxStartups|LoginGraceTime|AllowTcpForwarding|AllowAgentForwarding)\\b' "
+            "/etc/ssh/sshd_config /etc/ssh/sshd_config.d/*.conf 2>/dev/null | sed 's#^/etc/ssh/##' || "
             "echo 'SSH config unavailable') | sed -n '1,40p'"
         ]))
         lines.append('')

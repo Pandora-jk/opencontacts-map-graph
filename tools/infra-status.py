@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import glob
 import os
 import re
 import shutil
@@ -37,6 +38,22 @@ ART_DIR = INFRA / 'artifacts' / 'checks'
 LOG_DIR = ROOT / 'logs'
 ACTIVITY_LOG = LOG_DIR / 'infra-activity.log'
 BACKUP_VERIFY_SCRIPT = ROOT / 'scripts' / 'verify-backup-integrity.sh'
+SSH_CONFIG_KEYS = {
+    'permitrootlogin',
+    'passwordauthentication',
+    'x11forwarding',
+    'permitemptypasswords',
+    'maxauthtries',
+    'maxstartups',
+    'logingracetime',
+    'allowtcpforwarding',
+    'allowagentforwarding',
+}
+KNOWN_SSHD_PATHS = (
+    Path('/usr/sbin/sshd'),
+    Path('/usr/local/sbin/sshd'),
+    Path('/sbin/sshd'),
+)
 
 
 def run_cmd(cmd: list[str], max_chars: int = 800) -> str:
@@ -94,38 +111,77 @@ def check_firewall_status() -> str:
 
 def parse_sshd_kv(lines: list[str]) -> dict[str, str]:
     cfg: dict[str, str] = {}
+    in_match_block = False
     for raw in lines:
         line = raw.strip()
         if not line or line.startswith('#'):
             continue
-        parts = line.split()
+        if re.match(r'^Match\b', line, re.IGNORECASE):
+            in_match_block = True
+            continue
+        if in_match_block:
+            continue
+        parts = line.split(None, 1)
         if len(parts) < 2:
             continue
         key = parts[0].lower()
-        value = parts[1].lower()
-        if key in {
-            'permitrootlogin',
-            'passwordauthentication',
-            'x11forwarding',
-            'permitemptypasswords',
-            'maxauthtries',
-        }:
+        value = parts[1].split('#', 1)[0].strip().lower()
+        if key in SSH_CONFIG_KEYS and value and key not in cfg:
             cfg[key] = value
     return cfg
 
 
+def _include_tokens(value: str) -> list[str]:
+    return [token.strip('"\'') for token in re.findall(r'"[^"]+"|\'[^\']+\'|\S+', value)]
+
+
+def load_sshd_config_lines(path: Path, seen: set[Path] | None = None) -> list[str]:
+    resolved = path.resolve(strict=False)
+    if seen is None:
+        seen = set()
+    if resolved in seen or not path.exists():
+        return []
+    seen.add(resolved)
+
+    lines: list[str] = []
+    for raw in path.read_text(encoding='utf-8', errors='ignore').splitlines():
+        stripped = raw.strip()
+        if stripped and not stripped.startswith('#'):
+            parts = stripped.split(None, 1)
+            if len(parts) == 2 and parts[0].lower() == 'include':
+                for token in _include_tokens(parts[1]):
+                    for match in sorted(glob.glob(token)):
+                        lines.extend(load_sshd_config_lines(Path(match), seen))
+                continue
+        lines.append(raw)
+    return lines
+
+
+def read_sshd_config(path: Path = Path('/etc/ssh/sshd_config')) -> dict[str, str]:
+    return parse_sshd_kv(load_sshd_config_lines(path))
+
+
+def find_sshd_binary() -> str | None:
+    binary = shutil.which('sshd')
+    if binary:
+        return binary
+    for candidate in KNOWN_SSHD_PATHS:
+        if candidate.exists() and os.access(candidate, os.X_OK):
+            return str(candidate)
+    return None
+
+
 def get_effective_ssh_config() -> dict[str, str]:
     """Get effective SSH daemon settings, preferring `sshd -T`."""
-    sshd = shutil.which('sshd')
+    sshd = find_sshd_binary()
     if sshd:
-        out = run_cmd([sshd, '-T'])
+        out = run_cmd([sshd, '-T'], max_chars=12000)
         if out and out != 'n/a' and not out.startswith('Error:'):
-            return parse_sshd_kv(out.splitlines())
+            parsed = parse_sshd_kv(out.splitlines())
+            if parsed:
+                return parsed
 
-    ssh_config = Path('/etc/ssh/sshd_config')
-    if ssh_config.exists():
-        return parse_sshd_kv(ssh_config.read_text(encoding='utf-8', errors='ignore').splitlines())
-    return {}
+    return read_sshd_config()
 
 
 def score_ssh_risk(cfg: dict[str, str]) -> tuple[list[str], list[str]]:
@@ -138,21 +194,42 @@ def score_ssh_risk(cfg: dict[str, str]) -> tuple[list[str], list[str]]:
     x11_forwarding = cfg.get('x11forwarding', 'not_set')
     empty_passwords = cfg.get('permitemptypasswords', 'not_set')
     max_auth_tries = cfg.get('maxauthtries', 'not_set')
+    max_startups = cfg.get('maxstartups', 'not_set')
+    login_grace_time = cfg.get('logingracetime', 'not_set')
+    allow_tcp_forwarding = cfg.get('allowtcpforwarding', 'not_set')
+    allow_agent_forwarding = cfg.get('allowagentforwarding', 'not_set')
 
     info.append(f'PermitRootLogin: {permit_root_login}')
     info.append(f'PasswordAuthentication: {password_auth}')
     info.append(f'X11Forwarding: {x11_forwarding}')
     info.append(f'PermitEmptyPasswords: {empty_passwords}')
     info.append(f'MaxAuthTries: {max_auth_tries}')
+    info.append(f'MaxStartups: {max_startups}')
+    info.append(f'LoginGraceTime: {login_grace_time}')
+    info.append(f'AllowTcpForwarding: {allow_tcp_forwarding}')
+    info.append(f'AllowAgentForwarding: {allow_agent_forwarding}')
 
-    if permit_root_login in {'yes', 'without-password', 'prohibit-password'}:
-        risks.append(f'RISK: PermitRootLogin={permit_root_login}')
+    if permit_root_login == 'yes':
+        risks.append('RISK: PermitRootLogin enabled')
+    elif permit_root_login in {'without-password', 'prohibit-password'}:
+        info.append('INFO: root SSH login is limited to keys')
     if password_auth == 'yes':
         risks.append('RISK: PasswordAuthentication enabled')
     if x11_forwarding == 'yes':
         risks.append('RISK: X11Forwarding enabled')
     if empty_passwords == 'yes':
         risks.append('CRITICAL: PermitEmptyPasswords enabled')
+    if max_auth_tries.isdigit() and int(max_auth_tries) > 4:
+        risks.append(f'WARN: MaxAuthTries is high ({max_auth_tries})')
+
+    if any(value == 'not_set' for value in (permit_root_login, password_auth, max_auth_tries, login_grace_time)):
+        risks.append('WARN: effective SSH hardening is only partially visible; some key settings are not explicitly set')
+        risks.append('HARDENING: preview a managed sshd drop-in with `python3 tools/infra_sshd_hardening.py --stdout`')
+        risks.append('HARDENING: sync the managed workspace sshd config with `python3 tools/infra_sshd_hardening.py --write-managed-config`')
+        risks.append(
+            'HARDENING: stage/test the install outside /etc with '
+            '`python3 tools/infra_sshd_hardening.py --stage-dir /tmp/openclaw-sshd-stage --validate-live`'
+        )
 
     return info, risks
 
