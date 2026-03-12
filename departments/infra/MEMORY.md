@@ -7,6 +7,15 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-12 11:34 UTC:**
+  - Reconfirmed `Run security audit` remained the top infra task from TODO + latest logs/artifacts because suspicious SSH probe lines were still active while external listeners had returned to the allowlist.
+  - Hardened the repo-side SSH probe response path with a staged `fail2ban` workflow:
+    - added `tools/infra_ssh_ban_hardening.py` to preview, stage, and validate a managed `fail2ban` sshd jail without touching live `/etc`
+    - added managed config `fail2ban/99-openclaw-sshd.local`
+    - updated `tools/infra_audit_common.py` auth-source guidance so recurring probe alerts now point to the staged workflow and explicit live-install verification commands
+  - Added regression coverage in `tests/test_infra_audit_common.py` and new `tests/test_infra_ssh_ban_hardening.py`.
+  - Verification passed: `python3 -m unittest tests.test_infra_audit_common tests.test_infra_autopilot tests.test_infra_ssh_ban_hardening`, `python3 -m py_compile tools/infra_audit_common.py tools/infra-status.py tools/infra-autopilot.py tools/infra_ssh_ban_hardening.py`, `python3 tools/infra_ssh_ban_hardening.py --stage-dir /tmp/openclaw-fail2ban-stage --validate-live`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifact `20260312T113429Z-r177-run-security-audit-check-for-open-ports-ssh-config-faile.md` now includes the managed `fail2ban` staging/install guidance under `Auth Source Summary`.
 - **2026-03-11 17:32 UTC:**
   - Reconfirmed from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh owned runs 155-156 that `Run security audit` remains the top infra task; the latest status now shows `5` suspicious auth lines with no unexpected external listeners, so the active risk has shifted to recurring SSH probe sources plus blocked `ufw` visibility.
   - Hardened the shared auth-source parser so security-audit output no longer drops common SSH disconnect formats:

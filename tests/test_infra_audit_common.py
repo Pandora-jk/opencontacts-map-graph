@@ -104,6 +104,14 @@ class InfraAuditCommonTests(unittest.TestCase):
             "HARDENING: review recurring auth-event sources for host/cloud firewall blocking or access-list restrictions",
             result,
         )
+        self.assertIn(
+            "HARDENING: preview a managed SSH ban config with `python3 tools/infra_ssh_ban_hardening.py --stdout`",
+            result,
+        )
+        self.assertIn(
+            "HARDENING: stage/test the install outside /etc with `python3 tools/infra_ssh_ban_hardening.py --stage-dir /tmp/openclaw-fail2ban-stage --validate-live`",
+            result,
+        )
 
     def test_summarize_auth_event_sources_handles_disconnect_lines_without_omitting_sources(self) -> None:
         log_text = "\n".join(

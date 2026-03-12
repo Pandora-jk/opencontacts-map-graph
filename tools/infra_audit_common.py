@@ -140,7 +140,26 @@ def summarize_auth_event_sources(
         lines.append(f'HARDENING: {len(top_sources) - detail_limit} additional auth-event source(s) omitted from detail view')
     if len(suspicious_lines) >= alert_threshold:
         lines.append('HARDENING: review recurring auth-event sources for host/cloud firewall blocking or access-list restrictions')
-        lines.append('HARDENING: if these probes recur, consider SSH ban/rate-limit tooling such as fail2ban or sshguard')
+        lines.append('HARDENING: preview a managed SSH ban config with `python3 tools/infra_ssh_ban_hardening.py --stdout`')
+        lines.append('HARDENING: sync the managed workspace fail2ban config with `python3 tools/infra_ssh_ban_hardening.py --write-managed-config`')
+        lines.append(
+            'HARDENING: stage/test the install outside /etc with '
+            '`python3 tools/infra_ssh_ban_hardening.py --stage-dir /tmp/openclaw-fail2ban-stage --validate-live`'
+        )
+        lines.append(
+            'HARDENING: staged validation only confirms the managed config content/path; '
+            'it does not enable host bans until the live /etc install and fail2ban restart'
+        )
+        lines.append(
+            'HARDENING: install the managed config with '
+            '`sudo install -D -m 0644 /home/ubuntu/.openclaw/workspace/fail2ban/99-openclaw-sshd.local '
+            '/etc/fail2ban/jail.d/99-openclaw-sshd.local`'
+        )
+        lines.append(
+            'HARDENING: restart fail2ban and verify with '
+            '`sudo systemctl restart fail2ban && python3 tools/infra_ssh_ban_hardening.py --validate-live` '
+            '(expect LIVE_VALIDATION_DONE; LIVE_VALIDATION_FAILED means the managed config is missing/drifted)'
+        )
     return '\n'.join(lines)
 
 
