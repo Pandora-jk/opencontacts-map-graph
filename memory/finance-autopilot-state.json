@@ -1,13 +1,13 @@
 {
-  "runs": 278,
-  "last_primary_task": "Define the initial delivery checklist for the first paying client",
-  "task_cursor": 14,
+  "runs": 280,
+  "last_primary_task": "Review cold email templates for GDPR/CAN-SPAM compliance",
+  "task_cursor": 1,
   "task_progress": {
     "**Daily cash task:** close one short-cycle offer (lead pack, template pack, quick script fix).": 1,
     "**Recurring income task:** build/iterate one monthly-retainer style product offer.": 1,
     "**Pipeline expansion:** scrape 50 new solar wholesalers for outreach expansion.": 1,
     "No autonomous task queued": 0,
-    "Review cold email templates for GDPR/CAN-SPAM compliance": 17,
+    "Review cold email templates for GDPR/CAN-SPAM compliance": 18,
     "Verify email footer includes address + unsubscribe link": 17,
     "Test unsubscribe flow end-to-end": 17,
     "Confirm suppression list is operational": 17,
@@ -21,6 +21,6 @@
     "Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate": 17,
     "Prepare the 15-minute demo script around 3 sample agency prospects": 17,
     "Define the initial delivery checklist for the first paying client": 17,
-    "Scan GitHub bounties in Ansible, Linux, DevOps, and automation as side cash only": 16
+    "Scan GitHub bounties in Ansible, Linux, DevOps, and automation as side cash only": 17
   }
 }

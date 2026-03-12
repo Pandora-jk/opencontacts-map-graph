@@ -1,5 +1,6 @@
 import importlib.util
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -82,6 +83,43 @@ class InfraAuditCommonTests(unittest.TestCase):
 
         self.assertIn('WARN: ufw installed but status visibility is blocked by current privileges', result)
         self.assertIn('HARDENING: verify `sudo ufw status verbose` from an unrestricted host shell', result)
+
+    def test_inspect_unexpected_listeners_reuses_recent_artifact_attribution_when_owner_hidden(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifact_dir = Path(tmpdir)
+            artifact = artifact_dir / "20260312T152345Z-r186-run-security-audit.md"
+            artifact.write_text(
+                "\n".join(
+                    [
+                        "ALERT: Detailed inspection for unexpected listeners (1): udp/44346",
+                        "udp/44346 scope: *:*",
+                        "udp/44346 owner(s): java",
+                        "udp/44346 pid(s): 137452",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            result = infra_audit_common.inspect_unexpected_listeners(
+                lambda cmd, max_chars=800: "n/a",
+                "udp *:44346\ntcp 0.0.0.0:22",
+                artifact_dir=artifact_dir,
+            )
+
+        self.assertIn("udp/44346 owner not visible from current permissions/capabilities", result)
+        self.assertIn(
+            "INFO: recent artifact attribution for udp/44346: owner(s): java (20260312T152345Z-r186-run-security-audit.md)",
+            result,
+        )
+        self.assertIn(
+            "INFO: recent artifact pid(s) for udp/44346: 137452 (20260312T152345Z-r186-run-security-audit.md)",
+            result,
+        )
+        self.assertIn(
+            "HARDENING: inspect/reconfigure the owning service before allowing external exposure on udp/44346",
+            result,
+        )
 
     def test_summarize_auth_event_sources_ranks_ips_and_usernames(self) -> None:
         log_text = "\n".join(

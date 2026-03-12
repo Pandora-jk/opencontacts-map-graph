@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from collections import Counter
 from collections.abc import Callable
+from pathlib import Path
 
 AUTH_LOG_SAMPLE_LIMIT = 400
 AUTH_LOG_SAMPLE_MAX_CHARS = 12000
@@ -10,6 +11,9 @@ AUTH_SUSPICIOUS_ALERT_THRESHOLD = 5
 AUTH_SOURCE_SUMMARY_LIMIT = 5
 EXPECTED_EXTERNAL_PORTS = {'tcp': {22}, 'udp': {68}}
 UNEXPECTED_LISTENER_DETAIL_LIMIT = 5
+LISTENER_HISTORY_ARTIFACT_LIMIT = 12
+WORKSPACE_ROOT = Path('/home/ubuntu/.openclaw/workspace')
+INFRA_CHECK_ARTIFACT_DIR = WORKSPACE_ROOT / 'departments' / 'infra' / 'artifacts' / 'checks'
 LOCAL_LISTENER_PREFIXES = (
     '127.',
     'localhost:',
@@ -301,11 +305,45 @@ def _listener_processes(listener_detail: str) -> list[tuple[str, str | None]]:
     return list(dict.fromkeys(processes))
 
 
+def recent_listener_artifact_hint(
+    entry: str,
+    *,
+    artifact_dir: Path = INFRA_CHECK_ARTIFACT_DIR,
+    limit: int = LISTENER_HISTORY_ARTIFACT_LIMIT,
+) -> tuple[str, str | None, str | None, str | None] | None:
+    if not artifact_dir.exists():
+        return None
+
+    entry_pattern = re.escape(entry)
+    scope_re = re.compile(rf'^{entry_pattern} scope: (.+)$', re.MULTILINE)
+    owner_re = re.compile(rf'^{entry_pattern} owner\(s\): (.+)$', re.MULTILINE)
+    pid_re = re.compile(rf'^{entry_pattern} pid\(s\): (.+)$', re.MULTILINE)
+    artifacts = sorted(artifact_dir.glob('*.md'), key=lambda path: path.stat().st_mtime, reverse=True)
+    for artifact in artifacts[:limit]:
+        try:
+            text = artifact.read_text(encoding='utf-8', errors='ignore')
+        except OSError:
+            continue
+        owner_match = owner_re.search(text)
+        if not owner_match:
+            continue
+        scope_match = scope_re.search(text)
+        pid_match = pid_re.search(text)
+        return (
+            artifact.name,
+            scope_match.group(1) if scope_match else None,
+            owner_match.group(1),
+            pid_match.group(1) if pid_match else None,
+        )
+    return None
+
+
 def inspect_unexpected_listeners(
     run_cmd: Callable[[list[str], int], str],
     port_lines: str,
     *,
     expected_external_ports: dict[str, set[int]] | None = None,
+    artifact_dir: Path = INFRA_CHECK_ARTIFACT_DIR,
 ) -> str:
     if not port_lines or port_lines == 'n/a':
         return 'No unexpected listener details to inspect'
@@ -323,8 +361,16 @@ def inspect_unexpected_listeners(
     lines = [f'ALERT: Detailed inspection for unexpected listeners ({len(unexpected)}): {preview}']
     for entry in unexpected[:UNEXPECTED_LISTENER_DETAIL_LIMIT]:
         detail = run_cmd(_listener_query(entry), max_chars=1200)
+        recent_hint = recent_listener_artifact_hint(entry, artifact_dir=artifact_dir)
         if detail.startswith('Error:'):
             lines.append(f'{entry} detail error: {one_line(detail, 180)}')
+            if recent_hint:
+                artifact_name, scope, owner, pid = recent_hint
+                if scope:
+                    lines.append(f'INFO: recent artifact scope for {entry}: {scope} ({artifact_name})')
+                lines.append(f'INFO: recent artifact attribution for {entry}: owner(s): {owner} ({artifact_name})')
+                if pid:
+                    lines.append(f'INFO: recent artifact pid(s) for {entry}: {pid} ({artifact_name})')
             lines.append(
                 f"HARDENING: inspect {entry} from an unrestricted shell with "
                 f"`{_listener_shell_hint(entry)}`"
@@ -332,9 +378,23 @@ def inspect_unexpected_listeners(
             continue
         if detail in {'n/a', ''}:
             lines.append(f'{entry} owner not visible from current permissions/capabilities')
+            if recent_hint:
+                artifact_name, scope, owner, pid = recent_hint
+                if scope:
+                    lines.append(f'INFO: recent artifact scope for {entry}: {scope} ({artifact_name})')
+                lines.append(f'INFO: recent artifact attribution for {entry}: owner(s): {owner} ({artifact_name})')
+                if pid:
+                    lines.append(f'INFO: recent artifact pid(s) for {entry}: {pid} ({artifact_name})')
             lines.append(
                 f"HARDENING: inspect {entry} from an unrestricted shell with "
                 f"`{_listener_shell_hint(entry)}`"
+            )
+            lines.append(
+                f'HARDENING: inspect/reconfigure the owning service before allowing external exposure on {entry}'
+            )
+            lines.append(
+                f'HARDENING: if {entry} is not required publicly, bind it to loopback/internal interfaces only '
+                'or block it with host/cloud firewall policy'
             )
             continue
 
@@ -347,6 +407,13 @@ def inspect_unexpected_listeners(
             lines.append(f"{entry} owner(s): {', '.join(owners)}")
         else:
             lines.append(f'{entry} owner not visible from current permissions/capabilities')
+            if recent_hint:
+                artifact_name, hint_scope, owner, pid = recent_hint
+                if hint_scope and not scope:
+                    lines.append(f'INFO: recent artifact scope for {entry}: {hint_scope} ({artifact_name})')
+                lines.append(f'INFO: recent artifact attribution for {entry}: owner(s): {owner} ({artifact_name})')
+                if pid:
+                    lines.append(f'INFO: recent artifact pid(s) for {entry}: {pid} ({artifact_name})')
             lines.append(
                 f"HARDENING: inspect {entry} from an unrestricted shell with "
                 f"`{_listener_shell_hint(entry)}`"
