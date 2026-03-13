@@ -59,6 +59,14 @@ class InfraAutopilotTests(unittest.TestCase):
             ), mock.patch.object(
                 infra_autopilot, "check_firewall_status", return_value="Firewall nominal"
             ), mock.patch.object(
+                infra_autopilot,
+                "ssh_hardening_validation_status",
+                return_value="ERROR: effective sshd policy drift detected\n- AllowStreamLocalForwarding=yes (expected no)",
+            ), mock.patch.object(
+                infra_autopilot,
+                "ssh_ban_hardening_status",
+                return_value="WARN: live config drift: /etc/fail2ban/jail.d/99-openclaw-sshd.local",
+            ), mock.patch.object(
                 infra_autopilot, "get_auth_sample", return_value=("Invalid user root from 1.2.3.4", "auth.log")
             ):
                 artifact, _ = infra_autopilot.execute_task(
@@ -70,7 +78,48 @@ class InfraAutopilotTests(unittest.TestCase):
 
         self.assertIn("## Unexpected Listener Details", content)
         self.assertIn("udp/58627 owner(s): openclaw-gateway", content)
+        self.assertIn("## SSH Hardening Validation", content)
+        self.assertIn("AllowStreamLocalForwarding=yes (expected no)", content)
         self.assertIn("## Auth Source Summary", content)
+        self.assertIn("## SSH Ban Hardening", content)
+        self.assertIn("live config drift: /etc/fail2ban/jail.d/99-openclaw-sshd.local", content)
+
+    def test_ssh_hardening_validation_status_reports_effective_drift(self) -> None:
+        with mock.patch.object(
+            infra_autopilot,
+            "sshd_managed_config_status",
+            return_value="managed config ready",
+        ), mock.patch.object(
+            infra_autopilot,
+            "sshd_live_config_status",
+            return_value="live config drift",
+        ), mock.patch.object(
+            infra_autopilot,
+            "read_effective_sshd_settings",
+            return_value=(
+                {
+                    "passwordauthentication": "no",
+                    "permitrootlogin": "without-password",
+                    "permitemptypasswords": "no",
+                    "kbdinteractiveauthentication": "no",
+                    "x11forwarding": "no",
+                    "allowtcpforwarding": "no",
+                    "allowagentforwarding": "no",
+                    "allowstreamlocalforwarding": "yes",
+                    "permittunnel": "no",
+                    "maxauthtries": "3",
+                    "logingracetime": "30",
+                    "maxstartups": "10:30:60",
+                },
+                None,
+            ),
+        ):
+            result = infra_autopilot.ssh_hardening_validation_status()
+
+        self.assertIn("managed config ready", result)
+        self.assertIn("live config drift", result)
+        self.assertIn("ERROR: effective sshd policy drift detected", result)
+        self.assertIn("AllowStreamLocalForwarding=yes (expected no)", result)
 
     def test_score_task_from_status_ignores_stale_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

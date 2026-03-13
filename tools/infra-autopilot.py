@@ -16,6 +16,21 @@ from pathlib import Path
 
 from infra_disk import DISK_ALERT_THRESHOLD, DISK_CRITICAL_THRESHOLD, build_disk_usage_report
 from infra_network import inspect_mdns_exposure
+from infra_ssh_ban_hardening import (
+    fail2ban_binary_status,
+    fail2ban_policy_status,
+    fail2ban_service_status,
+    fail2ban_sshd_status,
+    live_config_status as fail2ban_live_config_status,
+    managed_config_status as fail2ban_managed_config_status,
+)
+from infra_sshd_hardening import (
+    LIVE_SSHD_MAIN_CONFIG,
+    effective_policy_drift as sshd_effective_policy_drift,
+    live_config_status as sshd_live_config_status,
+    managed_config_status as sshd_managed_config_status,
+    read_effective_sshd_settings,
+)
 from infra_update_health import render_auto_update_health
 from infra_audit_common import (
     AUTH_LOG_SAMPLE_LIMIT,
@@ -150,6 +165,41 @@ def summarize_backup_risk(result: str) -> str:
     if re.search(r'^(ALERT|FAIL|RISK|WARN):', result, re.MULTILINE):
         return f'ALERT: backup integrity risk detected ({result.splitlines()[0]})'
     return 'No backup integrity risk signals detected'
+
+
+def ssh_hardening_validation_status() -> str:
+    lines = [
+        sshd_managed_config_status(),
+        sshd_live_config_status(),
+    ]
+    effective_settings, effective_error = read_effective_sshd_settings(include_target=str(LIVE_SSHD_MAIN_CONFIG))
+    if effective_error:
+        lines.append(effective_error)
+        return '\n'.join(lines)
+    if not effective_settings:
+        lines.append('WARN: effective sshd policy check returned no settings')
+        return '\n'.join(lines)
+
+    drift = sshd_effective_policy_drift(effective_settings)
+    if drift:
+        lines.append('ERROR: effective sshd policy drift detected')
+        lines.extend(f'- {item}' for item in drift)
+    else:
+        lines.append('INFO: effective sshd policy matches the managed hardening')
+    return '\n'.join(lines)
+
+
+def ssh_ban_hardening_status() -> str:
+    return '\n'.join(
+        [
+            fail2ban_managed_config_status(),
+            fail2ban_live_config_status(),
+            fail2ban_policy_status(),
+            fail2ban_binary_status(),
+            fail2ban_service_status(),
+            fail2ban_sshd_status(),
+        ]
+    )
 
 
 def task_kind(task: str) -> str:
@@ -450,6 +500,9 @@ def execute_task(task: str, run_id: int) -> tuple[Path, str]:
             "echo 'SSH config unavailable') | sed -n '1,40p'"
         ]))
         lines.append('')
+        lines.append('## SSH Hardening Validation')
+        lines.append(ssh_hardening_validation_status())
+        lines.append('')
         lines.append('## Recent SSH/Auth Findings')
         auth_sample, source = get_auth_sample()
         auth_lines = extract_recent_auth_findings(auth_sample)
@@ -460,6 +513,9 @@ def execute_task(task: str, run_id: int) -> tuple[Path, str]:
         lines.append('')
         lines.append('## Auth Source Summary')
         lines.append(common_summarize_auth_event_sources(auth_sample, suspicious_pattern=AUTH_SUSPICIOUS_PATTERN))
+        lines.append('')
+        lines.append('## SSH Ban Hardening')
+        lines.append(ssh_ban_hardening_status())
     elif 'backup integrity' in tl:
         lines.append('## Backup Integrity Check')
         if BACKUP_VERIFY_SCRIPT.exists():
