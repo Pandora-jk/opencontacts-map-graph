@@ -1,7 +1,6 @@
 # Infrastructure Department - TODO Queue
 
 ## 🔴 User Blocking
-- [ ] **Approve UFW installation** (Security hardening).
 - [ ] **Configure backup destination** (S3 bucket name / Local path).
 
 ## 🟢 Autonomous Queue
@@ -14,3 +13,4 @@
 - [x] Department setup.
 - [x] Initial health check (Disk 47%, 2 updates pending).
 - [x] **Approve auto-updates** for security patches (reconciled from live APT config on 2026-03-13).
+- [x] **Approve UFW installation** (reconciled from live UFW status on 2026-03-13).

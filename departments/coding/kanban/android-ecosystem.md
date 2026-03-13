@@ -38,6 +38,8 @@ Project scope: Android Contacts App with Material You dynamic colors, system the
     - Obtanium can detect and install updates
     - Signed APKs for seamless updates
   - priority: CRITICAL
+  - status: ⏳ **READY TO START** - See OBTANIUM_READY_CHECKLIST.md
+  - next_action: Create GitHub repo and generate signing key
 
 - [ ] **Verify Material You dynamic colors on device**
   - branch: `feature/material-you-verification`
