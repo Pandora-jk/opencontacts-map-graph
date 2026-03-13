@@ -9,7 +9,6 @@ import argparse
 import datetime as dt
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -291,7 +290,7 @@ def build_digest_message(candidates: list[dict], slot: dict) -> str:
     chosen = top_candidates(candidates)
     label = str(slot["label"])
     if not chosen:
-        return f"{label}: no action for you. No material issues."
+        return "NO_REPLY"
 
     human_item = next((item for item in chosen if item.get("human_action")), None)
     lines: list[str] = [f"IMPORTANT: {label}" if human_item else label]
@@ -329,7 +328,6 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Emit one proactive digest or NO_REPLY")
     parser.add_argument("--dry-run", action="store_true", help="Do not update state")
     parser.add_argument("--debug", action="store_true", help="Print candidate metadata to stderr")
-    parser.add_argument("--deliver", action="store_true", help="Deliver via Telegram if there's something to report")
     args = parser.parse_args()
 
     state = load_state()
@@ -361,6 +359,19 @@ def main() -> int:
         return 0
 
     output = build_digest_message(candidates, slot)
+    print(output)
+    if output == "NO_REPLY":
+        if not args.dry_run:
+            save_state(
+                record_check(
+                    state,
+                    slot_key=slot_key,
+                    candidate_kinds=[],
+                    sent=False,
+                    message=None,
+                )
+            )
+        return 0
     if not args.dry_run:
         save_state(
             record_check(
@@ -371,23 +382,6 @@ def main() -> int:
                 message=output,
             )
         )
-    print(output)
-    if args.deliver:
-        try:
-            subprocess.run(
-                [
-                    "python3",
-                    "/home/ubuntu/.openclaw/workspace/tools/send-telegram.py",
-                    "--to",
-                    "156480904",
-                    "--text",
-                    output,
-                ],
-                cwd=str(ROOT),
-                check=False,
-            )
-        except Exception:
-            pass
     return 0
 
 

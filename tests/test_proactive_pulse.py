@@ -48,12 +48,12 @@ class ProactivePulseTests(unittest.TestCase):
         self.assertIn("TODO: decide whether to keep browser control enabled.", result)
         self.assertIn("Automation issue: Finance Status Push failing.", result)
 
-    def test_build_digest_message_is_concise_when_there_are_no_material_issues(self) -> None:
+    def test_build_digest_message_returns_no_reply_when_there_are_no_material_issues(self) -> None:
         slot = {"name": "morning", "label": "Morning update"}
 
         result = proactive_pulse.build_digest_message([], slot)
 
-        self.assertEqual("Morning update: no action for you. No material issues.", result)
+        self.assertEqual("NO_REPLY", result)
 
     def test_already_sent_for_slot_uses_slot_key(self) -> None:
         state = {"last_slot_key": "2026-03-13:morning"}
