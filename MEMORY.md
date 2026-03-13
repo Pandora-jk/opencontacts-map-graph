@@ -33,5 +33,10 @@
 - GitHub PAT must be refreshed manually if expired.
 - Some scripts lack `try/except` blocks (queued for refactor).
 
+## Durable Runtime Notes
+- Reminder capability exists and should be treated as available.
+- For natural-language reminder requests, use `python3 /home/ubuntu/.openclaw/workspace/tools/department-commands.py remind ...`
+- Do not answer that reminders are unsupported unless that deterministic command path has been checked and is actually missing/broken.
+
 ## Tech Stack
 - Python 3.8+, Bash, Git, NVIDIA NIM (LLM), Bitwarden (Secrets)

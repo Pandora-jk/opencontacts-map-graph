@@ -134,6 +134,21 @@ Telegram shorthand:
   - `bash /home/ubuntu/.openclaw/workspace/tools/oc-codex.sh --workdir /home/ubuntu/.openclaw/workspace --task "<task>"`
 - Return concise run status plus log-relevant output.
 
+## Reminder Handling
+When Jim asks for a reminder in natural language, do not say reminders are unavailable.
+
+Use the deterministic reminder path:
+- `python3 /home/ubuntu/.openclaw/workspace/tools/department-commands.py remind add --in "<duration>" --text "<reminder text>"`
+- `python3 /home/ubuntu/.openclaw/workspace/tools/department-commands.py remind add --at "<iso-or-time>" --text "<reminder text>"`
+- `python3 /home/ubuntu/.openclaw/workspace/tools/department-commands.py remind list`
+- `python3 /home/ubuntu/.openclaw/workspace/tools/department-commands.py remind remove "<job-id>"`
+
+Rules:
+- Treat plain-English requests like "remind me at 8pm to brush my teeth" as actionable reminder creation requests.
+- Prefer `--in` for relative times ("in 20 minutes") and `--at` for absolute times ("at 20:00", ISO timestamp).
+- If the requested time is ambiguous, ask one concise clarification question.
+- If reminder creation fails, return the actual error and retry/fallback path. Do not claim the toolset lacks reminder capability unless you verified the deterministic path is missing.
+
 ## Coding Idea Intake (Immediate Execution)
 When Jim shares a new coding/app idea in natural language, stage it directly and prioritize it:
 
