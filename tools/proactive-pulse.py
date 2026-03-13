@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Emit one proactive, state-aware suggestion for Jim or NO_REPLY.
+Emit one concise proactive digest for Jim or NO_REPLY.
 """
 
 from __future__ import annotations
@@ -9,8 +9,10 @@ import argparse
 import datetime as dt
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 ROOT = Path("/home/ubuntu/.openclaw/workspace")
 HOME = Path.home()
@@ -19,19 +21,20 @@ OPENCLAW_CONFIG = HOME / ".openclaw" / "openclaw.json"
 ACTION_ITEMS = ROOT / "docs" / "openclaw-setup-action-items-2026-03-07.md"
 INFRA_CHECKS = ROOT / "departments" / "infra" / "artifacts" / "checks"
 STATE_FILE = ROOT / "memory" / "proactive-pulse-state.json"
-
-SUPPRESS_HOURS = {
-    "cron_failure": 2,
-    "disk_pressure": 12,
-    "coding_blocker": 12,
-    "network_exposure": 12,
-    "provider_cleanup": 72,
-    "browser_review": 72,
-}
+SYDNEY_TZ = ZoneInfo("Australia/Sydney")
+DIGEST_MAX_ITEMS = 2
+DIGEST_SLOTS = (
+    {"name": "morning", "label": "Morning update", "start_hour": 8, "end_hour": 12},
+    {"name": "evening", "label": "Evening update", "start_hour": 18, "end_hour": 23},
+)
 
 
 def utc_now() -> dt.datetime:
     return dt.datetime.now(dt.UTC).replace(microsecond=0)
+
+
+def sydney_now() -> dt.datetime:
+    return utc_now().astimezone(SYDNEY_TZ)
 
 
 def load_json(path: Path, default):
@@ -61,6 +64,37 @@ def save_state(state: dict) -> None:
 def newest_path(pattern: str) -> Path | None:
     matches = sorted(INFRA_CHECKS.glob(pattern))
     return matches[-1] if matches else None
+
+
+def ensure_sentence(text: str) -> str:
+    stripped = text.strip()
+    if not stripped:
+        return stripped
+    if stripped[-1] in ".!?":
+        return stripped
+    return f"{stripped}."
+
+
+def current_digest_slot(now: dt.datetime | None = None) -> dict | None:
+    local = (now or sydney_now()).astimezone(SYDNEY_TZ)
+    for slot in DIGEST_SLOTS:
+        if slot["start_hour"] <= local.hour < slot["end_hour"]:
+            return slot
+    return None
+
+
+def digest_slot_key(now: dt.datetime | None = None) -> str | None:
+    local = (now or sydney_now()).astimezone(SYDNEY_TZ)
+    slot = current_digest_slot(local)
+    if slot is None:
+        return None
+    return f"{local.date().isoformat()}:{slot['name']}"
+
+
+def top_candidates(candidates: list[dict], limit: int = DIGEST_MAX_ITEMS) -> list[dict]:
+    material = [item for item in candidates if item]
+    material.sort(key=lambda item: (-int(item["priority"]), str(item["kind"])))
+    return material[:limit]
 
 
 def find_cron_failures() -> list[dict]:
@@ -108,11 +142,9 @@ def cron_failure_candidate() -> dict | None:
         "kind": "cron_failure",
         "priority": 100,
         "fingerprint": f"cron:{'|'.join(sorted(item['name'] for item in failures))}",
-        "message": (
-            f"[PROACTIVE] Automation issue: {names} need attention. "
-            "Next step: inspect the latest cron run before changing more config."
-        ),
-        "details": failures,
+        "headline": f"Automation issue: {names} failing",
+        "todo": "inspect the latest cron run before changing more config",
+        "human_action": False,
     }
 
 
@@ -141,25 +173,24 @@ def disk_pressure_candidate() -> dict | None:
     )
     if stale:
         size, path = stale.groups()
-        next_step = f"clear stale temp data at {path} ({size}) and rerun infra status"
+        todo = f"clear stale temp data at {path} ({size}) and rerun infra status"
         fingerprint = f"disk:{pct}:{path}:{size}"
     else:
         reclaim = re.search(r"^- ([0-9.]+[KMG]?) (\S+)$", text, flags=re.M)
         if reclaim:
             size, path = reclaim.groups()
-            next_step = f"review {path} ({size}) for safe cleanup and rerun infra status"
+            todo = f"review {path} ({size}) for safe cleanup and rerun infra status"
             fingerprint = f"disk:{pct}:{path}:{size}"
         else:
-            next_step = "reclaim disk space and rerun infra status"
+            todo = "reclaim disk space and rerun infra status"
             fingerprint = f"disk:{pct}:{avail}"
     return {
         "kind": "disk_pressure",
         "priority": 95,
         "fingerprint": fingerprint,
-        "message": (
-            f"[PROACTIVE] Host risk: root disk is {pct}% full ({avail} free). "
-            f"Next step: {next_step}."
-        ),
+        "headline": f"Host risk: root disk is {pct}% full ({avail} free)",
+        "todo": todo,
+        "human_action": False,
     }
 
 
@@ -173,10 +204,9 @@ def network_exposure_candidate() -> dict | None:
         "kind": "network_exposure",
         "priority": 80,
         "fingerprint": f"network:{exposed}",
-        "message": (
-            f"[PROACTIVE] Infra risk: {exposed} is still externally exposed. "
-            "Next step: disable MulticastDNS/LLMNR or block it in host/cloud firewall policy."
-        ),
+        "headline": f"Infra risk: {exposed} still externally exposed",
+        "todo": "disable MulticastDNS/LLMNR or block it in host and cloud firewall policy",
+        "human_action": False,
     }
 
 
@@ -192,10 +222,9 @@ def coding_blocker_candidate() -> dict | None:
         "kind": "coding_blocker",
         "priority": 90,
         "fingerprint": "coding:secret-scanning-blocker",
-        "message": (
-            "[PROACTIVE] Coding autonomy is still blocked by GitHub secret scanning on push history. "
-            "Next step: remove or rewrite the exposed secrets so Coding Day Loop can push unattended."
-        ),
+        "headline": "Coding autonomy still blocked by GitHub secret-scanning history",
+        "todo": "rewrite or remove the exposed secrets from push history",
+        "human_action": False,
     }
 
 
@@ -215,10 +244,9 @@ def provider_cleanup_candidate() -> dict | None:
         "kind": "provider_cleanup",
         "priority": 35,
         "fingerprint": "provider:openrouter-cleanup",
-        "message": (
-            "[PROACTIVE] Config cleanup remains: legacy OpenRouter auth is still present. "
-            "Next step: remove or repair that profile so runtime provider config matches reality."
-        ),
+        "headline": "Config cleanup pending: legacy OpenRouter auth still present",
+        "todo": "remove or repair the stale OpenRouter profile",
+        "human_action": False,
     }
 
 
@@ -238,89 +266,126 @@ def browser_review_candidate() -> dict | None:
         "kind": "browser_review",
         "priority": 20,
         "fingerprint": "security:browser-enabled",
-        "message": (
-            "[PROACTIVE] Attack-surface review: browser control is still enabled for main. "
-            "Next step: disable it unless you actively use browser automation."
-        ),
+        "headline": "Browser control is still enabled for main",
+        "todo": "decide whether to keep browser control enabled",
+        "human_action": True,
     }
 
 
-def choose_candidate() -> dict | None:
-    candidates = [
-        cron_failure_candidate(),
-        disk_pressure_candidate(),
-        coding_blocker_candidate(),
-        network_exposure_candidate(),
-        provider_cleanup_candidate(),
-        browser_review_candidate(),
+def collect_candidates() -> list[dict]:
+    return [
+        item
+        for item in [
+            cron_failure_candidate(),
+            disk_pressure_candidate(),
+            coding_blocker_candidate(),
+            network_exposure_candidate(),
+            provider_cleanup_candidate(),
+            browser_review_candidate(),
+        ]
+        if item
     ]
-    material = [item for item in candidates if item]
-    if not material:
-        return None
-    material.sort(key=lambda item: (-int(item["priority"]), str(item["kind"])))
-    return material[0]
 
 
-def is_suppressed(candidate: dict, state: dict) -> bool:
-    last_fingerprint = state.get("last_fingerprint")
-    last_sent_at = state.get("last_sent_at")
-    if last_fingerprint != candidate["fingerprint"] or not isinstance(last_sent_at, str):
-        return False
-    try:
-        sent_at = dt.datetime.fromisoformat(last_sent_at.replace("Z", "+00:00"))
-    except ValueError:
-        return False
-    suppress_for = SUPPRESS_HOURS.get(candidate["kind"], 12)
-    return utc_now() - sent_at < dt.timedelta(hours=suppress_for)
+def build_digest_message(candidates: list[dict], slot: dict) -> str:
+    chosen = top_candidates(candidates)
+    label = str(slot["label"])
+    if not chosen:
+        return f"{label}: no action for you. No material issues."
+
+    human_item = next((item for item in chosen if item.get("human_action")), None)
+    lines: list[str] = [f"IMPORTANT: {label}" if human_item else label]
+    if human_item:
+        lines.append(f"TODO: {ensure_sentence(str(human_item['todo']))}")
+    for item in chosen:
+        lines.append(ensure_sentence(str(item["headline"])))
+    return "\n".join(lines)
 
 
-def record_check(state: dict, candidate: dict | None, sent: bool) -> dict:
+def already_sent_for_slot(state: dict, slot_key: str | None) -> bool:
+    return bool(slot_key and state.get("last_slot_key") == slot_key)
+
+
+def record_check(
+    state: dict,
+    *,
+    slot_key: str | None,
+    candidate_kinds: list[str],
+    sent: bool,
+    message: str | None,
+) -> dict:
     updated = dict(state)
     now = utc_now().isoformat().replace("+00:00", "Z")
     updated["last_checked_at"] = now
-    updated["last_candidate"] = candidate["kind"] if candidate else None
-    updated["last_candidate_fingerprint"] = candidate["fingerprint"] if candidate else None
-    if sent and candidate:
-        updated["last_fingerprint"] = candidate["fingerprint"]
-        updated["last_kind"] = candidate["kind"]
+    updated["last_candidate_kinds"] = candidate_kinds
+    if sent:
         updated["last_sent_at"] = now
-        updated["last_message"] = candidate["message"]
+        updated["last_slot_key"] = slot_key
+        updated["last_message"] = message
     return updated
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Emit one proactive suggestion or NO_REPLY")
+    parser = argparse.ArgumentParser(description="Emit one proactive digest or NO_REPLY")
     parser.add_argument("--dry-run", action="store_true", help="Do not update state")
     parser.add_argument("--debug", action="store_true", help="Print candidate metadata to stderr")
     parser.add_argument("--deliver", action="store_true", help="Deliver via Telegram if there's something to report")
     args = parser.parse_args()
 
     state = load_state()
-    candidate = choose_candidate()
-    suppressed = bool(candidate and is_suppressed(candidate, state))
+    slot = current_digest_slot()
+    slot_key = digest_slot_key()
+    candidates = collect_candidates()
 
     if args.debug:
         debug = {
-            "candidate": candidate,
-            "suppressed": suppressed,
+            "slot": slot,
+            "slot_key": slot_key,
+            "candidates": candidates,
             "state": state,
         }
         print(json.dumps(debug, indent=2), file=sys.stderr)
 
-    if candidate is None or suppressed:
+    if slot is None or (not args.dry_run and already_sent_for_slot(state, slot_key)):
         if not args.dry_run:
-            save_state(record_check(state, candidate, sent=False))
+            save_state(
+                record_check(
+                    state,
+                    slot_key=slot_key,
+                    candidate_kinds=[str(item["kind"]) for item in top_candidates(candidates)],
+                    sent=False,
+                    message=None,
+                )
+            )
         print("NO_REPLY")
         return 0
 
+    output = build_digest_message(candidates, slot)
     if not args.dry_run:
-        save_state(record_check(state, candidate, sent=True))
-    output = candidate["message"]
+        save_state(
+            record_check(
+                state,
+                slot_key=slot_key,
+                candidate_kinds=[str(item["kind"]) for item in top_candidates(candidates)],
+                sent=True,
+                message=output,
+            )
+        )
     print(output)
     if args.deliver:
         try:
-            import subprocess
-            subprocess.run(["python3", "/home/ubuntu/.openclaw/workspace/tools/send-telegram.py", "--to", "156480904", "--text", output], cwd=str(ROOT))
+            subprocess.run(
+                [
+                    "python3",
+                    "/home/ubuntu/.openclaw/workspace/tools/send-telegram.py",
+                    "--to",
+                    "156480904",
+                    "--text",
+                    output,
+                ],
+                cwd=str(ROOT),
+                check=False,
+            )
         except Exception:
             pass
     return 0
