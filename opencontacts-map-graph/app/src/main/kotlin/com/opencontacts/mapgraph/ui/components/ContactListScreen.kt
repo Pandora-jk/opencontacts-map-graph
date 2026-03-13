@@ -41,7 +41,7 @@ fun ContactListScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("No contacts yet")
+                Text("No contacts yet - Add contacts to see them on the map")
             }
         } else {
             LazyColumn(
