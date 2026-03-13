@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-13T12:21:10Z
-- Run count: 325
-- Primary task: Confirm suppression list is operational
-- Primary task progress count: 21
-- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260313-r325.md
+- Last run (UTC): 2026-03-13T13:37:05Z
+- Run count: 327
+- Primary task: Write the one-line sales promise for the core service offer
+- Primary task progress count: 20
+- Last artifact: departments/finance/artifacts/offers/core-service-offer-20260313-r327.md
 - Blocking items: 0
 - Autonomous queue items: 14
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Confirm suppression list is operational
+Write the one-line sales promise for the core service offer
 
 ## Blocking
 - None
