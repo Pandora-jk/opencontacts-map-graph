@@ -1,0 +1,43 @@
+{
+  "created_at": 1773380051,
+  "expires_at": 1773381851,
+  "before_hashes": {
+    "config": "7e7ebf89994ba291627dbbbb09ac0118fc3040a57ee2650eb7858e8a3d0d4b74",
+    "cron": "d5486d81c1b89020ead23cf5ec5f9418f4a459058c36fb4f5330302124f9de09"
+  },
+  "changes": [
+    {
+      "path": "agents.defaults.heartbeat.every",
+      "target": "config",
+      "resolved_path": "agents.defaults.heartbeat.every",
+      "value": "30m",
+      "before": "0m"
+    },
+    {
+      "path": "agents.defaults.heartbeat.target",
+      "target": "config",
+      "resolved_path": "agents.defaults.heartbeat.target",
+      "value": "none",
+      "before": "none"
+    },
+    {
+      "path": "channels.telegram.directPolicy",
+      "target": "config",
+      "resolved_path": "channels.telegram.directPolicy",
+      "value": "block",
+      "before": null
+    },
+    {
+      "path": "channels.defaults.heartbeat",
+      "target": "config",
+      "resolved_path": "channels.defaults.heartbeat",
+      "value": {
+        "showOk": false,
+        "showAlerts": false,
+        "useIndicator": true
+      },
+      "before": null
+    }
+  ],
+  "plan_id": "e11571f14de2"
+}

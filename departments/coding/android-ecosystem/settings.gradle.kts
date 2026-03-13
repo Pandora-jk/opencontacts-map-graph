@@ -14,8 +14,20 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "android-map-ecosystem"
+// Apps
+include(":apps:contacts")
+// include(":apps:gallery")  // Future
+// include(":apps:dialer")   // Future
 
-include(":core-sdk")
-include(":contacts-app")
-include(":gallery-app")
+// Core Libraries
+include(":core:database")
+include(":core:map")
+include(":core:media")
+include(":core:sync")
+include(":core:ui")
+include(":core:network")
+
+// Legacy (to be removed after migration)
+// include(":contacts-app")
+// include(":core-sdk")
+// include(":gallery-app")
