@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-12T23:26:47Z
-- Run count: 298
-- Primary task: Document approved public B2B data sources
-- Primary task progress count: 19
-- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260312-r298.md
+- Last run (UTC): 2026-03-13T00:00:49Z
+- Run count: 299
+- Primary task: Write the one-line sales promise for the core service offer
+- Primary task progress count: 18
+- Last artifact: departments/finance/artifacts/offers/core-service-offer-20260313-r299.md
 - Blocking items: 0
 - Autonomous queue items: 14
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Document approved public B2B data sources
+Write the one-line sales promise for the core service offer
 
 ## Blocking
 - None
