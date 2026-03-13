@@ -17,6 +17,8 @@ import datetime as dt
 import json
 import re
 import subprocess
+import time
+import uuid
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -26,6 +28,7 @@ ROOT = Path("/home/ubuntu/.openclaw/workspace")
 CRON_JOBS_PATH = Path("/home/ubuntu/.openclaw/cron/jobs.json")
 DEPARTMENTS = ("finance", "coding", "infra", "travel")
 REMINDER_PREFIX = "Reminder: "
+REMINDER_MODEL = "nvidia/qwen/qwen3.5-397b-a17b"
 
 
 def todo_path(dept: str) -> Path:
@@ -229,6 +232,115 @@ def default_telegram_target() -> str:
     raise ValueError("no Telegram delivery target found in cron jobs")
 
 
+def parse_reminder_when(when: str) -> tuple[str, int]:
+    raw = when.strip()
+    now = dt.datetime.now(dt.timezone.utc)
+    rel = re.fullmatch(r"\+?\s*(\d+)\s*([smhdw])", raw, flags=re.I)
+    if rel:
+        amount = int(rel.group(1))
+        unit = rel.group(2).lower()
+        delta = {
+            "s": dt.timedelta(seconds=amount),
+            "m": dt.timedelta(minutes=amount),
+            "h": dt.timedelta(hours=amount),
+            "d": dt.timedelta(days=amount),
+            "w": dt.timedelta(weeks=amount),
+        }[unit]
+        target = now + delta
+    else:
+        normalized = raw.replace("Z", "+00:00")
+        try:
+            parsed = dt.datetime.fromisoformat(normalized)
+        except ValueError as exc:
+            raise ValueError(f"invalid reminder time: {raw}") from exc
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=dt.timezone.utc)
+        target = parsed.astimezone(dt.timezone.utc)
+    target = target.replace(microsecond=0)
+    return target.isoformat().replace("+00:00", "Z"), int(target.timestamp() * 1000)
+
+
+def reminder_job_spec(when: str, text: str) -> tuple[dict, str, int]:
+    at_iso, run_at_ms = parse_reminder_when(when)
+    clean_text = " ".join(text.split()).strip()
+    now_ms = int(time.time() * 1000)
+    job = {
+        "id": str(uuid.uuid4()),
+        "name": reminder_name(clean_text),
+        "enabled": True,
+        "deleteAfterRun": True,
+        "createdAtMs": now_ms,
+        "updatedAtMs": now_ms,
+        "schedule": {"kind": "at", "at": at_iso},
+        "sessionTarget": "isolated",
+        "wakeMode": "now",
+        "payload": {
+            "kind": "agentTurn",
+            "message": f"Return exactly: {reminder_name(clean_text)}",
+            "model": REMINDER_MODEL,
+        },
+        "delivery": {
+            "mode": "announce",
+            "channel": "telegram",
+            "to": default_telegram_target(),
+        },
+        "state": {
+            "nextRunAtMs": run_at_ms,
+            "consecutiveErrors": 0,
+        },
+    }
+    return job, at_iso, run_at_ms
+
+
+def rewrite_cron_store(mutator) -> None:
+    payload = parse_json_output(CRON_JOBS_PATH.read_text(encoding="utf-8"))
+    jobs = payload.get("jobs")
+    if not isinstance(jobs, list):
+        raise RuntimeError("cron store missing jobs array")
+    payload["jobs"] = mutator(list(jobs))
+    tmp_path = CRON_JOBS_PATH.with_suffix(".json.tmp")
+    tmp_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    tmp_path.replace(CRON_JOBS_PATH)
+
+
+def add_reminder_via_store(when: str, text: str) -> str:
+    job, at_iso, _ = reminder_job_spec(when, text)
+
+    def mutator(jobs: list[dict]) -> list[dict]:
+        jobs.append(job)
+        return jobs
+
+    rewrite_cron_store(mutator)
+    created_at_utc = (
+        dt.datetime.fromtimestamp(job["createdAtMs"] / 1000, tz=dt.timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z")
+    )
+    return "\n".join(
+        [
+            f"reminder created: id={job['id']}",
+            f"scheduled={when.strip()}",
+            f"created_at_utc={created_at_utc}",
+            f"next_run={at_iso}",
+        ]
+    )
+
+
+def remove_reminder_via_store(job_id: str) -> str:
+    removed = {"value": False}
+
+    def mutator(jobs: list[dict]) -> list[dict]:
+        kept = [job for job in jobs if job.get("id") != job_id]
+        removed["value"] = len(kept) != len(jobs)
+        return kept
+
+    rewrite_cron_store(mutator)
+    if not removed["value"]:
+        raise RuntimeError(f"reminder not found: {job_id}")
+    return f"reminder removed: id={job_id}"
+
+
 def list_reminder_jobs() -> list[dict]:
     payload = parse_json_output(CRON_JOBS_PATH.read_text(encoding="utf-8"))
     jobs = payload.get("jobs") or []
@@ -260,13 +372,16 @@ def add_reminder(when: str, text: str) -> str:
             "--to",
             default_telegram_target(),
             "--model",
-            "nvidia/qwen/qwen3.5-397b-a17b",
+            REMINDER_MODEL,
             "--delete-after-run",
             "--json",
         ]
     )
     if out.returncode != 0:
-        raise RuntimeError(out.stderr.strip() or out.stdout.strip() or "openclaw cron add failed")
+        message = out.stderr.strip() or out.stdout.strip() or "openclaw cron add failed"
+        if "gateway closed" in message.lower():
+            return add_reminder_via_store(when, clean_text)
+        raise RuntimeError(message)
     payload = parse_json_output(out.stdout)
     job = payload.get("job") or payload
     schedule = job.get("schedule") or {}
@@ -305,7 +420,10 @@ def format_reminder_list(reminders: list[dict]) -> str:
 def remove_reminder(job_id: str) -> str:
     out = run_cli(["openclaw", "cron", "rm", job_id, "--json"])
     if out.returncode != 0:
-        raise RuntimeError(out.stderr.strip() or out.stdout.strip() or "openclaw cron rm failed")
+        message = out.stderr.strip() or out.stdout.strip() or "openclaw cron rm failed"
+        if "gateway closed" in message.lower():
+            return remove_reminder_via_store(job_id)
+        raise RuntimeError(message)
     return f"reminder removed: id={job_id}"
 
 
