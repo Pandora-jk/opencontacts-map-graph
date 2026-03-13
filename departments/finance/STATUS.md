@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-13T14:36:45Z
-- Run count: 329
-- Primary task: Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes
+- Last run (UTC): 2026-03-13T16:49:48Z
+- Run count: 333
+- Primary task: Prepare the 15-minute demo script around 3 sample agency prospects
 - Primary task progress count: 21
-- Last artifact: departments/finance/artifacts/pipeline/founder-led-agencies-first-20-20260313-r329.csv
+- Last artifact: departments/finance/artifacts/demos/demo-script-20260313-r333.md
 - Blocking items: 0
 - Autonomous queue items: 14
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes
+Prepare the 15-minute demo script around 3 sample agency prospects
 
 ## Blocking
 - None

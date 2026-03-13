@@ -315,6 +315,12 @@ def score_task_from_status(task: str, artifact: Path | None) -> tuple[int, str]:
         if 'RISK: AllowAgentForwarding enabled' in text:
             score += 30
             reasons.append('latest infra-status shows SSH agent forwarding enabled')
+        if 'RISK: AllowStreamLocalForwarding enabled' in text:
+            score += 30
+            reasons.append('latest infra-status shows SSH stream-local forwarding enabled')
+        if 'RISK: PermitTunnel enabled' in text:
+            score += 30
+            reasons.append('latest infra-status shows SSH tunneling enabled')
         if 'WARN: MaxAuthTries is high' in text:
             score += 15
             reasons.append('latest infra-status shows high SSH MaxAuthTries')
@@ -439,7 +445,7 @@ def execute_task(task: str, run_id: int) -> tuple[Path, str]:
         lines.append(run_cmd([
             'bash',
             '-lc',
-            "(grep -H -Ei '^(PermitRootLogin|PasswordAuthentication|X11Forwarding|MaxAuthTries|PermitEmptyPasswords|MaxStartups|LoginGraceTime|AllowTcpForwarding|AllowAgentForwarding)\\b' "
+            "(grep -H -Ei '^(PermitRootLogin|PasswordAuthentication|X11Forwarding|MaxAuthTries|PermitEmptyPasswords|MaxStartups|LoginGraceTime|AllowTcpForwarding|AllowAgentForwarding|AllowStreamLocalForwarding|PermitTunnel)\\b' "
             "/etc/ssh/sshd_config /etc/ssh/sshd_config.d/*.conf 2>/dev/null | sed 's#^/etc/ssh/##' || "
             "echo 'SSH config unavailable') | sed -n '1,40p'"
         ]))

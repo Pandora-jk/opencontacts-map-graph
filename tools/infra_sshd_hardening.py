@@ -18,6 +18,8 @@ SSHD_HARDENING_CONFIG = (
     "X11Forwarding no\n"
     "AllowTcpForwarding no\n"
     "AllowAgentForwarding no\n"
+    "AllowStreamLocalForwarding no\n"
+    "PermitTunnel no\n"
     "MaxAuthTries 3\n"
     "LoginGraceTime 30\n"
     "MaxStartups 10:30:60\n"

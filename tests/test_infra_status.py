@@ -199,6 +199,8 @@ class InfraStatusTests(unittest.TestCase):
                 "logingracetime": "30",
                 "allowtcpforwarding": "no",
                 "allowagentforwarding": "no",
+                "allowstreamlocalforwarding": "no",
+                "permittunnel": "no",
             },
         )
 
@@ -252,11 +254,15 @@ class InfraStatusTests(unittest.TestCase):
                 "x11forwarding": "no",
                 "allowtcpforwarding": "yes",
                 "allowagentforwarding": "yes",
+                "allowstreamlocalforwarding": "yes",
+                "permittunnel": "yes",
             }
         )
 
         self.assertIn("RISK: AllowTcpForwarding enabled", risks)
         self.assertIn("RISK: AllowAgentForwarding enabled", risks)
+        self.assertIn("RISK: AllowStreamLocalForwarding enabled", risks)
+        self.assertIn("RISK: PermitTunnel enabled", risks)
 
     def test_generate_report_risk_summary_includes_ssh_warn_first_line(self) -> None:
         with mock.patch.object(infra_status, "current_port_lines", return_value="tcp 0.0.0.0:22"), mock.patch.object(

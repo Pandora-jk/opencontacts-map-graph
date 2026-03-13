@@ -59,6 +59,8 @@ SSH_CONFIG_KEYS = {
     'logingracetime',
     'allowtcpforwarding',
     'allowagentforwarding',
+    'allowstreamlocalforwarding',
+    'permittunnel',
 }
 SSH_KEY_LABELS = {
     'permitrootlogin': 'PermitRootLogin',
@@ -70,6 +72,8 @@ SSH_KEY_LABELS = {
     'logingracetime': 'LoginGraceTime',
     'allowtcpforwarding': 'AllowTcpForwarding',
     'allowagentforwarding': 'AllowAgentForwarding',
+    'allowstreamlocalforwarding': 'AllowStreamLocalForwarding',
+    'permittunnel': 'PermitTunnel',
 }
 SSH_VISIBILITY_KEYS = (
     'permitrootlogin',
@@ -79,6 +83,8 @@ SSH_VISIBILITY_KEYS = (
     'logingracetime',
     'allowtcpforwarding',
     'allowagentforwarding',
+    'allowstreamlocalforwarding',
+    'permittunnel',
 )
 KNOWN_SSHD_PATHS = (
     Path('/usr/sbin/sshd'),
@@ -298,6 +304,8 @@ def score_ssh_risk(cfg: dict[str, str], managed_cfg: dict[str, str] | None = Non
     login_grace_time = cfg.get('logingracetime', 'not_set')
     allow_tcp_forwarding = cfg.get('allowtcpforwarding', 'not_set')
     allow_agent_forwarding = cfg.get('allowagentforwarding', 'not_set')
+    allow_streamlocal_forwarding = cfg.get('allowstreamlocalforwarding', 'not_set')
+    permit_tunnel = cfg.get('permittunnel', 'not_set')
 
     info.append(f'PermitRootLogin: {permit_root_login}')
     info.append(f'PasswordAuthentication: {password_auth}')
@@ -308,6 +316,8 @@ def score_ssh_risk(cfg: dict[str, str], managed_cfg: dict[str, str] | None = Non
     info.append(f'LoginGraceTime: {login_grace_time}')
     info.append(f'AllowTcpForwarding: {allow_tcp_forwarding}')
     info.append(f'AllowAgentForwarding: {allow_agent_forwarding}')
+    info.append(f'AllowStreamLocalForwarding: {allow_streamlocal_forwarding}')
+    info.append(f'PermitTunnel: {permit_tunnel}')
 
     if permit_root_login == 'yes':
         risks.append('RISK: PermitRootLogin enabled')
@@ -323,6 +333,10 @@ def score_ssh_risk(cfg: dict[str, str], managed_cfg: dict[str, str] | None = Non
         risks.append('RISK: AllowTcpForwarding enabled')
     if allow_agent_forwarding == 'yes':
         risks.append('RISK: AllowAgentForwarding enabled')
+    if allow_streamlocal_forwarding == 'yes':
+        risks.append('RISK: AllowStreamLocalForwarding enabled')
+    if permit_tunnel == 'yes':
+        risks.append('RISK: PermitTunnel enabled')
     if max_auth_tries.isdigit() and int(max_auth_tries) > 4:
         risks.append(f'WARN: MaxAuthTries is high ({max_auth_tries})')
 

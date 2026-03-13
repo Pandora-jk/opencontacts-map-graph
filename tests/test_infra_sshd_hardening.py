@@ -21,6 +21,8 @@ class InfraSshdHardeningTests(unittest.TestCase):
     def test_managed_config_disables_forwarding(self) -> None:
         self.assertIn("AllowTcpForwarding no\n", infra_sshd_hardening.SSHD_HARDENING_CONFIG)
         self.assertIn("AllowAgentForwarding no\n", infra_sshd_hardening.SSHD_HARDENING_CONFIG)
+        self.assertIn("AllowStreamLocalForwarding no\n", infra_sshd_hardening.SSHD_HARDENING_CONFIG)
+        self.assertIn("PermitTunnel no\n", infra_sshd_hardening.SSHD_HARDENING_CONFIG)
 
     def test_validate_install_target_blocks_live_path_without_explicit_override(self) -> None:
         with self.assertRaisesRegex(ValueError, "matches the live sshd path"):
