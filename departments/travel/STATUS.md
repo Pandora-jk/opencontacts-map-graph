@@ -1,9 +1,9 @@
 # Travel Status
 
-- Last run (UTC): 2026-03-12T23:26:51Z
-- Run count: 76
-- Active task: **Plan van-friendly campsites:** Free/low-cost stops with facilities for 70-day route.
+- Last run (UTC): 2026-03-13T00:56:53Z
+- Run count: 77
+- Active task: **Check road conditions:** Fraser Island (4WD permit), northern QLD wet season closures.
 - Task progress count: 10
-- Last artifact: departments/travel/artifacts/plans/20260312T232651Z-r76-plan-van-friendly-campsites-free-low-cost-stops-with-fac.md
+- Last artifact: departments/travel/artifacts/plans/20260313T005653Z-r77-check-road-conditions-fraser-island-4wd-permit-northern-.md
 - Autonomous open queue: 8
 
