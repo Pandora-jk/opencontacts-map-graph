@@ -2,7 +2,6 @@
 
 ## 🔴 User Blocking
 - [ ] **Approve UFW installation** (Security hardening).
-- [ ] **Approve auto-updates** for security patches (Yes/No).
 - [ ] **Configure backup destination** (S3 bucket name / Local path).
 
 ## 🟢 Autonomous Queue
@@ -14,3 +13,4 @@
 ## [OK] Completed
 - [x] Department setup.
 - [x] Initial health check (Disk 47%, 2 updates pending).
+- [x] **Approve auto-updates** for security patches (reconciled from live APT config on 2026-03-13).

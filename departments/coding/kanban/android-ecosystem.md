@@ -25,6 +25,20 @@ Project scope: Android Contacts App with Material You dynamic colors, system the
   - acceptance: app respects system theme + manual override
 
 ## Ready
+- [ ] **Setup GitHub repo for Obtanium auto-updates**
+  - branch: `main` (production-ready releases)
+  - tasks: 
+    - Create GitHub Releases with APK assets
+    - Add release notes with version changelog
+    - Configure release signing for updates
+    - Document Obtanium installation URL
+    - Add auto-update metadata to APK
+  - acceptance: 
+    - APK downloadable from GitHub Releases
+    - Obtanium can detect and install updates
+    - Signed APKs for seamless updates
+  - priority: CRITICAL
+
 - [ ] **Verify Material You dynamic colors on device**
   - branch: `feature/material-you-verification`
   - tests: Android 12+ wallpaper colors, light/dark theme switching

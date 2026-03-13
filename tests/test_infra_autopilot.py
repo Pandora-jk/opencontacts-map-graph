@@ -159,6 +159,47 @@ class InfraAutopilotTests(unittest.TestCase):
         self.assertEqual(40, score)
         self.assertIn("latest infra-status shows blocked ufw visibility", reason)
 
+    def test_score_task_from_status_keeps_healthy_pending_updates_low_priority(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "infra-status.md"
+            artifact.write_text(
+                "2 pending updates\n"
+                "INFO: auto-updates enabled (APT::Periodic::Update-Package-Lists=1, "
+                "APT::Periodic::Unattended-Upgrade=1)\n"
+                "INFO: unattended-upgrades last completed at 2026-03-13 01:05 UTC (1h ago): "
+                "No packages found that can be upgraded unattended and no pending auto-removals\n"
+                "INFO: pending updates should clear on the next successful unattended-upgrades run\n",
+                encoding="utf-8",
+            )
+
+            score, reason = infra_autopilot.score_task_from_status(
+                "Check for system updates daily and report count.",
+                artifact,
+            )
+
+        self.assertEqual(5, score)
+        self.assertIn("awaiting the next unattended-upgrades window", reason)
+
+    def test_score_task_from_status_prioritizes_incomplete_unattended_updates(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "infra-status.md"
+            artifact.write_text(
+                "4 pending updates\n"
+                "INFO: auto-updates enabled (APT::Periodic::Update-Package-Lists=1, "
+                "APT::Periodic::Unattended-Upgrade=1)\n"
+                "WARN: unattended-upgrades last started at 2026-03-12 14:35 UTC (12h ago) but no completion was logged\n"
+                "RISK: pending updates remain after an incomplete unattended-upgrades run\n",
+                encoding="utf-8",
+            )
+
+            score, reason = infra_autopilot.score_task_from_status(
+                "Check for system updates daily and report count.",
+                artifact,
+            )
+
+        self.assertEqual(70, score)
+        self.assertIn("pending updates after an incomplete unattended-upgrades run", reason)
+
     def test_select_task_prefers_non_stale_security_risk_over_stale_disk_status(self) -> None:
         tasks = [
             "Run security audit: Check for open ports, SSH config, failed logins.",

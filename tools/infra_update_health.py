@@ -174,9 +174,15 @@ def render_auto_update_health(
     elif status == 'incomplete' and isinstance(started_at, dt.datetime):
         age = reference_now - started_at
         age_hours = max(0, int(age.total_seconds() // 3600))
+        severity = 'WARN' if pending_count > 0 else 'INFO'
+        suffix = (
+            'but no completion was logged'
+            if pending_count > 0
+            else 'but no completion was logged; no pending updates remain'
+        )
         lines.append(
-            'WARN: unattended-upgrades last started at '
-            f'{started_at.strftime("%Y-%m-%d %H:%M UTC")} ({age_hours}h ago) but no completion was logged'
+            f'{severity}: unattended-upgrades last started at '
+            f'{started_at.strftime("%Y-%m-%d %H:%M UTC")} ({age_hours}h ago) {suffix}'
         )
     else:
         log_path = current_run.get('log_path', UNATTENDED_UPGRADES_LOG)
