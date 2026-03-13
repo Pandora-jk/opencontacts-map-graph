@@ -1,9 +1,13 @@
 {
-  "last_checked_at": "2026-03-13T02:27:22Z",
+  "last_checked_at": "2026-03-13T03:27:48Z",
   "last_candidate": "cron_failure",
   "last_candidate_fingerprint": "cron:Coding Day Loop|Night Coding Delegation",
   "last_fingerprint": "cron:Coding Day Loop|Night Coding Delegation",
   "last_kind": "cron_failure",
   "last_sent_at": "2026-03-13T02:27:22Z",
-  "last_message": "[PROACTIVE] Automation issue: Night Coding Delegation, Coding Day Loop need attention. Next step: inspect the latest cron run before changing more config."
+  "last_message": "[PROACTIVE] Automation issue: Night Coding Delegation, Coding Day Loop need attention. Next step: inspect the latest cron run before changing more config.",
+  "last_candidate_kinds": [
+    "cron_failure",
+    "coding_blocker"
+  ]
 }
