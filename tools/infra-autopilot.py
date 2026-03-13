@@ -16,6 +16,7 @@ from pathlib import Path
 
 from infra_disk import DISK_ALERT_THRESHOLD, DISK_CRITICAL_THRESHOLD, build_disk_usage_report
 from infra_network import inspect_mdns_exposure
+from infra_update_health import render_auto_update_health
 from infra_audit_common import (
     AUTH_LOG_SAMPLE_LIMIT,
     AUTH_LOG_SAMPLE_MAX_CHARS,
@@ -232,13 +233,31 @@ def score_task_from_artifact(task: str, artifact: Path | None) -> tuple[int, str
         if match:
             score += max(0, int(match.group(1)) - DISK_ALERT_THRESHOLD)
     elif kind == 'updates':
-        match = re.search(r'(\d+)\s+pending updates', text)
-        if match and int(match.group(1)) > 0:
-            score += min(40, int(match.group(1)) * 10)
-            reasons.append(f"{match.group(1)} pending package updates")
+        if 'RISK: auto-updates disabled or drifted' in text:
+            score += 80
+            reasons.append('auto-updates disabled or drifted')
+        if 'RISK: pending updates are waiting while auto-updates are disabled' in text:
+            score += 60
+            reasons.append('pending updates are waiting while auto-updates are disabled')
+        if 'RISK: pending updates remain after an incomplete unattended-upgrades run' in text:
+            score += 70
+            reasons.append('pending updates remain after an incomplete unattended-upgrades run')
+        stale_match = re.search(r'RISK: pending updates remain and unattended-upgrades has not completed recently \((\d+)h old\)', text)
+        if stale_match:
+            score += 50
+            reasons.append(
+                f"pending updates remain and unattended-upgrades has not completed recently ({stale_match.group(1)}h old)"
+            )
+        elif (
+            'pending updates' in text
+            and 'INFO: auto-updates enabled' in text
+            and 'RISK: pending updates' not in text
+        ):
+            score += 5
+            reasons.append('pending package updates awaiting the next unattended-upgrades window')
         else:
             listed = len(re.findall(r'upgradable from:', text))
-            if listed > 0:
+            if listed > 0 and 'INFO: auto-updates enabled' not in text:
                 score += min(40, listed * 10)
                 reasons.append(f'{listed} listed package updates')
 
@@ -307,10 +326,29 @@ def score_task_from_status(task: str, artifact: Path | None) -> tuple[int, str]:
             score += 60
             reasons.append(f'latest infra-status shows {auth.group(1)} suspicious auth lines')
     elif kind == 'updates':
-        match = re.search(r'(\d+)\s+pending updates', text)
-        if match and int(match.group(1)) > 0:
-            score = 20 + min(40, int(match.group(1)) * 10)
-            reasons.append(f'latest infra-status shows {match.group(1)} pending updates')
+        if 'RISK: auto-updates disabled or drifted' in text:
+            score += 80
+            reasons.append('latest infra-status shows auto-updates disabled or drifted')
+        if 'RISK: pending updates are waiting while auto-updates are disabled' in text:
+            score += 60
+            reasons.append('latest infra-status shows pending updates waiting while auto-updates are disabled')
+        if 'RISK: pending updates remain after an incomplete unattended-upgrades run' in text:
+            score += 70
+            reasons.append('latest infra-status shows pending updates after an incomplete unattended-upgrades run')
+        stale_match = re.search(r'RISK: pending updates remain and unattended-upgrades has not completed recently \((\d+)h old\)', text)
+        if stale_match:
+            score += 50
+            reasons.append(
+                'latest infra-status shows pending updates with stale unattended-upgrades completion '
+                f'({stale_match.group(1)}h old)'
+            )
+        elif (
+            'pending updates' in text
+            and 'INFO: auto-updates enabled' in text
+            and 'RISK: pending updates' not in text
+        ):
+            score += 5
+            reasons.append('latest infra-status shows pending updates awaiting the next unattended-upgrades window')
     elif kind == 'backup':
         if re.search(r'^(ALERT|FAIL|RISK|WARN): .*backup', text, re.MULTILINE):
             score = 120
@@ -359,7 +397,13 @@ def execute_task(task: str, run_id: int) -> tuple[Path, str]:
         lines.append('## Pending Updates')
         apt = shutil.which('apt')
         if apt:
-            lines.append(run_cmd(['bash', '-lc', "apt list --upgradable 2>/dev/null | sed -n '1,40p'"]))
+            raw_output = run_cmd(['bash', '-lc', "apt list --upgradable 2>/dev/null | sed -n '1,40p'"], max_chars=4000)
+            listed = [line for line in raw_output.splitlines() if '/' in line and 'upgradable from:' in line]
+            lines.append(render_auto_update_health(len(listed), now=now))
+            if listed:
+                lines.append('')
+                lines.append('## Package Listing')
+                lines.extend(listed[:40])
         else:
             lines.append('apt not available')
     elif 'ssh' in tl or 'brute-force' in tl or 'security audit' in tl:

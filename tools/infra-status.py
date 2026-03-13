@@ -32,6 +32,7 @@ from infra_audit_common import (
 )
 from infra_disk import build_disk_usage_report
 from infra_network import inspect_mdns_exposure
+from infra_update_health import render_auto_update_health
 
 ROOT = Path('/home/ubuntu/.openclaw/workspace')
 INFRA = ROOT / 'departments' / 'infra'
@@ -102,10 +103,7 @@ def check_system_updates() -> str:
     if output.startswith('Error:'):
         return output
     lines = [line for line in output.splitlines() if '/' in line and 'upgradable from:' in line]
-    count = len(lines)
-    if count > 0:
-        return f'{count} pending updates'
-    return 'No pending updates'
+    return render_auto_update_health(len(lines))
 
 
 def check_disk_usage() -> str:
