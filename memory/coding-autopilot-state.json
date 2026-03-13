@@ -1,9 +1,9 @@
 {
-  "runs": 677,
+  "runs": 678,
   "cursor": 1,
   "progress": {
     "**Build first monetizable report outline from existing income tracks**": 56,
     "**Write unit tests for `pdf_to_csv.py` core conversion path**": 536,
-    "**Android shared core: define modular architecture + API contracts**": 85
+    "**Android shared core: define modular architecture + API contracts**": 86
   }
 }
