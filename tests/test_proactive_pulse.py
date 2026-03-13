@@ -126,6 +126,45 @@ Plain summary line
 
         self.assertEqual("NO_REPLY", result)
 
+    def test_select_immediate_decision_returns_new_human_action(self) -> None:
+        candidates = [
+            {
+                "kind": "recent_activity",
+                "priority": 70,
+                "headline": "Infra auto-update reconciliation finished",
+                "human_action": False,
+                "fingerprint": "memory:Infra auto-update reconciliation finished",
+            },
+            {
+                "kind": "browser_review",
+                "priority": 20,
+                "headline": "Browser control is still enabled for main",
+                "todo": "decide whether to keep browser control enabled",
+                "human_action": True,
+                "fingerprint": "security:browser-enabled",
+            },
+        ]
+
+        result = proactive_pulse.select_immediate_decision(candidates, {})
+
+        self.assertEqual("security:browser-enabled", result["fingerprint"])
+
+    def test_build_immediate_decision_message_formats_important_todo(self) -> None:
+        candidate = {
+            "kind": "browser_review",
+            "priority": 20,
+            "headline": "Browser control is still enabled for main",
+            "todo": "decide whether to keep browser control enabled",
+            "human_action": True,
+            "fingerprint": "security:browser-enabled",
+        }
+
+        result = proactive_pulse.build_immediate_decision_message(candidate)
+
+        self.assertIn("IMPORTANT: Decision needed", result)
+        self.assertIn("TODO: decide whether to keep browser control enabled.", result)
+        self.assertIn("Browser control is still enabled for main.", result)
+
     def test_already_sent_for_slot_uses_slot_key(self) -> None:
         state = {"last_slot_key": "2026-03-13:morning"}
 

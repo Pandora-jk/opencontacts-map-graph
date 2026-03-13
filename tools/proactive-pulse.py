@@ -375,6 +375,29 @@ def build_digest_message(candidates: list[dict], slot: dict) -> str:
     return "\n".join(lines)
 
 
+def select_immediate_decision(candidates: list[dict], state: dict | None = None) -> dict | None:
+    seen_human_fingerprints = set(((state or {}).get("last_human_fingerprints")) or [])
+    return next(
+        (
+            item
+            for item in top_candidates(candidates, limit=len(candidates))
+            if item.get("human_action") and str(item.get("fingerprint")) not in seen_human_fingerprints
+        ),
+        None,
+    )
+
+
+def build_immediate_decision_message(candidate: dict | None) -> str:
+    if not candidate:
+        return "NO_REPLY"
+    lines = [
+        "IMPORTANT: Decision needed",
+        f"TODO: {ensure_sentence(str(candidate['todo']))}",
+        ensure_sentence(str(candidate["headline"])),
+    ]
+    return "\n".join(lines)
+
+
 def already_sent_for_slot(state: dict, slot_key: str | None) -> bool:
     return bool(slot_key and state.get("last_slot_key") == slot_key)
 
@@ -406,16 +429,63 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Emit one proactive digest or NO_REPLY")
     parser.add_argument("--dry-run", action="store_true", help="Do not update state")
     parser.add_argument("--debug", action="store_true", help="Print candidate metadata to stderr")
+    parser.add_argument(
+        "--mode",
+        choices=("digest", "immediate-decision"),
+        default="digest",
+        help="Choose scheduled digest mode or immediate decision-only mode",
+    )
     args = parser.parse_args()
 
     state = load_state()
+    candidates = collect_candidates(state)
+    if args.mode == "immediate-decision":
+        decision = select_immediate_decision(candidates, state)
+        output = build_immediate_decision_message(decision)
+        if args.debug:
+            debug = {
+                "mode": args.mode,
+                "decision": decision,
+                "candidates": candidates,
+                "state": state,
+            }
+            print(json.dumps(debug, indent=2), file=sys.stderr)
+        print(output)
+        if output == "NO_REPLY":
+            if not args.dry_run:
+                save_state(
+                    record_check(
+                        state,
+                        slot_key=None,
+                        candidate_kinds=[],
+                        human_fingerprints=[],
+                        recent_fingerprints=[],
+                        sent=False,
+                        message=None,
+                    )
+                )
+            return 0
+        if not args.dry_run and decision:
+            save_state(
+                record_check(
+                    state,
+                    slot_key=None,
+                    candidate_kinds=[str(decision["kind"])],
+                    human_fingerprints=[str(decision["fingerprint"])],
+                    recent_fingerprints=[],
+                    sent=True,
+                    message=output,
+                )
+            )
+        return 0
+
     slot = current_digest_slot()
     slot_key = digest_slot_key()
-    candidates = collect_candidates(state)
     chosen = select_digest_items(candidates, state)
 
     if args.debug:
         debug = {
+            "mode": args.mode,
             "slot": slot,
             "slot_key": slot_key,
             "candidates": candidates,
