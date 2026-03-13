@@ -23,15 +23,37 @@ class ProactivePulseTests(unittest.TestCase):
         self.assertEqual("evening", proactive_pulse.current_digest_slot(evening)["name"])
         self.assertIsNone(proactive_pulse.current_digest_slot(midday))
 
-    def test_build_digest_message_marks_human_todo_as_important(self) -> None:
-        slot = {"name": "evening", "label": "Evening update"}
+    def test_extract_memory_sections_returns_titles_and_summaries(self) -> None:
+        text = """# 2026-03-13
+
+## First Event
+- Did the first thing
+
+## Second Event
+Plain summary line
+"""
+
+        result = proactive_pulse.extract_memory_sections(text)
+
+        self.assertEqual(
+            [("First Event", "Did the first thing"), ("Second Event", "Plain summary line")],
+            result,
+        )
+
+    def test_select_digest_items_prefers_recent_activity_and_human_todo(self) -> None:
         candidates = [
             {
                 "kind": "cron_failure",
                 "priority": 100,
                 "headline": "Automation issue: Finance Status Push failing",
-                "todo": "inspect the latest cron run",
                 "human_action": False,
+            },
+            {
+                "kind": "recent_activity",
+                "priority": 70,
+                "headline": "Infra auto-update reconciliation finished",
+                "human_action": False,
+                "fingerprint": "memory:Infra auto-update reconciliation finished",
             },
             {
                 "kind": "browser_review",
@@ -42,11 +64,60 @@ class ProactivePulseTests(unittest.TestCase):
             },
         ]
 
+        result = proactive_pulse.select_digest_items(candidates)
+
+        self.assertEqual(["browser_review", "recent_activity"], [item["kind"] for item in result])
+
+    def test_select_digest_items_skips_previously_sent_human_todo(self) -> None:
+        candidates = [
+            {
+                "kind": "recent_activity",
+                "priority": 70,
+                "headline": "Infra auto-update reconciliation finished",
+                "human_action": False,
+                "fingerprint": "memory:Infra auto-update reconciliation finished",
+            },
+            {
+                "kind": "browser_review",
+                "priority": 20,
+                "headline": "Browser control is still enabled for main",
+                "todo": "decide whether to keep browser control enabled",
+                "human_action": True,
+                "fingerprint": "security:browser-enabled",
+            },
+        ]
+
+        result = proactive_pulse.select_digest_items(
+            candidates,
+            {"last_human_fingerprints": ["security:browser-enabled"]},
+        )
+
+        self.assertEqual(["recent_activity"], [item["kind"] for item in result])
+
+    def test_build_digest_message_marks_human_todo_as_important(self) -> None:
+        slot = {"name": "evening", "label": "Evening update"}
+        candidates = [
+            {
+                "kind": "browser_review",
+                "priority": 20,
+                "headline": "Browser control is still enabled for main",
+                "todo": "decide whether to keep browser control enabled",
+                "human_action": True,
+            },
+            {
+                "kind": "recent_activity",
+                "priority": 70,
+                "headline": "Infra auto-update reconciliation finished",
+                "human_action": False,
+                "fingerprint": "memory:Infra auto-update reconciliation finished",
+            },
+        ]
+
         result = proactive_pulse.build_digest_message(candidates, slot)
 
         self.assertIn("IMPORTANT: Evening update", result)
         self.assertIn("TODO: decide whether to keep browser control enabled.", result)
-        self.assertIn("Automation issue: Finance Status Push failing.", result)
+        self.assertIn("Infra auto-update reconciliation finished.", result)
 
     def test_build_digest_message_returns_no_reply_when_there_are_no_material_issues(self) -> None:
         slot = {"name": "morning", "label": "Morning update"}

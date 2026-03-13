@@ -19,6 +19,7 @@ CRON_JOBS = HOME / ".openclaw" / "cron" / "jobs.json"
 OPENCLAW_CONFIG = HOME / ".openclaw" / "openclaw.json"
 ACTION_ITEMS = ROOT / "docs" / "openclaw-setup-action-items-2026-03-07.md"
 INFRA_CHECKS = ROOT / "departments" / "infra" / "artifacts" / "checks"
+MEMORY_DIR = ROOT / "memory"
 STATE_FILE = ROOT / "memory" / "proactive-pulse-state.json"
 SYDNEY_TZ = ZoneInfo("Australia/Sydney")
 DIGEST_MAX_ITEMS = 2
@@ -94,6 +95,58 @@ def top_candidates(candidates: list[dict], limit: int = DIGEST_MAX_ITEMS) -> lis
     material = [item for item in candidates if item]
     material.sort(key=lambda item: (-int(item["priority"]), str(item["kind"])))
     return material[:limit]
+
+
+def extract_memory_sections(text: str) -> list[tuple[str, str]]:
+    sections: list[tuple[str, str]] = []
+    matches = list(re.finditer(r"^##\s+(.+)$", text, flags=re.M))
+    for index, match in enumerate(matches):
+        title = match.group(1).strip()
+        start = match.end()
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        body = text[start:end]
+        summary = title
+        for line in body.splitlines():
+            stripped = line.strip()
+            if not stripped:
+                continue
+            if stripped.startswith("- "):
+                summary = stripped[2:].strip()
+                break
+            summary = stripped
+            break
+        sections.append((title, summary))
+    return sections
+
+
+def recent_activity_candidates(state: dict) -> list[dict]:
+    recent_files = [
+        MEMORY_DIR / f"{(utc_now().date() - dt.timedelta(days=offset)).isoformat()}.md"
+        for offset in (1, 0)
+    ]
+    sent_fingerprints = set(state.get("last_recent_fingerprints") or [])
+    sections: list[tuple[str, str]] = []
+    for path in recent_files:
+        text = load_text(path)
+        if text:
+            sections.extend(extract_memory_sections(text))
+
+    candidates: list[dict] = []
+    for title, summary in sections[-DIGEST_MAX_ITEMS:]:
+        fingerprint = f"memory:{title}"
+        if fingerprint in sent_fingerprints:
+            continue
+        headline = summary or title
+        candidates.append(
+            {
+                "kind": "recent_activity",
+                "priority": 70,
+                "fingerprint": fingerprint,
+                "headline": headline,
+                "human_action": False,
+            }
+        )
+    return candidates
 
 
 def find_cron_failures() -> list[dict]:
@@ -271,8 +324,8 @@ def browser_review_candidate() -> dict | None:
     }
 
 
-def collect_candidates() -> list[dict]:
-    return [
+def collect_candidates(state: dict) -> list[dict]:
+    return recent_activity_candidates(state) + [
         item
         for item in [
             cron_failure_candidate(),
@@ -286,8 +339,29 @@ def collect_candidates() -> list[dict]:
     ]
 
 
+def select_digest_items(candidates: list[dict], state: dict | None = None) -> list[dict]:
+    seen_human_fingerprints = set(((state or {}).get("last_human_fingerprints")) or [])
+    human_item = next(
+        (
+            item
+            for item in top_candidates(candidates, limit=len(candidates))
+            if item.get("human_action") and str(item.get("fingerprint")) not in seen_human_fingerprints
+        ),
+        None,
+    )
+    recent_items = [item for item in candidates if item.get("kind") == "recent_activity"]
+    chosen: list[dict] = []
+    if human_item:
+        chosen.append(human_item)
+    for item in recent_items:
+        if len(chosen) >= DIGEST_MAX_ITEMS:
+            break
+        chosen.append(item)
+    return chosen
+
+
 def build_digest_message(candidates: list[dict], slot: dict) -> str:
-    chosen = top_candidates(candidates)
+    chosen = select_digest_items(candidates)
     label = str(slot["label"])
     if not chosen:
         return "NO_REPLY"
@@ -310,6 +384,8 @@ def record_check(
     *,
     slot_key: str | None,
     candidate_kinds: list[str],
+    human_fingerprints: list[str],
+    recent_fingerprints: list[str],
     sent: bool,
     message: str | None,
 ) -> dict:
@@ -321,6 +397,8 @@ def record_check(
         updated["last_sent_at"] = now
         updated["last_slot_key"] = slot_key
         updated["last_message"] = message
+        updated["last_human_fingerprints"] = human_fingerprints
+        updated["last_recent_fingerprints"] = recent_fingerprints
     return updated
 
 
@@ -333,7 +411,8 @@ def main() -> int:
     state = load_state()
     slot = current_digest_slot()
     slot_key = digest_slot_key()
-    candidates = collect_candidates()
+    candidates = collect_candidates(state)
+    chosen = select_digest_items(candidates, state)
 
     if args.debug:
         debug = {
@@ -350,7 +429,9 @@ def main() -> int:
                 record_check(
                     state,
                     slot_key=slot_key,
-                    candidate_kinds=[str(item["kind"]) for item in top_candidates(candidates)],
+                    candidate_kinds=[str(item["kind"]) for item in chosen],
+                    human_fingerprints=[],
+                    recent_fingerprints=[],
                     sent=False,
                     message=None,
                 )
@@ -367,6 +448,8 @@ def main() -> int:
                     state,
                     slot_key=slot_key,
                     candidate_kinds=[],
+                    human_fingerprints=[],
+                    recent_fingerprints=[],
                     sent=False,
                     message=None,
                 )
@@ -377,7 +460,17 @@ def main() -> int:
             record_check(
                 state,
                 slot_key=slot_key,
-                candidate_kinds=[str(item["kind"]) for item in top_candidates(candidates)],
+                candidate_kinds=[str(item["kind"]) for item in chosen],
+                human_fingerprints=[
+                    str(item["fingerprint"])
+                    for item in chosen
+                    if item.get("human_action")
+                ],
+                recent_fingerprints=[
+                    str(item["fingerprint"])
+                    for item in chosen
+                    if str(item.get("kind")) == "recent_activity"
+                ],
                 sent=True,
                 message=output,
             )
