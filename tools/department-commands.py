@@ -230,10 +230,7 @@ def default_telegram_target() -> str:
 
 
 def list_reminder_jobs() -> list[dict]:
-    out = run_cli(["openclaw", "cron", "list", "--json"])
-    if out.returncode != 0:
-        raise RuntimeError(out.stderr.strip() or out.stdout.strip() or "openclaw cron list failed")
-    payload = parse_json_output(out.stdout)
+    payload = parse_json_output(CRON_JOBS_PATH.read_text(encoding="utf-8"))
     jobs = payload.get("jobs") or []
     reminders = [job for job in jobs if reminder_matches(job)]
     reminders.sort(key=lambda job: ((job.get("schedule") or {}).get("at") or "", job.get("id") or ""))
