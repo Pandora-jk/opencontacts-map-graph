@@ -1,0 +1,18 @@
+{
+  "created_at": 1773375508,
+  "expires_at": 1773377308,
+  "before_hashes": {
+    "config": "bebcc1818fd168615dc9fa3525ddce8fd1ed2a6192a0085d634ef0c8947d7ba1",
+    "cron": "04064b047e434ae8e1c509d3341fd6af9047e6e6687e258c3f3c5d6e90541c16"
+  },
+  "changes": [
+    {
+      "path": "cron.jobs[\"Coding Day Loop\"].schedule.expr",
+      "target": "cron",
+      "resolved_path": "jobs[\"Coding Day Loop\"].schedule.expr",
+      "value": "*/5 6-23 * * *",
+      "before": "*/10 6-23 * * *"
+    }
+  ],
+  "plan_id": "49952571858d"
+}
