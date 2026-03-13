@@ -1,18 +1,18 @@
 {
-  "created_at": 1773375508,
-  "expires_at": 1773377308,
+  "created_at": 1773377884,
+  "expires_at": 1773379684,
   "before_hashes": {
     "config": "bebcc1818fd168615dc9fa3525ddce8fd1ed2a6192a0085d634ef0c8947d7ba1",
-    "cron": "04064b047e434ae8e1c509d3341fd6af9047e6e6687e258c3f3c5d6e90541c16"
+    "cron": "0df90834347cc6d38ec8abe79447c6a314162d5c6b397a356407aff2b73ef0d9"
   },
   "changes": [
     {
-      "path": "cron.jobs[\"Coding Day Loop\"].schedule.expr",
-      "target": "cron",
-      "resolved_path": "jobs[\"Coding Day Loop\"].schedule.expr",
-      "value": "*/5 6-23 * * *",
-      "before": "*/10 6-23 * * *"
+      "path": "agents.defaults.heartbeat.prompt",
+      "target": "config",
+      "resolved_path": "agents.defaults.heartbeat.prompt",
+      "value": "Run the normal background heartbeat checks for main. Do not draft or preview a user-facing message here. Immediate decisions are handled by cron, and routine updates are handled by Proactive Pulse. Reply exactly HEARTBEAT_OK.",
+      "before": "If there is one actionable thing Jim should know from HEARTBEAT.md, recent memory, or recent project activity, send one short proactive update with one suggested next step. If nothing materially new exists, say HEARTBEAT_OK."
     }
   ],
-  "plan_id": "49952571858d"
+  "plan_id": "7e17a48009de"
 }
