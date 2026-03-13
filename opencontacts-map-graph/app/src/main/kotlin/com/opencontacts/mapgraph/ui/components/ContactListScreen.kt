@@ -8,15 +8,42 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.opencontacts.mapgraph.data.local.entity.ContactEntity
 
 @Composable
-fun ContactListScreen(
-    viewModel: ContactViewModel = viewModel()
-) {
-    val contacts by viewModel.contacts.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+fun ContactListScreen() {
+    val contacts = remember { listOf(
+        ContactEntity(
+            id = 1,
+            displayName = "John Doe",
+            phoneNumber = "+1-555-0123",
+            email = "john.doe@example.com",
+            addressCity = "Sydney",
+            addressState = "NSW",
+            addressCountry = "Australia",
+            contactSource = "android"
+        ),
+        ContactEntity(
+            id = 2,
+            displayName = "Jane Smith",
+            phoneNumber = "+61-412-345-678",
+            email = "jane.smith@example.com",
+            addressCity = "Melbourne",
+            addressState = "VIC",
+            addressCountry = "Australia",
+            contactSource = "android"
+        ),
+        ContactEntity(
+            id = 3,
+            displayName = "Bob Johnson",
+            phoneNumber = "+61-8-9000-0000",
+            email = "bob.johnson@example.com",
+            addressCity = "Perth",
+            addressState = "WA",
+            addressCountry = "Australia",
+            contactSource = "android"
+        )
+    ) }
 
     Column(
         modifier = Modifier
@@ -29,19 +56,12 @@ fun ContactListScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        if (isLoading) {
+        if (contacts.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
-            }
-        } else if (contacts.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("No contacts yet - Add contacts to see them on the map")
+                Text("No contacts yet")
             }
         } else {
             LazyColumn(
@@ -67,7 +87,7 @@ fun ContactListItem(contact: ContactEntity) {
                 text = contact.displayName ?: "Unknown",
                 style = MaterialTheme.typography.titleMedium
             )
-            contact.phone?.let { phone ->
+            contact.phoneNumber?.let { phone ->
                 Text(
                     text = phone,
                     style = MaterialTheme.typography.bodyMedium,
@@ -78,6 +98,13 @@ fun ContactListItem(contact: ContactEntity) {
                 Text(
                     text = email,
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            if (!contact.addressCity.isNullOrBlank() || !contact.addressState.isNullOrBlank()) {
+                Text(
+                    text = "${contact.addressCity ?: ""} ${contact.addressState ?: ""}".trim(),
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

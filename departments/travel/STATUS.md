@@ -1,9 +1,9 @@
 # Travel Status
 
-- Last run (UTC): 2026-03-13T20:48:07Z
-- Run count: 89
-- Active task: **Map multi-day hikes:** 6 Foot Track (3 days, bookable now), Grand Canyon Loop.
+- Last run (UTC): 2026-03-13T22:20:18Z
+- Run count: 90
+- Active task: **Find surf schools:** Beginner-friendly in Byron Bay, Noosa (compare prices, availability).
 - Task progress count: 12
-- Last artifact: departments/travel/artifacts/plans/20260313T204807Z-r89-map-multi-day-hikes-6-foot-track-3-days-bookable-now-gra.md
+- Last artifact: departments/travel/artifacts/plans/20260313T222018Z-r90-find-surf-schools-beginner-friendly-in-byron-bay-noosa-c.md
 - Autonomous open queue: 8
 

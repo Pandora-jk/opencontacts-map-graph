@@ -21,6 +21,11 @@ Patch 4 (openai-completions.js): Add NVIDIA and Groq to isNonStandard providers.
   not in the isNonStandard list, causing openclaw to send role='developer' for
   the system prompt on reasoning models, resulting in HTTP 400 "Unexpected message
   role." which openclaw mis-reports as "Message ordering conflict".
+
+Patch 5 (net/tailnet/ws/daemon bundles): Guard os.networkInterfaces() calls.
+  Some restricted environments raise:
+    SystemError [ERR_SYSTEM_ERROR]: uv_interface_addresses returned ...
+  These commands should degrade gracefully instead of crashing.
 """
 
 import os
@@ -238,26 +243,19 @@ def patch_compat():
 
 
 def patch_tailnet():
-    """Patch tailnet-*.js: guard os.networkInterfaces() for environments that throw.
+    """Patch dist bundles: guard os.networkInterfaces() for environments that throw.
 
     Some environments can raise:
       SystemError [ERR_SYSTEM_ERROR]: uv_interface_addresses returned ...
     This should not break CLI status/health commands.
     """
-    candidates = list(DIST.glob("tailnet-*.js"))
+    candidates = iter_dist_candidates("tailnet-*.js", "net-*.js", "ws-*.js", "daemon-cli.js")
     if not candidates:
-        print("[patch-openclaw] WARNING: no tailnet-*.js found — skipping tailnet patch", file=sys.stderr)
+        print("[patch-openclaw] WARNING: no network bundle found — skipping network patch", file=sys.stderr)
         return
 
-    target = candidates[0]
-    data = target.read_text()
-
-    if "networkInterfacesSafeError" in data:
-        print(f"[patch-openclaw] tailnet patch already applied: {target.name}", file=sys.stderr)
-        return
-
-    old = "const ifaces = os.networkInterfaces();"
-    new = (
+    tailnet_old = "const ifaces = os.networkInterfaces();"
+    tailnet_new = (
         "let ifaces;\n"
         "\ttry {\n"
         "\t\tifaces = os.networkInterfaces();\n"
@@ -268,14 +266,41 @@ def patch_tailnet():
         "\t\t};\n"
         "\t}"
     )
+    lan_old = "function pickPrimaryLanIPv4() {\n\tconst nets = os.networkInterfaces();"
+    lan_new = (
+        "function pickPrimaryLanIPv4() {\n"
+        "\tlet nets;\n"
+        "\ttry {\n"
+        "\t\tnets = os.networkInterfaces();\n"
+        "\t} catch (networkInterfacesSafeError) {\n"
+        "\t\treturn;\n"
+        "\t}"
+    )
 
-    if old not in data:
-        print(f"[patch-openclaw] WARNING: tailnet target not found in {target.name} — skipping", file=sys.stderr)
-        return
+    matched_any = False
+    for target in candidates:
+        data = target.read_text()
+        changed = False
 
-    data = data.replace(old, new, 1)
-    target.write_text(data)
-    print(f"[patch-openclaw] tailnet patch applied: {target.name}", file=sys.stderr)
+        if tailnet_old in data:
+            matched_any = True
+            data = data.replace(tailnet_old, tailnet_new, 1)
+            changed = True
+
+        if lan_old in data:
+            matched_any = True
+            data = data.replace(lan_old, lan_new, 1)
+            changed = True
+
+        if changed:
+            target.write_text(data)
+            print(f"[patch-openclaw] network patch applied: {target.name}", file=sys.stderr)
+        elif "networkInterfacesSafeError" in data:
+            matched_any = True
+            print(f"[patch-openclaw] network patch already applied: {target.name}", file=sys.stderr)
+
+    if not matched_any:
+        print("[patch-openclaw] WARNING: networkInterfaces targets not found — skipping", file=sys.stderr)
 
 
 if __name__ == "__main__":
