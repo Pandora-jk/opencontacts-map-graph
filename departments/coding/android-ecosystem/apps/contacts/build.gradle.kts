@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -44,6 +45,17 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    sourceSets {
+        getByName("main") {
+            manifest.srcFile("src/main/AndroidManifest.xml")
+            java.srcDirs("src/main/kotlin", "main/kotlin")
+            res.srcDirs("src/main/res")
+        }
+        getByName("test") {
+            java.srcDirs("test/kotlin")
+        }
+    }
 }
 
 dependencies {
@@ -63,11 +75,12 @@ dependencies {
     // Room Database
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
-    annotationProcessor("androidx.room:room-compiler:2.6.1")
-    
+    kapt("androidx.room:room-compiler:2.6.1")
+
     // Maps
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     
     // Testing
     testImplementation("junit:junit:4.13.2")

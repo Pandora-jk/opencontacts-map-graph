@@ -11,7 +11,7 @@ interface ContactDao {
     fun getAllContacts(): Flow<List<ContactEntity>>
     
     @Query("SELECT * FROM contacts ORDER BY displayName ASC")
-    suspend fun getAllContactsSync(): List<ContactEntity>>
+    suspend fun getAllContactsSync(): List<ContactEntity>
     
     @Query("SELECT * FROM contacts WHERE id = :id")
     suspend fun getContactById(id: Long): ContactEntity?
@@ -20,7 +20,7 @@ interface ContactDao {
     fun getContactsWithCoordinates(): Flow<List<ContactEntity>>
     
     @Query("SELECT * FROM contacts WHERE addressFormatted IS NOT NULL AND (latitude IS NULL OR longitude IS NULL)")
-    suspend fun getContactsNeedingGeocoding(): List<ContactEntity>>
+    suspend fun getContactsNeedingGeocoding(): List<ContactEntity>
     
     @Query("SELECT COUNT(*) FROM contacts WHERE latitude IS NULL AND addressFormatted IS NOT NULL")
     suspend fun getPendingGeocodingCount(): Int

@@ -1,7 +1,5 @@
 package com.opencontacts.mapgraph.data.repository
 
-import android.Manifest
-import android.content.ContentResolver
 import android.content.Context
 import android.provider.ContactsContract
 import com.opencontacts.mapgraph.data.local.ContactDatabase
@@ -139,28 +137,13 @@ class ContactRepository(
                             addressPostalCode = ac.getString(3)
                             addressCountry = ac.getString(4)
                             
-                            // Build formatted address
-                            addressFormatted = buildString {
-                                if (!addressStreet.isNullOrBlank()) {
-                                    append(addressStreet)
-                                }
-                                if (!addressCity.isNullOrBlank()) {
-                                    if (isNotEmpty()) append(", "
-                                    append(addressCity)
-                                }
-                                if (!addressState.isNullOrBlank()) {
-                                    if (isNotEmpty()) append(", "
-                                    append(addressState)
-                                }
-                                if (!addressPostalCode.isNullOrBlank()) {
-                                    if (isNotEmpty()) append(" "
-                                    append(addressPostalCode)
-                                }
-                                if (!addressCountry.isNullOrBlank()) {
-                                    if (isNotEmpty()) append(", "
-                                    append(addressCountry)
-                                }
-                            }.trim().trimEnd(',')
+                            addressFormatted = formatStructuredAddress(
+                                street = addressStreet,
+                                city = addressCity,
+                                state = addressState,
+                                postalCode = addressPostalCode,
+                                country = addressCountry,
+                            )
                         }
                     }
                     
@@ -170,7 +153,7 @@ class ContactRepository(
                         givenName = null,
                         familyName = null,
                         phoneNumber = phoneNumber,
-                        phoneNumberNormalized = phoneNumber?.let { normalizePhoneNumber(it) },
+                        phoneNumberNormalized = normalizePhoneNumber(phoneNumber),
                         phoneNumberType = phoneNumberType,
                         email = email,
                         addressStreet = addressStreet,
@@ -255,13 +238,6 @@ class ContactRepository(
      * Get count of contacts pending geocoding.
      */
     suspend fun getGeocodingPendingCount(): Int = dao.getPendingGeocodingCount()
-    
-    /**
-     * Normalize phone number by removing non-digit characters.
-     */
-    private fun normalizePhoneNumber(phone: String): String {
-        return phone.filter { it.isDigit() }
-    }
     
     data class LoadResult(
         val loaded: Int,

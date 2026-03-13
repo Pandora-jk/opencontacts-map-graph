@@ -6,6 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 from infra_network import run_cmd
@@ -37,6 +38,7 @@ KNOWN_SSH_KEYGEN_PATHS = (
     Path('/usr/bin/ssh-keygen'),
     Path('/bin/ssh-keygen'),
 )
+LIVE_SSHD_MAIN_CONFIG = Path('/etc/ssh/sshd_config')
 
 
 def write_config(path: Path) -> None:
@@ -120,6 +122,30 @@ def staged_config_status(path: Path) -> str:
     return _config_status(path, label='staged', ready_word='installed')
 
 
+def parse_sshd_kv(lines: list[str]) -> dict[str, str]:
+    cfg: dict[str, str] = {}
+    for raw in lines:
+        line = raw.strip()
+        if not line or line.startswith('#'):
+            continue
+        parts = line.split(None, 1)
+        if len(parts) < 2:
+            continue
+        cfg[parts[0].lower()] = parts[1].split('#', 1)[0].strip().lower()
+    return cfg
+
+
+def required_sshd_settings() -> dict[str, tuple[str, str]]:
+    required: dict[str, tuple[str, str]] = {}
+    for raw in SSHD_HARDENING_CONFIG.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        key, value = line.split(None, 1)
+        required[key.lower()] = (key, value.strip().lower())
+    return required
+
+
 def find_sshd_binary_path() -> Path | None:
     sshd = shutil.which('sshd')
     if sshd:
@@ -154,6 +180,12 @@ def validation_main_config(stage_dir: Path) -> str:
     return f'HostKey {hostkey}\nPidFile {pidfile}\nInclude {stage_dir}/*.conf\n'
 
 
+def validation_main_config_for_include(stage_dir: Path, include_target: str) -> str:
+    hostkey = validation_hostkey_path(stage_dir)
+    pidfile = stage_dir / 'sshd.pid'
+    return f'HostKey {hostkey}\nPidFile {pidfile}\nInclude {include_target}\n'
+
+
 def _one_line(value: str, max_len: int = 160) -> str:
     compact = ' '.join((value or '').split())
     if len(compact) <= max_len:
@@ -161,29 +193,39 @@ def _one_line(value: str, max_len: int = 160) -> str:
     return compact[: max_len - 1] + '…'
 
 
+def _generate_validation_hostkey(stage_dir: Path, *, context: str) -> str | None:
+    ssh_keygen = find_ssh_keygen_binary_path()
+    if not ssh_keygen:
+        return f'WARN: ssh-keygen unavailable from this shell; skipped {context}'
+
+    hostkey = validation_hostkey_path(stage_dir)
+    if hostkey.exists():
+        return None
+
+    hostkey.parent.mkdir(parents=True, exist_ok=True)
+    generated = subprocess.run(
+        [str(ssh_keygen), '-q', '-N', '', '-t', 'ed25519', '-f', str(hostkey)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if generated.returncode == 0:
+        return None
+
+    details = generated.stderr.strip() or generated.stdout.strip() or 'unknown error'
+    return f'WARN: ssh-keygen failed for {context}: {_one_line(details)}'
+
+
 def stage_sshd_configtest(stage_dir: Path) -> str:
     sshd = find_sshd_binary_path()
     if not sshd:
         return 'WARN: sshd config test unavailable from this shell'
 
-    ssh_keygen = find_ssh_keygen_binary_path()
-    if not ssh_keygen:
-        return 'WARN: ssh-keygen unavailable from this shell; skipped staged sshd config test'
+    generated_hostkey = _generate_validation_hostkey(stage_dir, context='staged sshd config test')
+    if generated_hostkey:
+        return generated_hostkey
 
-    hostkey = validation_hostkey_path(stage_dir)
     config_path = validation_config_path(stage_dir)
-    if not hostkey.exists():
-        hostkey.parent.mkdir(parents=True, exist_ok=True)
-        generated = subprocess.run(
-            [str(ssh_keygen), '-q', '-N', '', '-t', 'ed25519', '-f', str(hostkey)],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        if generated.returncode != 0:
-            details = generated.stderr.strip() or generated.stdout.strip() or 'unknown error'
-            return f'WARN: ssh-keygen failed for staged sshd config test: {_one_line(details)}'
-
     config_path.write_text(validation_main_config(stage_dir), encoding='utf-8')
     try:
         os.chmod(config_path, 0o644)
@@ -239,6 +281,62 @@ def current_auth_probe_summary() -> str:
     if log in {'n/a', ''} or log.startswith('Error:'):
         return 'Recent auth probe sample unavailable'
     return f'Recent auth probe sample:\n{log}'
+
+
+def read_effective_sshd_settings(*, include_target: str) -> tuple[dict[str, str], str | None]:
+    sshd = find_sshd_binary_path()
+    if not sshd:
+        return {}, 'WARN: sshd effective policy check unavailable from this shell'
+
+    try:
+        with tempfile.TemporaryDirectory(prefix='openclaw-sshd-effective-') as tmpdir:
+            stage_dir = Path(tmpdir)
+            generated_hostkey = _generate_validation_hostkey(
+                stage_dir,
+                context='effective sshd policy check',
+            )
+            if generated_hostkey:
+                return {}, generated_hostkey
+
+            config_path = validation_config_path(stage_dir)
+            config_path.write_text(
+                validation_main_config_for_include(stage_dir, include_target),
+                encoding='utf-8',
+            )
+            try:
+                os.chmod(config_path, 0o644)
+            except OSError:
+                pass
+
+            checked = subprocess.run(
+                [str(sshd), '-T', '-f', str(config_path)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+    except OSError as exc:
+        return {}, f'WARN: effective sshd policy check failed: {_one_line(str(exc))}'
+
+    if checked.returncode != 0:
+        details = checked.stderr.strip() or checked.stdout.strip() or 'unknown error'
+        return {}, f'WARN: effective sshd policy check failed: {_one_line(details)}'
+
+    return parse_sshd_kv(checked.stdout.splitlines()), None
+
+
+def normalize_effective_setting(key: str, value: str) -> str:
+    if key == 'permitrootlogin' and value == 'without-password':
+        return 'prohibit-password'
+    return value
+
+
+def effective_policy_drift(settings: dict[str, str]) -> list[str]:
+    drift: list[str] = []
+    for key, (label, expected) in required_sshd_settings().items():
+        actual = normalize_effective_setting(key, settings.get(key, 'not_set'))
+        if actual != expected:
+            drift.append(f'{label}={actual} (expected {expected})')
+    return drift
 
 
 def is_live_validation_target(live_config: Path, live_config_dir: Path) -> bool:
@@ -335,9 +433,31 @@ def main() -> int:
         else:
             applied_status = staged_config_status(effective_live_config)
         print(applied_status)
+        include_target = str(LIVE_SSHD_MAIN_CONFIG) if live_target else f'{effective_live_config_dir}/*.conf'
+        effective_settings, effective_error = read_effective_sshd_settings(include_target=include_target)
+        effective_drift = effective_policy_drift(effective_settings) if effective_settings else []
+        print('Effective sshd policy status:')
+        if effective_error:
+            print(effective_error)
+        elif not effective_settings:
+            print('WARN: effective sshd policy check returned no settings')
+        elif effective_drift:
+            print('ERROR: effective sshd policy drift detected')
+            for item in effective_drift:
+                print(f'- {item}')
+        else:
+            print('INFO: effective sshd policy matches the managed hardening')
         if live_target:
             if not applied_status.startswith('live config installed:'):
                 print('ERROR: live validation requires the managed /etc sshd drop-in to be installed cleanly before the host can be marked remediated')
+                print('LIVE_VALIDATION_FAILED')
+                return 1
+            if effective_error or not effective_settings:
+                print('ERROR: live validation requires an effective sshd policy check before the host can be marked remediated')
+                print('LIVE_VALIDATION_FAILED')
+                return 1
+            if effective_drift:
+                print('ERROR: live validation requires the effective sshd daemon policy to match the managed hardening before the host can be marked remediated')
                 print('LIVE_VALIDATION_FAILED')
                 return 1
             print('LIVE_VALIDATION_DONE')
@@ -349,6 +469,10 @@ def main() -> int:
             config_test_status = stage_sshd_configtest(effective_live_config_dir)
             print(config_test_status)
             if config_test_status.startswith('ERROR:'):
+                print('STAGED_VALIDATION_FAILED')
+                return 1
+            if effective_drift:
+                print('ERROR: staged validation requires the staged sshd policy to match the managed hardening')
                 print('STAGED_VALIDATION_FAILED')
                 return 1
             print('NOTE: staged validation only confirms the managed config content/path; it does not reload the live ssh service.')

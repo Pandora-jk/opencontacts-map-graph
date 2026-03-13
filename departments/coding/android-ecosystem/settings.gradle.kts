@@ -24,8 +24,6 @@ include(":core:database")
 include(":core:map")
 include(":core:media")
 include(":core:sync")
-include(":core:ui")
-include(":core:network")
 
 // Legacy (to be removed after migration)
 // include(":contacts-app")

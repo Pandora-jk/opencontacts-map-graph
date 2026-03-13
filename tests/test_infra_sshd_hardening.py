@@ -24,6 +24,50 @@ class InfraSshdHardeningTests(unittest.TestCase):
         self.assertIn("AllowStreamLocalForwarding no\n", infra_sshd_hardening.SSHD_HARDENING_CONFIG)
         self.assertIn("PermitTunnel no\n", infra_sshd_hardening.SSHD_HARDENING_CONFIG)
 
+    def test_required_sshd_settings_include_streamlocal_and_tunnel(self) -> None:
+        required = infra_sshd_hardening.required_sshd_settings()
+        self.assertEqual(("AllowStreamLocalForwarding", "no"), required["allowstreamlocalforwarding"])
+        self.assertEqual(("PermitTunnel", "no"), required["permittunnel"])
+
+    def test_effective_policy_drift_reports_forwarding_mismatches(self) -> None:
+        drift = infra_sshd_hardening.effective_policy_drift(
+            {
+                "passwordauthentication": "no",
+                "permitrootlogin": "prohibit-password",
+                "permitemptypasswords": "no",
+                "kbdinteractiveauthentication": "no",
+                "x11forwarding": "no",
+                "allowtcpforwarding": "no",
+                "allowagentforwarding": "no",
+                "allowstreamlocalforwarding": "yes",
+                "permittunnel": "yes",
+                "maxauthtries": "3",
+                "logingracetime": "30",
+                "maxstartups": "10:30:60",
+            }
+        )
+        self.assertIn("AllowStreamLocalForwarding=yes (expected no)", drift)
+        self.assertIn("PermitTunnel=yes (expected no)", drift)
+
+    def test_effective_policy_drift_allows_permit_root_login_alias(self) -> None:
+        drift = infra_sshd_hardening.effective_policy_drift(
+            {
+                "passwordauthentication": "no",
+                "permitrootlogin": "without-password",
+                "permitemptypasswords": "no",
+                "kbdinteractiveauthentication": "no",
+                "x11forwarding": "no",
+                "allowtcpforwarding": "no",
+                "allowagentforwarding": "no",
+                "allowstreamlocalforwarding": "no",
+                "permittunnel": "no",
+                "maxauthtries": "3",
+                "logingracetime": "30",
+                "maxstartups": "10:30:60",
+            }
+        )
+        self.assertEqual([], drift)
+
     def test_validate_install_target_blocks_live_path_without_explicit_override(self) -> None:
         with self.assertRaisesRegex(ValueError, "matches the live sshd path"):
             infra_sshd_hardening.validate_install_target(

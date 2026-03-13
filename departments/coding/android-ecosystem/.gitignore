@@ -1,3 +1,5 @@
 contacts-app/
 core-sdk/
 gallery-app/
+*.keystore
+*.jks
