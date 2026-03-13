@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-13T07:41:09Z
-- Run count: 317
-- Primary task: Prepare the first outreach batch with personalized first lines for the first 20 qualified companies
+- Last run (UTC): 2026-03-13T08:16:59Z
+- Run count: 318
+- Primary task: Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate
 - Primary task progress count: 20
-- Last artifact: departments/finance/artifacts/outreach/outreach-draft-20260313-r317.md
+- Last artifact: departments/finance/artifacts/offers/core-service-offer-20260313-r318.md
 - Blocking items: 0
 - Autonomous queue items: 14
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Prepare the first outreach batch with personalized first lines for the first 20 qualified companies
+Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate
 
 ## Blocking
 - None
