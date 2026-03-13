@@ -7,6 +7,16 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-13 13:02 UTC:**
+  - Reconfirmed from `departments/infra/TODO.md`, fresh status, and recent auth findings that `Run security audit` remains the top infra task because blocked `ufw` visibility and recurring SSH probes still need host-side follow-up.
+  - Hardened the repo-side SSH ban workflow so it fails closed on real drift instead of reporting a false green:
+    - tightened the managed fail2ban jail in `fail2ban/99-openclaw-sshd.local` to `maxretry=3`, `findtime=10m`, `bantime=4h`
+    - updated `tools/infra_ssh_ban_hardening.py` to distinguish root-only socket visibility from missing fail2ban state and to fail live validation when `/etc/fail2ban/jail.d/99-openclaw-sshd.local` drifts from the managed policy
+    - updated `tools/infra-status.py` to add `SSH Ban Hardening` output and surface fail2ban drift in `Risk Summary`
+    - updated `tools/infra-autopilot.py` to score live fail2ban jail drift as a security signal
+  - Added regression coverage in `tests/test_infra_ssh_ban_hardening.py`, `tests/test_infra_status.py`, and `tests/test_infra_autopilot.py`.
+  - Verification passed: `python3 -m unittest tests.test_infra_ssh_ban_hardening tests.test_infra_status tests.test_infra_autopilot -v`, `python3 -m py_compile tools/infra_ssh_ban_hardening.py tools/infra-status.py tools/infra-autopilot.py tests/test_infra_ssh_ban_hardening.py tests/test_infra_status.py tests/test_infra_autopilot.py`, `python3 tools/infra_ssh_ban_hardening.py --validate-live` (expected `LIVE_VALIDATION_FAILED` on live drift), `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260313T130152Z-infra-status.md` and `20260313T130255Z-r222-run-security-audit-check-for-open-ports-ssh-config-faile.md`.
 - **2026-03-12 17:35 UTC:**
   - Reconfirmed from `departments/infra/TODO.md`, fresh `infra-status`, and logs/runs 194-195 that `Run security audit` remains the top infra reliability/security task because the remaining live gaps are blocked `ufw` visibility and incomplete live SSH-hardening visibility.
   - Hardened `tools/infra-status.py` so repo-side audit output is more actionable without requiring host privileges:

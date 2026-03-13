@@ -321,6 +321,18 @@ def score_task_from_status(task: str, artifact: Path | None) -> tuple[int, str]:
         if 'WARN: effective SSH hardening is only partially visible' in text:
             score += 20
             reasons.append('latest infra-status shows incomplete SSH hardening visibility')
+        if 'WARN: live config missing: /etc/fail2ban/jail.d/99-openclaw-sshd.local' in text:
+            score += 55
+            reasons.append('latest infra-status shows missing live fail2ban sshd jail')
+        if 'WARN: live config drift: /etc/fail2ban/jail.d/99-openclaw-sshd.local' in text:
+            score += 45
+            reasons.append('latest infra-status shows live fail2ban sshd jail drift')
+        if 'WARN: fail2ban service state unavailable from current shell' in text:
+            score += 20
+            reasons.append('latest infra-status cannot confirm fail2ban service state')
+        if 'WARN: fail2ban sshd jail unavailable from current shell' in text:
+            score += 20
+            reasons.append('latest infra-status cannot confirm fail2ban sshd jail state')
         auth = re.search(r'ALERT: (\d+) suspicious auth lines found', text)
         if auth:
             score += 60

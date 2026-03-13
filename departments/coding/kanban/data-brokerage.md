@@ -36,6 +36,7 @@ Project scope: lead generation pipeline, data quality, and packaging for sale.
 
 ## Ready
 - [ ] **Expand solar sample workflow toward 500-entry production list**
+- [ ] **BUILD COMPLETE UI AND APK FOR OPENCONTACTS - DEADLINE TOMORROW** (CRITICAL, 2026-03-13) - branch: `feature/automation-scripts-build-complete-ui-layer-for-opencontacts-map-graph-android-app-and-ensure-apk-is-built-2026-03-13` - tests: GitHub Actions APK build passes, release created with APK artifact - acceptance: APK available at https://github.com/Pandora-jk/opencontacts-map-graph/releases for user to install - notes: URGENT - User needs installable APK by tomorrow. Create MainActivity, ContactListScreen, ViewModel, theme files, commit to main, trigger CI/CD, verify build succeeds.
 - [ ] **Android app for geo-gallery using the same shared map core** (Epic, 2026-03-04)
 - [ ] **Android geo-gallery: import photos + extract geotags into shared metadata store**
 - [ ] **Android geo-gallery: map photo clusters + timeline drill-down**

@@ -159,6 +159,22 @@ class InfraAutopilotTests(unittest.TestCase):
         self.assertEqual(40, score)
         self.assertIn("latest infra-status shows blocked ufw visibility", reason)
 
+    def test_score_task_from_status_counts_live_fail2ban_drift_for_security(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "infra-status.md"
+            artifact.write_text(
+                "WARN: live config drift: /etc/fail2ban/jail.d/99-openclaw-sshd.local\n",
+                encoding="utf-8",
+            )
+
+            score, reason = infra_autopilot.score_task_from_status(
+                "Run security audit: Check for open ports, SSH config, failed logins.",
+                artifact,
+            )
+
+        self.assertEqual(45, score)
+        self.assertIn("latest infra-status shows live fail2ban sshd jail drift", reason)
+
     def test_score_task_from_status_keeps_healthy_pending_updates_low_priority(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             artifact = Path(tmpdir) / "infra-status.md"

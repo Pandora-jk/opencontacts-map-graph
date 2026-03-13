@@ -14,13 +14,14 @@ FAIL2BAN_SSH_JAIL = (
     "port = ssh\n"
     "backend = auto\n"
     "logpath = %(sshd_log)s\n"
-    "maxretry = 4\n"
-    "findtime = 15m\n"
-    "bantime = 1h\n"
+    "maxretry = 3\n"
+    "findtime = 10m\n"
+    "bantime = 4h\n"
 )
 WORKSPACE_ROOT = Path('/home/ubuntu/.openclaw/workspace')
 MANAGED_FAIL2BAN_CONFIG = WORKSPACE_ROOT / 'fail2ban' / '99-openclaw-sshd.local'
 LIVE_FAIL2BAN_CONFIG = Path('/etc/fail2ban/jail.d/99-openclaw-sshd.local')
+FAIL2BAN_SOCKET = Path('/var/run/fail2ban/fail2ban.sock')
 DEFAULT_STAGE_DIR = Path('/tmp/openclaw-fail2ban-stage')
 
 
@@ -78,13 +79,13 @@ def _config_mode(path: Path) -> int | None:
 
 def _config_status(path: Path, *, label: str, ready_word: str) -> str:
     if not path.exists():
-        return f'{label} config missing: {path}'
+        return f'WARN: {label} config missing: {path}'
     try:
         content = path.read_text(encoding='utf-8')
     except OSError as exc:
-        return f'{label} config unreadable: {exc}'
+        return f'WARN: {label} config unreadable: {exc}'
     if content != FAIL2BAN_SSH_JAIL:
-        return f'{label} config drift: {path}'
+        return f'WARN: {label} config drift: {path}'
     mode = _config_mode(path)
     if mode is None:
         return f'{label} config {ready_word}: {path}'
@@ -103,6 +104,30 @@ def live_config_status(path: Path = LIVE_FAIL2BAN_CONFIG) -> str:
 
 def staged_config_status(path: Path) -> str:
     return _config_status(path, label='staged', ready_word='installed')
+
+
+def fail2ban_policy_status() -> str:
+    return 'INFO: managed fail2ban sshd jail policy: maxretry=3, findtime=10m, bantime=4h'
+
+
+def fail2ban_socket_status(path: Path = FAIL2BAN_SOCKET) -> str:
+    if not path.exists():
+        return f'WARN: fail2ban socket missing: {path}'
+    details: list[str] = []
+    mode = _config_mode(path)
+    if mode is not None:
+        details.append(f'mode {mode:04o}')
+    try:
+        stat_result = path.stat()
+        if stat_result.st_uid == 0 and stat_result.st_gid == 0:
+            details.append('owner root:root')
+        else:
+            details.append(f'uid={stat_result.st_uid} gid={stat_result.st_gid}')
+    except OSError:
+        pass
+    if details:
+        return f'INFO: fail2ban socket present: {path} ({", ".join(details)})'
+    return f'INFO: fail2ban socket present: {path}'
 
 
 def fail2ban_binary_status() -> str:
@@ -134,13 +159,36 @@ def fail2ban_service_status() -> str:
     status = run_cmd(['bash', '-lc', 'service fail2ban status 2>/dev/null | sed -n "1,3p"'], max_chars=180)
     if status not in {'n/a', ''} and not status.startswith('Error:'):
         return f'fail2ban service: {" ".join(status.split())}'
-    return 'fail2ban service: unavailable from current shell'
+    socket_status = fail2ban_socket_status()
+    if socket_status.startswith('INFO: fail2ban socket present:'):
+        return socket_status.replace(
+            'INFO: fail2ban socket present:',
+            'INFO: fail2ban service state not visible from current shell; socket present:',
+            1,
+        )
+    return 'WARN: fail2ban service state unavailable from current shell'
 
 
 def fail2ban_sshd_status() -> str:
-    status = run_cmd(['bash', '-lc', 'fail2ban-client status sshd 2>/dev/null | sed -n "1,20p"'], max_chars=400)
+    status = run_cmd(['bash', '-lc', 'fail2ban-client status sshd 2>&1 | sed -n "1,20p"'], max_chars=400)
+    if 'Permission denied to socket' in status:
+        socket_status = fail2ban_socket_status()
+        if socket_status.startswith('INFO: fail2ban socket present:'):
+            return socket_status.replace(
+                'INFO: fail2ban socket present:',
+                'INFO: fail2ban sshd jail status requires root; socket present:',
+                1,
+            )
+        return 'WARN: fail2ban sshd jail status requires root but the fail2ban socket is not visible'
     if status in {'n/a', ''} or status.startswith('Error:'):
-        return 'fail2ban sshd jail: unavailable from current shell'
+        socket_status = fail2ban_socket_status()
+        if socket_status.startswith('INFO: fail2ban socket present:'):
+            return socket_status.replace(
+                'INFO: fail2ban socket present:',
+                'WARN: fail2ban sshd jail status unavailable from current shell; socket present:',
+                1,
+            )
+        return 'WARN: fail2ban sshd jail unavailable from current shell'
     return f'fail2ban sshd jail:\n{status}'
 
 
@@ -202,6 +250,7 @@ def main() -> int:
     print()
     print('Suggested fail2ban jail:')
     print(FAIL2BAN_SSH_JAIL, end='')
+    print(fail2ban_policy_status())
     print()
     print('Validation after applying on the host:')
     print(

@@ -32,6 +32,14 @@ from infra_audit_common import (
 )
 from infra_disk import build_disk_usage_report
 from infra_network import inspect_mdns_exposure
+from infra_ssh_ban_hardening import (
+    fail2ban_binary_status,
+    fail2ban_policy_status,
+    fail2ban_service_status,
+    fail2ban_sshd_status,
+    live_config_status as fail2ban_live_config_status,
+    managed_config_status as fail2ban_managed_config_status,
+)
 from infra_update_health import render_auto_update_health
 
 ROOT = Path('/home/ubuntu/.openclaw/workspace')
@@ -401,6 +409,18 @@ def check_auth_source_summary() -> str:
     return f'{summary}\nSource: {source}'
 
 
+def check_ssh_ban_hardening() -> str:
+    lines = [
+        fail2ban_managed_config_status(),
+        fail2ban_live_config_status(),
+        fail2ban_policy_status(),
+        fail2ban_binary_status(),
+        fail2ban_service_status(),
+        fail2ban_sshd_status(),
+    ]
+    return '\n'.join(lines)
+
+
 def check_backup_integrity() -> str:
     """Check backup integrity status."""
     if BACKUP_VERIFY_SCRIPT.exists():
@@ -523,6 +543,11 @@ def generate_report() -> tuple[str, list[str]]:
         'result': check_auth_source_summary()
     }
 
+    findings['checks']['ssh_ban_hardening'] = {
+        'status': 'checked',
+        'result': check_ssh_ban_hardening()
+    }
+
     findings['checks']['backup_integrity'] = {
         'status': 'checked',
         'result': check_backup_integrity()
@@ -565,6 +590,10 @@ def generate_report() -> tuple[str, list[str]]:
     failed_result = findings['checks']['failed_logins']['result']
     if failed_result.startswith('ALERT:'):
         risk_summary.append(f'RISK: {first_signal_line(failed_result)}')
+
+    ssh_ban_result = findings['checks']['ssh_ban_hardening']['result']
+    if re.search(r'^(ALERT|RISK|WARN|FAIL):', ssh_ban_result, re.MULTILINE):
+        risk_summary.append(f'RISK: {first_signal_line(ssh_ban_result)}')
 
     backup_result = findings['checks']['backup_integrity']['result']
     if re.search(r'^(ALERT|FAIL|RISK|WARN):', backup_result, re.MULTILINE):
@@ -612,6 +641,10 @@ def generate_report() -> tuple[str, list[str]]:
         '',
         f"```\n{findings['checks']['auth_source_summary']['result']}\n```",
         '',
+        '## SSH Ban Hardening',
+        '',
+        f"```\n{findings['checks']['ssh_ban_hardening']['result']}\n```",
+        '',
         '## Backup Integrity',
         '',
         f"```\n{findings['checks']['backup_integrity']['result']}\n```",
@@ -651,6 +684,7 @@ def generate_report() -> tuple[str, list[str]]:
         f"SSH: {one_line(findings['checks']['ssh_config']['result'])}",
         f"Failed Logins: {one_line(findings['checks']['failed_logins']['result'])}",
         f"Auth Sources: {one_line(findings['checks']['auth_source_summary']['result'])}",
+        f"SSH Ban: {one_line(findings['checks']['ssh_ban_hardening']['result'])}",
         f"Backup: {one_line(findings['checks']['backup_integrity']['result'])}",
         f"Services: {one_line(findings['checks']['service_health']['result'])}",
     ]

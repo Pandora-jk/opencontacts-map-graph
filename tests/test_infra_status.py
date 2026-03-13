@@ -89,6 +89,8 @@ class InfraStatusTests(unittest.TestCase):
         ), mock.patch.object(
             infra_status, "check_backup_integrity", return_value="Backup nominal"
         ), mock.patch.object(
+            infra_status, "check_ssh_ban_hardening", return_value="SSH ban nominal"
+        ), mock.patch.object(
             infra_status, "check_service_health", return_value="service-manager: unavailable"
         ), mock.patch.object(
             infra_status, "run_cmd", return_value="UNCONN 0 0 0.0.0.0:5353 0.0.0.0:*"
@@ -100,6 +102,7 @@ class InfraStatusTests(unittest.TestCase):
         self.assertIn("## Multicast DNS Exposure", md_content)
         self.assertIn("## Unexpected Listener Details", md_content)
         self.assertIn("## Auth Source Summary", md_content)
+        self.assertIn("## SSH Ban Hardening", md_content)
         self.assertIn("ALERT: External mDNS listener detected on udp/5353", md_content)
         self.assertTrue(
             any("mDNS: ALERT: External mDNS listener detected on udp/5353" in line for line in summary_lines)
@@ -275,6 +278,8 @@ class InfraStatusTests(unittest.TestCase):
         ), mock.patch.object(
             infra_status, "check_auth_source_summary", return_value="No suspicious auth-event source summary available (auth.log)"
         ), mock.patch.object(
+            infra_status, "check_ssh_ban_hardening", return_value="SSH ban nominal"
+        ), mock.patch.object(
             infra_status, "check_backup_integrity", return_value="Backup nominal"
         ), mock.patch.object(
             infra_status, "check_service_health", return_value="service-manager: unavailable"
@@ -307,6 +312,8 @@ class InfraStatusTests(unittest.TestCase):
         ), mock.patch.object(
             infra_status, "check_auth_source_summary", return_value="No suspicious auth-event source summary available (auth.log)"
         ), mock.patch.object(
+            infra_status, "check_ssh_ban_hardening", return_value="SSH ban nominal"
+        ), mock.patch.object(
             infra_status, "check_backup_integrity", return_value="Backup nominal"
         ), mock.patch.object(
             infra_status, "check_service_health", return_value="service-manager: unavailable"
@@ -318,6 +325,38 @@ class InfraStatusTests(unittest.TestCase):
             md_content,
         )
         self.assertNotIn("INFO: ufw boot config ENABLED=yes (/etc/ufw/ufw.conf)\n\n---", md_content)
+
+    def test_generate_report_risk_summary_includes_ssh_ban_warning(self) -> None:
+        with mock.patch.object(infra_status, "current_port_lines", return_value="tcp 0.0.0.0:22"), mock.patch.object(
+            infra_status, "check_system_updates", return_value="No pending updates"
+        ), mock.patch.object(
+            infra_status, "check_disk_usage", return_value="Disk usage nominal"
+        ), mock.patch.object(
+            infra_status, "check_unexpected_listener_details", return_value="No unexpected listener details to inspect"
+        ), mock.patch.object(
+            infra_status, "check_firewall_status", return_value="Firewall nominal"
+        ), mock.patch.object(
+            infra_status, "check_ssh_config", return_value="SSH nominal"
+        ), mock.patch.object(
+            infra_status, "check_failed_logins", return_value="ALERT: 9 suspicious auth lines found in sampled logs (auth.log)"
+        ), mock.patch.object(
+            infra_status, "check_auth_source_summary", return_value="ALERT: Auth event sources in sampled logs"
+        ), mock.patch.object(
+            infra_status,
+            "check_ssh_ban_hardening",
+            return_value="WARN: live config missing: /etc/fail2ban/jail.d/99-openclaw-sshd.local",
+        ), mock.patch.object(
+            infra_status, "check_backup_integrity", return_value="Backup nominal"
+        ), mock.patch.object(
+            infra_status, "check_service_health", return_value="service-manager: unavailable"
+        ):
+            md_content, summary_lines = infra_status.generate_report()
+
+        self.assertIn(
+            "- RISK: WARN: live config missing: /etc/fail2ban/jail.d/99-openclaw-sshd.local",
+            md_content,
+        )
+        self.assertTrue(any("SSH Ban: WARN: live config missing" in line for line in summary_lines))
 
 
 if __name__ == "__main__":
