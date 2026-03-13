@@ -1,4 +1,5 @@
 import importlib.util
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -44,6 +45,90 @@ class DepartmentCommandsTests(unittest.TestCase):
 
         self.assertIn("[INFRA UPDATE]", output)
         self.assertIn("Status refresh:", output)
+
+    def test_add_reminder_uses_isolated_telegram_cron_job(self) -> None:
+        completed = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout=(
+                '{"job":{"id":"abc123","createdAtMs":1773397800000,'
+                '"schedule":{"kind":"at","at":"2026-03-13T10:40:00.000Z"}}}'
+            ),
+            stderr="",
+        )
+
+        with (
+            mock.patch.object(department_commands, "run_cli", return_value=completed) as run_cli,
+            mock.patch.object(department_commands, "default_telegram_target", return_value="156480904"),
+        ):
+            output = department_commands.add_reminder("10m", "Brush your teeth")
+
+        run_cli.assert_called_once_with(
+            [
+                "openclaw",
+                "cron",
+                "add",
+                "--name",
+                "Reminder: Brush your teeth",
+                "--at",
+                "10m",
+                "--session",
+                "isolated",
+                "--message",
+                "Return exactly: Reminder: Brush your teeth",
+                "--announce",
+                "--channel",
+                "telegram",
+                "--to",
+                "156480904",
+                "--model",
+                "nvidia/qwen/qwen3.5-397b-a17b",
+                "--delete-after-run",
+                "--json",
+            ]
+        )
+        self.assertIn("reminder created: id=abc123", output)
+        self.assertIn("scheduled=10m", output)
+        self.assertIn("next_run=2026-03-13T10:40:00.000Z", output)
+
+    def test_reminder_matches_only_isolated_telegram_at_jobs(self) -> None:
+        matching_job = {
+            "id": "abc123",
+            "name": "Reminder: Brush your teeth",
+            "sessionTarget": "isolated",
+            "schedule": {"kind": "at", "at": "2026-03-13T10:40:00.000Z"},
+            "payload": {"kind": "agentTurn", "message": "Return exactly: Reminder: Brush your teeth"},
+            "delivery": {"mode": "announce", "channel": "telegram", "to": "156480904"},
+        }
+        non_matching_job = {
+            "id": "def456",
+            "name": "Coding Day Loop",
+            "sessionTarget": "isolated",
+            "schedule": {"kind": "cron", "expr": "*/10 * * * *"},
+            "payload": {"kind": "agentTurn", "message": "Run coding"},
+            "delivery": {"mode": "none", "channel": "last"},
+        }
+
+        self.assertTrue(department_commands.reminder_matches(matching_job))
+        self.assertFalse(department_commands.reminder_matches(non_matching_job))
+
+    def test_format_reminder_list_shows_text_and_schedule(self) -> None:
+        output = department_commands.format_reminder_list(
+            [
+                {
+                    "id": "abc123",
+                    "name": "Reminder: Brush your teeth",
+                    "sessionTarget": "isolated",
+                    "schedule": {"kind": "at", "at": "2026-03-13T10:40:00.000Z"},
+                    "payload": {"kind": "agentTurn", "message": "Return exactly: Reminder: Brush your teeth"},
+                    "delivery": {"mode": "announce", "channel": "telegram", "to": "156480904"},
+                }
+            ]
+        )
+
+        self.assertIn("id=abc123", output)
+        self.assertIn("scheduled=2026-03-13T10:40:00.000Z", output)
+        self.assertIn("text=Brush your teeth", output)
 
 
 if __name__ == "__main__":
