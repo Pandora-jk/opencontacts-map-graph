@@ -245,3 +245,4 @@
 [2026-03-12 22:58:17 UTC] run=297 primary='Confirm suppression list is operational' artifact='departments/finance/artifacts/compliance/compliance-check-20260312-r297.md' blocking=0 queue=14
 [2026-03-12 23:26:47 UTC] run=298 primary='Document approved public B2B data sources' artifact='departments/finance/artifacts/compliance/compliance-check-20260312-r298.md' blocking=0 queue=14
 [2026-03-13 00:00:49 UTC] run=299 primary='Write the one-line sales promise for the core service offer' artifact='departments/finance/artifacts/offers/core-service-offer-20260313-r299.md' blocking=0 queue=14
+[2026-03-13 00:36:35 UTC] run=300 primary='Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md' artifact='departments/finance/artifacts/pipeline/founder-led-agencies-first-20-20260313-r300.csv' blocking=0 queue=14
