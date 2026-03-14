@@ -317,6 +317,67 @@ class InfraAutopilotTests(unittest.TestCase):
         self.assertEqual(70, score)
         self.assertIn("pending updates after an incomplete unattended-upgrades run", reason)
 
+    def test_score_task_from_status_prioritizes_stalled_unattended_updates_more_strongly(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "infra-status.md"
+            artifact.write_text(
+                "4 pending updates\n"
+                "INFO: auto-updates enabled (APT::Periodic::Update-Package-Lists=1, "
+                "APT::Periodic::Unattended-Upgrade=1)\n"
+                "WARN: unattended-upgrades last started at 2026-03-12 14:35 UTC (12h ago) but no completion was logged\n"
+                "INFO: package-manager activity: no active apt/dpkg/unattended-upgrades process visible\n"
+                "RISK: unattended-upgrades appears stalled; last start was 2026-03-12 14:35 UTC and no active package-manager process is visible\n",
+                encoding="utf-8",
+            )
+
+            score, reason = infra_autopilot.score_task_from_status(
+                "Check for system updates daily and report count.",
+                artifact,
+            )
+
+        self.assertEqual(95, score)
+        self.assertIn("unattended-upgrades appears stalled", reason)
+
+    def test_score_task_from_status_adds_security_sensitive_update_weight(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "infra-status.md"
+            artifact.write_text(
+                "2 pending updates\n"
+                "INFO: auto-updates enabled (APT::Periodic::Update-Package-Lists=1, "
+                "APT::Periodic::Unattended-Upgrade=1)\n"
+                "INFO: unattended-upgrades last completed at 2026-03-13 01:05 UTC (1h ago): "
+                "All upgrades installed\n"
+                "RISK: security-sensitive updates pending: kernel=linux-image-aws, linux-libc-dev\n",
+                encoding="utf-8",
+            )
+
+            score, reason = infra_autopilot.score_task_from_status(
+                "Check for system updates daily and report count.",
+                artifact,
+            )
+
+        self.assertEqual(40, score)
+        self.assertIn("security-sensitive updates pending", reason)
+
+    def test_score_task_from_artifact_adds_reboot_required_weight(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "updates.md"
+            artifact.write_text(
+                "No pending updates\n"
+                "INFO: auto-updates enabled (APT::Periodic::Update-Package-Lists=1, "
+                "APT::Periodic::Unattended-Upgrade=1)\n"
+                "WARN: reboot required by previously installed updates (/var/run/reboot-required)\n",
+                encoding="utf-8",
+            )
+
+            score, reason = infra_autopilot.score_task_from_artifact(
+                "Check for system updates daily and report count.",
+                artifact,
+            )
+
+        self.assertEqual(50, score)
+        self.assertIn("reboot required by previously installed updates", reason)
+
     def test_select_task_prefers_non_stale_security_risk_over_stale_disk_status(self) -> None:
         tasks = [
             "Run security audit: Check for open ports, SSH config, failed logins.",

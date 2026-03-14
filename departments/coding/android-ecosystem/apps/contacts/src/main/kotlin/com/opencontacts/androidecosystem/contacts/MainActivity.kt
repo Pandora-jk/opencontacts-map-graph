@@ -1,17 +1,25 @@
 package com.opencontacts.androidecosystem.contacts
 
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.color.MaterialColors
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        bindThemeVerificationCard()
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         val viewPager = findViewById<ViewPager2>(R.id.view_pager)
@@ -53,6 +61,25 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun bindThemeVerificationCard() {
+        val card = findViewById<MaterialCardView>(R.id.theme_verification_card)
+        val summaryView = findViewById<TextView>(R.id.theme_verification_summary)
+        val hintView = findViewById<TextView>(R.id.theme_verification_hint)
+        val rootView = findViewById<View>(android.R.id.content)
+        val snapshot = ThemeVerificationSnapshot(
+            dynamicColorCapable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
+            darkThemeEnabled =
+                (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+                    Configuration.UI_MODE_NIGHT_YES,
+            primaryColor = MaterialColors.getColor(rootView, com.google.android.material.R.attr.colorPrimary, 0),
+            surfaceColor = MaterialColors.getColor(rootView, com.google.android.material.R.attr.colorSurface, 0),
+        )
+
+        summaryView.text = buildThemeVerificationSummary(snapshot)
+        hintView.text = buildThemeVerificationHint(snapshot)
+        card.isVisible = true
     }
 }
 

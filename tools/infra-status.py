@@ -118,7 +118,7 @@ def check_system_updates() -> str:
     if output.startswith('Error:'):
         return output
     lines = [line for line in output.splitlines() if '/' in line and 'upgradable from:' in line]
-    return render_auto_update_health(len(lines))
+    return render_auto_update_health(len(lines), package_lines=lines)
 
 
 def check_disk_usage() -> str:
@@ -463,6 +463,15 @@ def first_signal_line(value: str) -> str:
     return one_line(value)
 
 
+def strongest_signal_line(value: str) -> str:
+    lines = [raw.strip() for raw in (value or '').splitlines() if raw.strip()]
+    for prefix in ('CRITICAL:', 'ALERT:', 'RISK:', 'WARN:', 'FAIL:', 'HARDENING:'):
+        for line in lines:
+            if line.startswith(prefix):
+                return line
+    return one_line(value)
+
+
 def check_service_health() -> str:
     """Check status of critical services."""
     services = ['ssh', 'nginx', 'docker', 'cron']
@@ -582,8 +591,13 @@ def generate_report() -> tuple[str, list[str]]:
         risk_summary.append(f'RISK: {ssh_signal}')
 
     updates_result = findings['checks']['system_updates']['result']
+    update_signal = strongest_signal_line(updates_result)
     update_match = re.search(r'(\d+)\s+pending updates', updates_result)
-    if update_match and int(update_match.group(1)) > 0:
+    if update_signal.startswith(('CRITICAL:', 'ALERT:', 'RISK:')):
+        risk_summary.append(update_signal)
+    elif update_signal.startswith(('WARN:', 'FAIL:')):
+        risk_summary.append(f'RISK: {update_signal}')
+    elif update_match and int(update_match.group(1)) > 0:
         risk_summary.append(f'RISK: {update_match.group(1)} system updates pending')
 
     disk_result = findings['checks']['disk_usage']['result']

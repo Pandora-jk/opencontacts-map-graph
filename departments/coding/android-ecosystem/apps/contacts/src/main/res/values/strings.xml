@@ -26,4 +26,5 @@
     <string name="marker_strength_template">%1$s • strength %2$d</string>
     <string name="contact_list_item_description">Contact row for %1$s</string>
     <string name="marker_info_description">Marker information for %1$s</string>
+    <string name="theme_verification_title">Material You verification</string>
 </resources>

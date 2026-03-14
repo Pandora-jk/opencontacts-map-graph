@@ -1,7 +1,7 @@
 {
-  "runs": 380,
-  "last_primary_task": "Test unsubscribe flow end-to-end",
-  "task_cursor": 3,
+  "runs": 390,
+  "last_primary_task": "Define the initial delivery checklist for the first paying client",
+  "task_cursor": 13,
   "task_progress": {
     "**Daily cash task:** close one short-cycle offer (lead pack, template pack, quick script fix).": 1,
     "**Recurring income task:** build/iterate one monthly-retainer style product offer.": 1,
@@ -10,17 +10,17 @@
     "Review cold email templates for GDPR/CAN-SPAM compliance": 25,
     "Verify email footer includes address + unsubscribe link": 25,
     "Test unsubscribe flow end-to-end": 25,
-    "Confirm suppression list is operational": 24,
-    "Document approved public B2B data sources": 24,
+    "Confirm suppression list is operational": 25,
+    "Document approved public B2B data sources": 25,
     "Lock the first ICP: founder-led B2B agencies with 5-30 employees, prioritizing SEO, paid ads, web/dev, automation, and RevOps agencies": 18,
-    "Write the one-line sales promise for the core service offer": 23,
-    "Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md": 24,
-    "Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes": 24,
-    "Filter out personal emails, low-ticket businesses, solo operators, giant agencies, and weak-fit prospects": 24,
-    "Prepare the first outreach batch with personalized first lines for the first 20 qualified companies": 24,
-    "Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate": 24,
-    "Prepare the 15-minute demo script around 3 sample agency prospects": 24,
-    "Define the initial delivery checklist for the first paying client": 24,
+    "Write the one-line sales promise for the core service offer": 24,
+    "Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md": 25,
+    "Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes": 25,
+    "Filter out personal emails, low-ticket businesses, solo operators, giant agencies, and weak-fit prospects": 25,
+    "Prepare the first outreach batch with personalized first lines for the first 20 qualified companies": 25,
+    "Set the Week 1 KPI chain: researched accounts, verified contacts, emails sent, replies, demos, closes, complaint rate": 25,
+    "Prepare the 15-minute demo script around 3 sample agency prospects": 25,
+    "Define the initial delivery checklist for the first paying client": 25,
     "Scan GitHub bounties in Ansible, Linux, DevOps, and automation as side cash only": 24
   }
 }

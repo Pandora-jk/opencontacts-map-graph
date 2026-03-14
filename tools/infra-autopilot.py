@@ -257,6 +257,8 @@ def score_task_from_artifact(task: str, artifact: Path | None) -> tuple[int, str
     text = artifact.read_text(encoding='utf-8', errors='ignore')
     reasons: list[str] = []
     score = 0
+    pending_updates_match = re.search(r'(\d+)\s+pending updates', text)
+    pending_updates = int(pending_updates_match.group(1)) if pending_updates_match else 0
 
     for line in text.splitlines():
         clean = clean_text(line)
@@ -295,9 +297,18 @@ def score_task_from_artifact(task: str, artifact: Path | None) -> tuple[int, str
         if 'RISK: pending updates are waiting while auto-updates are disabled' in text:
             score += 60
             reasons.append('pending updates are waiting while auto-updates are disabled')
+        if 'RISK: unattended-upgrades appears stalled;' in text:
+            score += 95
+            reasons.append('unattended-upgrades appears stalled')
         if 'RISK: pending updates remain after an incomplete unattended-upgrades run' in text:
             score += 70
             reasons.append('pending updates remain after an incomplete unattended-upgrades run')
+        if 'RISK: security-sensitive updates pending:' in text:
+            score += 40
+            reasons.append('security-sensitive updates are pending')
+        if 'WARN: reboot required by previously installed updates' in text:
+            score += 35
+            reasons.append('reboot required by previously installed updates')
         stale_match = re.search(r'RISK: pending updates remain and unattended-upgrades has not completed recently \((\d+)h old\)', text)
         if stale_match:
             score += 50
@@ -305,9 +316,12 @@ def score_task_from_artifact(task: str, artifact: Path | None) -> tuple[int, str
                 f"pending updates remain and unattended-upgrades has not completed recently ({stale_match.group(1)}h old)"
             )
         elif (
-            'pending updates' in text
+            pending_updates > 0
             and 'INFO: auto-updates enabled' in text
             and 'RISK: pending updates' not in text
+            and 'RISK: unattended-upgrades appears stalled;' not in text
+            and 'RISK: security-sensitive updates pending:' not in text
+            and 'WARN: reboot required by previously installed updates' not in text
         ):
             score += 5
             reasons.append('pending package updates awaiting the next unattended-upgrades window')
@@ -336,6 +350,8 @@ def score_task_from_status(task: str, artifact: Path | None) -> tuple[int, str]:
     reasons: list[str] = []
     score = 0
     kind = task_kind(task)
+    pending_updates_match = re.search(r'(\d+)\s+pending updates', text)
+    pending_updates = int(pending_updates_match.group(1)) if pending_updates_match else 0
 
     if kind == 'disk':
         critical = re.search(r'CRITICAL: Root filesystem usage is (\d+)%', text)
@@ -408,9 +424,18 @@ def score_task_from_status(task: str, artifact: Path | None) -> tuple[int, str]:
         if 'RISK: pending updates are waiting while auto-updates are disabled' in text:
             score += 60
             reasons.append('latest infra-status shows pending updates waiting while auto-updates are disabled')
+        if 'RISK: unattended-upgrades appears stalled;' in text:
+            score += 95
+            reasons.append('latest infra-status shows unattended-upgrades appears stalled')
         if 'RISK: pending updates remain after an incomplete unattended-upgrades run' in text:
             score += 70
             reasons.append('latest infra-status shows pending updates after an incomplete unattended-upgrades run')
+        if 'RISK: security-sensitive updates pending:' in text:
+            score += 40
+            reasons.append('latest infra-status shows security-sensitive updates pending')
+        if 'WARN: reboot required by previously installed updates' in text:
+            score += 35
+            reasons.append('latest infra-status shows a pending reboot requirement')
         stale_match = re.search(r'RISK: pending updates remain and unattended-upgrades has not completed recently \((\d+)h old\)', text)
         if stale_match:
             score += 50
@@ -419,9 +444,12 @@ def score_task_from_status(task: str, artifact: Path | None) -> tuple[int, str]:
                 f'({stale_match.group(1)}h old)'
             )
         elif (
-            'pending updates' in text
+            pending_updates > 0
             and 'INFO: auto-updates enabled' in text
             and 'RISK: pending updates' not in text
+            and 'RISK: unattended-upgrades appears stalled;' not in text
+            and 'RISK: security-sensitive updates pending:' not in text
+            and 'WARN: reboot required by previously installed updates' not in text
         ):
             score += 5
             reasons.append('latest infra-status shows pending updates awaiting the next unattended-upgrades window')
@@ -475,7 +503,7 @@ def execute_task(task: str, run_id: int) -> tuple[Path, str]:
         if apt:
             raw_output = run_cmd(['bash', '-lc', "apt list --upgradable 2>/dev/null | sed -n '1,40p'"], max_chars=4000)
             listed = [line for line in raw_output.splitlines() if '/' in line and 'upgradable from:' in line]
-            lines.append(render_auto_update_health(len(listed), now=now))
+            lines.append(render_auto_update_health(len(listed), now=now, package_lines=listed))
             if listed:
                 lines.append('')
                 lines.append('## Package Listing')

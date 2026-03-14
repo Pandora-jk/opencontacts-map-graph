@@ -297,6 +297,85 @@ class InfraStatusTests(unittest.TestCase):
             md_content,
         )
 
+    def test_generate_report_risk_summary_prefers_explicit_update_risk_over_pending_count(self) -> None:
+        with mock.patch.object(infra_status, "current_port_lines", return_value="tcp 0.0.0.0:22"), mock.patch.object(
+            infra_status,
+            "check_system_updates",
+            return_value=(
+                "5 pending updates\n"
+                "INFO: auto-updates enabled (APT::Periodic::Update-Package-Lists=1, "
+                "APT::Periodic::Unattended-Upgrade=1)\n"
+                "WARN: unattended-upgrades last started at 2026-03-14 13:06 UTC (0h ago) but no completion was logged\n"
+                "RISK: pending updates remain after an incomplete unattended-upgrades run\n"
+                "RISK: security-sensitive updates pending: kernel=linux-aws, linux-image-aws\n"
+            ),
+        ), mock.patch.object(
+            infra_status, "check_disk_usage", return_value="Disk usage nominal"
+        ), mock.patch.object(
+            infra_status, "check_unexpected_listener_details", return_value="No unexpected listener details to inspect"
+        ), mock.patch.object(
+            infra_status, "check_firewall_status", return_value="Firewall nominal"
+        ), mock.patch.object(
+            infra_status, "check_ssh_config", return_value="SSH nominal"
+        ), mock.patch.object(
+            infra_status, "check_failed_logins", return_value="No failed authentication attempts found in sampled logs"
+        ), mock.patch.object(
+            infra_status, "check_auth_source_summary", return_value="No suspicious auth-event source summary available (auth.log)"
+        ), mock.patch.object(
+            infra_status, "check_ssh_ban_hardening", return_value="SSH ban nominal"
+        ), mock.patch.object(
+            infra_status, "check_backup_integrity", return_value="Backup nominal"
+        ), mock.patch.object(
+            infra_status, "check_service_health", return_value="service-manager: unavailable"
+        ):
+            md_content, _ = infra_status.generate_report()
+
+        self.assertIn(
+            "- RISK: pending updates remain after an incomplete unattended-upgrades run",
+            md_content,
+        )
+        self.assertNotIn("- RISK: 5 system updates pending", md_content)
+
+    def test_generate_report_risk_summary_prefers_stalled_update_risk_over_generic_pending_count(self) -> None:
+        with mock.patch.object(infra_status, "current_port_lines", return_value="tcp 0.0.0.0:22"), mock.patch.object(
+            infra_status,
+            "check_system_updates",
+            return_value=(
+                "5 pending updates\n"
+                "INFO: auto-updates enabled (APT::Periodic::Update-Package-Lists=1, "
+                "APT::Periodic::Unattended-Upgrade=1)\n"
+                "WARN: unattended-upgrades last started at 2026-03-14 13:06 UTC (1h ago) but no completion was logged\n"
+                "INFO: package-manager activity: no active apt/dpkg/unattended-upgrades process visible\n"
+                "RISK: unattended-upgrades appears stalled; last start was 2026-03-14 13:06 UTC and no active package-manager process is visible\n"
+                "RISK: security-sensitive updates pending: kernel=linux-aws, linux-image-aws\n"
+            ),
+        ), mock.patch.object(
+            infra_status, "check_disk_usage", return_value="Disk usage nominal"
+        ), mock.patch.object(
+            infra_status, "check_unexpected_listener_details", return_value="No unexpected listener details to inspect"
+        ), mock.patch.object(
+            infra_status, "check_firewall_status", return_value="Firewall nominal"
+        ), mock.patch.object(
+            infra_status, "check_ssh_config", return_value="SSH nominal"
+        ), mock.patch.object(
+            infra_status, "check_failed_logins", return_value="No failed authentication attempts found in sampled logs"
+        ), mock.patch.object(
+            infra_status, "check_auth_source_summary", return_value="No suspicious auth-event source summary available (auth.log)"
+        ), mock.patch.object(
+            infra_status, "check_ssh_ban_hardening", return_value="SSH ban nominal"
+        ), mock.patch.object(
+            infra_status, "check_backup_integrity", return_value="Backup nominal"
+        ), mock.patch.object(
+            infra_status, "check_service_health", return_value="service-manager: unavailable"
+        ):
+            md_content, _ = infra_status.generate_report()
+
+        self.assertIn(
+            "- RISK: unattended-upgrades appears stalled; last start was 2026-03-14 13:06 UTC and no active package-manager process is visible",
+            md_content,
+        )
+        self.assertNotIn("- RISK: 5 system updates pending", md_content)
+
     def test_generate_report_risk_summary_collapses_multiline_firewall_warning(self) -> None:
         with mock.patch.object(infra_status, "current_port_lines", return_value="tcp 0.0.0.0:22"), mock.patch.object(
             infra_status, "check_system_updates", return_value="No pending updates"

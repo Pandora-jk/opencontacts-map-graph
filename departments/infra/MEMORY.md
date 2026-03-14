@@ -7,6 +7,15 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-14 13:36 UTC:**
+  - Reconfirmed from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh owned runs 264-265 that `Check for system updates` is the current top infra reliability task because unattended-upgrades started at `2026-03-14 13:06 UTC` but did not log completion while 5 kernel/security updates remain pending.
+  - Hardened the repo-side update-health path so the task output reflects impact instead of only a count:
+    - `tools/infra_update_health.py` now classifies security-sensitive pending packages, reports reboot-required state, and adds a maintenance-reboot hardening hint when kernel updates are pending
+    - `tools/infra-status.py` now bubbles the strongest update risk into `Risk Summary` instead of reducing update issues to `N system updates pending`
+    - `tools/infra-autopilot.py` now scores security-sensitive pending updates and reboot-required state, and no longer mis-scores `No pending updates` as pending
+  - Added regression coverage in `tests/test_infra_update_health.py`, `tests/test_infra_status.py`, and `tests/test_infra_autopilot.py`.
+  - Verification passed: `python3 -m unittest tests.test_infra_update_health tests.test_infra_status tests.test_infra_autopilot -v`, `python3 -m py_compile tools/infra_update_health.py tools/infra-status.py tools/infra-autopilot.py tests/test_infra_update_health.py tests/test_infra_status.py tests/test_infra_autopilot.py`, `python3 tools/infra-status.py`, and `python3 tools/department-commands.py run infra`.
+  - Fresh artifacts: `20260314T133617Z-infra-status.md` and `20260314T133617Z-r265-check-for-system-updates-daily-and-report-count.md`.
 - **2026-03-14 00:19 UTC:**
   - Cleared the remaining live host drift that the repo-side infra audit had been flagging:
     - installed the managed SSH drop-in to `/etc/ssh/sshd_config.d/99-openclaw-hardening.conf`
