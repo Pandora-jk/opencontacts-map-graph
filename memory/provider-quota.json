@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-03-14T01:03:36.612384+00:00",
+  "checked_at": "2026-03-14T07:02:49.619911+00:00",
   "providers": {
     "zai": {
       "type": "zai",
@@ -40,16 +40,33 @@
           "context_limit": 200000
         },
         {
+          "key": "agent:main:telegram:direct:156480904",
+          "model": "glm-4.7-Flash",
+          "input_tokens": 51969,
+          "output_tokens": 1257,
+          "context_used": 20576,
+          "context_limit": 200000
+        },
+        {
           "key": "agent:main:main",
           "model": "glm-4.7-Flash",
-          "input_tokens": 45784,
-          "output_tokens": 1460,
-          "context_used": 19970,
+          "input_tokens": 85378,
+          "output_tokens": 1382,
+          "context_used": 24452,
+          "context_limit": 200000
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:2a4935f6-3dde-4c48-a1cc-16b5f8e6b0e8",
+          "model": "glm-4.7-Flash",
+          "input_tokens": 8290,
+          "output_tokens": 100,
+          "context_used": 16168,
           "context_limit": 200000
         }
       ],
       "turns_today": {
-        "agent:main:telegram:direct:156480904": 1
+        "agent:main:main": 15,
+        "agent:main:telegram:direct:156480904": 90
       }
     },
     "cerebras": {
@@ -59,7 +76,8 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:telegram:direct:156480904": 1
+        "agent:main:main": 15,
+        "agent:main:telegram:direct:156480904": 90
       }
     },
     "groq": {
@@ -69,7 +87,8 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:telegram:direct:156480904": 1
+        "agent:main:main": 15,
+        "agent:main:telegram:direct:156480904": 90
       }
     },
     "chutes": {
@@ -79,7 +98,8 @@
       },
       "session_stats": [],
       "turns_today": {
-        "agent:main:telegram:direct:156480904": 1
+        "agent:main:main": 15,
+        "agent:main:telegram:direct:156480904": 90
       }
     },
     "nvidia": {
@@ -131,121 +151,9 @@
         {
           "key": "agent:main:cron:ssh-hardening-reminder-20260305",
           "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 28014,
-          "output_tokens": 44,
-          "context_used": 14037,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:telegram:direct:156480904",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 247077,
-          "output_tokens": 513,
-          "context_used": 0,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:bb84dbcf-fdbd-4b13-a919-c7756a09efec",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 26884,
-          "output_tokens": 44,
-          "context_used": 13472,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:ee4f7f85-7555-4952-815e-5b1836490540",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 26916,
-          "output_tokens": 44,
-          "context_used": 13504,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:0fd93f83-bf5d-4c7c-9efe-632f5d85ca8a:run:aa27aadc-4380-46d7-a7e2-324a76abe95b",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 26884,
-          "output_tokens": 44,
-          "context_used": 13472,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:6c469f84-4c3b-49b4-892c-64a26bfe339a",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27532,
-          "output_tokens": 60,
-          "context_used": 13806,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:3a0738ef-9331-464b-b6c1-3ecc908a6e8b",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27512,
-          "output_tokens": 44,
-          "context_used": 13786,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:ddf5dc81-5083-4369-abe4-da104e851ad3",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27512,
-          "output_tokens": 44,
-          "context_used": 13786,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:9d42749a-d213-497a-81dd-7d59297240e1",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27512,
-          "output_tokens": 44,
-          "context_used": 13786,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:c0ea530c-0cd2-4a27-8750-01b4f371de9d",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27512,
-          "output_tokens": 44,
-          "context_used": 13786,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:8e5c6928-5eaf-438d-8e79-3dcaa6f45151",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27512,
-          "output_tokens": 44,
-          "context_used": 13786,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:ddc7fe7d-6b5d-4735-90dd-728f885c9c1d",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27512,
-          "output_tokens": 44,
-          "context_used": 13786,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:78b2d259-073f-40fb-b018-1363bdae9354",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27512,
-          "output_tokens": 44,
-          "context_used": 13786,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:ac050dd2-e4ec-4e96-ac72-a5b18572c9b5",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27512,
-          "output_tokens": 44,
-          "context_used": 13786,
-          "context_limit": 131072
-        },
-        {
-          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:a36995fe-db85-45fc-814d-f7967f334d1c",
-          "model": "qwen/qwen3.5-397b-a17b",
-          "input_tokens": 27512,
-          "output_tokens": 44,
-          "context_used": 13786,
+          "input_tokens": 8290,
+          "output_tokens": 100,
+          "context_used": 16168,
           "context_limit": 131072
         },
         {
@@ -991,10 +899,251 @@
           "output_tokens": 44,
           "context_used": 14037,
           "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:c6285da7-7efe-41df-ba5e-17536612b69f",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:f6184cfb-4a22-47e2-b577-0191b6435c0d",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:7271c285-d40a-415c-be98-0e6d8739333a",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:2bb63df3-e65b-4173-8821-add065934aea",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:26fbd072-84b2-40c3-898b-9c6db681258d",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:19f5e9ad-9955-4c67-ae58-f588c5a2265c",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:890b7d00-28b4-40d8-927b-1a8af2a9ea03",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:0a31e0fa-69f7-4680-a94a-7a6f79acbfcc",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:e7374b39-dc6c-44c3-8de3-0354d611e7ef",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:8cfa23eb-6089-43fc-af06-d3e3c26673d8",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:4b61f43b-852f-4287-bf1c-876e95f83cd2",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:4824268f-fe86-460a-9d65-0709707bc708",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:7984e059-5fa9-4a2c-8898-708e4508107a",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:b7f86507-ae0e-4462-b528-e56641b7ea78",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:e3f67570-575a-41a5-8985-8e8e47f01701",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:24cefe57-2365-4249-a52d-c777b2ba76d0",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:c0ed43d0-0d63-4278-91e7-2180a77fe7db",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:f0226a4c-031a-46db-89ff-fd3f4a6c1976",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:b5490dc2-bf22-43f1-8147-f8f63829c750",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:c99d6868-2c06-4f19-be0b-99c922b6d531",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:8d006ec1-b7df-4ccd-bfc6-5088618e583c",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:d5c18e3c-e3c4-467e-b585-1a410b4f027b",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:342395db-73b2-4d2c-ab19-377398af3efb",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:e07874e2-061b-43bb-b4d1-a8ba1207e49e",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:3924c039-25ec-4742-97c2-b6290260c5a6",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 28014,
+          "output_tokens": 44,
+          "context_used": 14037,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:09d00887-c9ff-4b84-9c84-28041ffbc4d2",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 8290,
+          "output_tokens": 100,
+          "context_used": 16168,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:d0573f88-80e6-4125-bedc-174a2dabac03",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 8290,
+          "output_tokens": 100,
+          "context_used": 16168,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:e536e0b0-a03e-456d-ab74-ffee44961cf7",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 8290,
+          "output_tokens": 100,
+          "context_used": 16168,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:318126b8-d561-4382-b4d6-d454d3f59bad",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 8290,
+          "output_tokens": 100,
+          "context_used": 16168,
+          "context_limit": 131072
+        },
+        {
+          "key": "agent:main:cron:ssh-hardening-reminder-20260305:run:976d22f0-ddf2-4239-bad8-aa770925d4dc",
+          "model": "qwen/qwen3.5-397b-a17b",
+          "input_tokens": 8290,
+          "output_tokens": 100,
+          "context_used": 16168,
+          "context_limit": 131072
         }
       ],
       "turns_today": {
-        "agent:main:telegram:direct:156480904": 1
+        "agent:main:main": 15,
+        "agent:main:telegram:direct:156480904": 90
       }
     }
   }
