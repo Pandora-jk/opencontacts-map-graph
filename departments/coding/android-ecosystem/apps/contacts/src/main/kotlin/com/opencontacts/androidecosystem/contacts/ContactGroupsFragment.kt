@@ -44,7 +44,6 @@ class ContactGroupsFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_contact_groups, container, false)
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
-        val emptyText = view.findViewById<TextView>(R.id.empty_text)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = groupAdapter

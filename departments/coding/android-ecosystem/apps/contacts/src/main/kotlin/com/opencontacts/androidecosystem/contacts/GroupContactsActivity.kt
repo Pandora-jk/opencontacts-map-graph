@@ -48,7 +48,6 @@ class GroupContactsActivity : AppCompatActivity() {
         toolbar.title = groupName ?: "Group Contacts"
 
         val recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
-        val emptyText = findViewById<TextView>(R.id.empty_text)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = contactAdapter

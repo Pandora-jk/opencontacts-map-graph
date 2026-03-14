@@ -175,7 +175,7 @@ class EditContactActivity : AppCompatActivity() {
 
         try {
             if (isEditMode && contactId != null) {
-                updateExistingContact(firstName, lastName, phone, email, company, jobTitle, address)
+                updateExistingContact(firstName, lastName)
             } else {
                 createNewContact(firstName, lastName, phone, email, company, jobTitle, address)
             }
@@ -248,7 +248,7 @@ class EditContactActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateExistingContact(firstName: String, lastName: String, phone: String, email: String, company: String, jobTitle: String, address: String) {
+    private fun updateExistingContact(firstName: String, lastName: String) {
         val contactId = contactId ?: return
 
         // Update display name

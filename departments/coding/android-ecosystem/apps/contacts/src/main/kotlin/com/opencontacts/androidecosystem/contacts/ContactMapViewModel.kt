@@ -54,7 +54,6 @@ class ContactMapViewModel : ViewModel() {
      * then batch queries for related data.
      */
     private fun loadContactsFromDeviceOptimized(context: Context): List<ContactRecord> {
-        val contactList = mutableListOf<ContactRecord>()
         var cursor: Cursor? = null
 
         try {
@@ -64,7 +63,6 @@ class ContactMapViewModel : ViewModel() {
                 arrayOf(
                     ContactsContract.Contacts._ID,
                     ContactsContract.Contacts.DISPLAY_NAME,
-                    ContactsContract.Contacts.HAS_PHONE_NUMBER,
                     ContactsContract.Contacts.STARRED,
                     ContactsContract.Contacts.PHOTO_URI
                 ),
@@ -79,14 +77,12 @@ class ContactMapViewModel : ViewModel() {
             cursor?.use { contactsCursor ->
                 val idIndex = contactsCursor.getColumnIndex(ContactsContract.Contacts._ID)
                 val nameIndex = contactsCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
-                val hasPhoneIndex = contactsCursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)
                 val starredIndex = contactsCursor.getColumnIndex(ContactsContract.Contacts.STARRED)
                 val photoUriIndex = contactsCursor.getColumnIndex(ContactsContract.Contacts.PHOTO_URI)
 
                 while (contactsCursor.moveToNext()) {
                     val id = contactsCursor.getString(idIndex) ?: continue
                     val name = contactsCursor.getString(nameIndex)
-                    val hasPhone = contactsCursor.getInt(hasPhoneIndex)
                     val isStarred = contactsCursor.getInt(starredIndex) > 0
                     val photoUri = contactsCursor.getString(photoUriIndex)
 

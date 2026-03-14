@@ -149,14 +149,13 @@ class ContactDetailsActivity : AppCompatActivity() {
         // Call button (only if has phone)
         findViewById<MaterialButton>(R.id.btn_call).apply {
             if (contactPhone != null) {
+                val phone = contactPhone
                 visibility = View.VISIBLE
                 setOnClickListener {
-                    contactPhone?.let { phone ->
-                        val intent = Intent(Intent.ACTION_DIAL).apply {
-                            data = Uri.parse("tel:$phone")
-                        }
-                        startActivity(intent)
+                    val intent = Intent(Intent.ACTION_DIAL).apply {
+                        data = Uri.parse("tel:$phone")
                     }
+                    startActivity(intent)
                 }
             } else {
                 visibility = View.GONE
@@ -166,14 +165,13 @@ class ContactDetailsActivity : AppCompatActivity() {
         // Message button (only if has phone)
         findViewById<MaterialButton>(R.id.btn_message).apply {
             if (contactPhone != null) {
+                val phone = contactPhone
                 visibility = View.VISIBLE
                 setOnClickListener {
-                    contactPhone?.let { phone ->
-                        val intent = Intent(Intent.ACTION_SENDTO).apply {
-                            data = Uri.parse("smsto:${Uri.encode(phone)}")
-                        }
-                        startActivity(intent)
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("smsto:${Uri.encode(phone)}")
                     }
+                    startActivity(intent)
                 }
             } else {
                 visibility = View.GONE
@@ -184,10 +182,11 @@ class ContactDetailsActivity : AppCompatActivity() {
     /**
      * Sets text and visibility - only shows if value is not blank
      */
-    private fun setupTextView(viewId: Int, value: String?, hideIfBlank: String?) {
+    private fun setupTextView(viewId: Int, value: String?, fallbackValue: String?) {
         val textView = findViewById<TextView>(viewId)
-        if (!value.isNullOrBlank()) {
-            textView.text = value
+        val displayValue = value?.takeIf { it.isNotBlank() } ?: fallbackValue
+        if (!displayValue.isNullOrBlank()) {
+            textView.text = displayValue
             textView.visibility = View.VISIBLE
         } else {
             textView.visibility = View.GONE
