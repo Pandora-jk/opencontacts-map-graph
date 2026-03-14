@@ -90,7 +90,7 @@ android {
             res.srcDirs("src/main/res")
         }
         getByName("test") {
-            java.srcDirs("test/kotlin")
+            java.srcDirs("src/test/kotlin")
         }
     }
 }

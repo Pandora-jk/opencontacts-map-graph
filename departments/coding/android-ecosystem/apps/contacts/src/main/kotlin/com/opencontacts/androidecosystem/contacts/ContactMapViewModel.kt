@@ -168,7 +168,7 @@ class ContactMapViewModel : ViewModel() {
             val dataCursor = context.contentResolver.query(
                 ContactsContract.Data.CONTENT_URI,
                 arrayOf(
-                    ContactsContract.Data.RAW_CONTACT_ID,
+                    ContactsContract.Data.CONTACT_ID,
                     ContactsContract.Data.MIMETYPE,
                     ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME,
                     ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME,
@@ -182,7 +182,7 @@ class ContactMapViewModel : ViewModel() {
             )
 
             dataCursor?.use { dc ->
-                val rawContactIdIndex = dc.getColumnIndex(ContactsContract.Data.RAW_CONTACT_ID)
+                val contactIdIndex = dc.getColumnIndex(ContactsContract.Data.CONTACT_ID)
                 val mimetypeIndex = dc.getColumnIndex(ContactsContract.Data.MIMETYPE)
                 val givenNameIndex = dc.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME)
                 val familyNameIndex = dc.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME)
@@ -191,7 +191,7 @@ class ContactMapViewModel : ViewModel() {
                 val addressIndex = dc.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS)
 
                 while (dc.moveToNext()) {
-                    val contactId = dc.getString(rawContactIdIndex) ?: continue
+                    val contactId = dc.getString(contactIdIndex) ?: continue
                     val mimetype = dc.getString(mimetypeIndex)
                     val contact = contactsById[contactId] ?: continue
 
@@ -219,7 +219,7 @@ class ContactMapViewModel : ViewModel() {
             val groupCursor = context.contentResolver.query(
                 ContactsContract.Data.CONTENT_URI,
                 arrayOf(
-                    ContactsContract.Data.RAW_CONTACT_ID,
+                    ContactsContract.Data.CONTACT_ID,
                     ContactsContract.CommonDataKinds.GroupMembership.GROUP_ROW_ID
                 ),
                 "${ContactsContract.Data.MIMETYPE} = ?",
@@ -229,7 +229,7 @@ class ContactMapViewModel : ViewModel() {
 
             val contactGroups = mutableMapOf<String, MutableList<Long>>()
             groupCursor?.use { gc ->
-                val contactIdIndex = gc.getColumnIndex(ContactsContract.Data.RAW_CONTACT_ID)
+                val contactIdIndex = gc.getColumnIndex(ContactsContract.Data.CONTACT_ID)
                 val groupIdIndex = gc.getColumnIndex(ContactsContract.CommonDataKinds.GroupMembership.GROUP_ROW_ID)
 
                 while (gc.moveToNext()) {
@@ -297,7 +297,7 @@ class ContactMapViewModel : ViewModel() {
                     ContactsContract.Data.MIMETYPE,
                     ContactsContract.CommonDataKinds.GroupMembership.GROUP_ROW_ID
                 ),
-                "${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.Data.RAW_CONTACT_ID} = ?",
+                "${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.Data.CONTACT_ID} = ?",
                 arrayOf(ContactsContract.CommonDataKinds.GroupMembership.CONTENT_ITEM_TYPE, contactId),
                 null
             )
