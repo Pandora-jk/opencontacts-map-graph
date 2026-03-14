@@ -294,6 +294,9 @@ def score_task_from_artifact(task: str, artifact: Path | None) -> tuple[int, str
         if 'RISK: auto-updates disabled or drifted' in text:
             score += 80
             reasons.append('auto-updates disabled or drifted')
+        if 'RISK: auto-update timers not enabled at boot:' in text:
+            score += 75
+            reasons.append('auto-update timers are not enabled at boot')
         if 'RISK: pending updates are waiting while auto-updates are disabled' in text:
             score += 60
             reasons.append('pending updates are waiting while auto-updates are disabled')
@@ -421,6 +424,9 @@ def score_task_from_status(task: str, artifact: Path | None) -> tuple[int, str]:
         if 'RISK: auto-updates disabled or drifted' in text:
             score += 80
             reasons.append('latest infra-status shows auto-updates disabled or drifted')
+        if 'RISK: auto-update timers not enabled at boot:' in text:
+            score += 75
+            reasons.append('latest infra-status shows auto-update timers are not enabled at boot')
         if 'RISK: pending updates are waiting while auto-updates are disabled' in text:
             score += 60
             reasons.append('latest infra-status shows pending updates waiting while auto-updates are disabled')

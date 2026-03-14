@@ -317,6 +317,25 @@ class InfraAutopilotTests(unittest.TestCase):
         self.assertEqual(70, score)
         self.assertIn("pending updates after an incomplete unattended-upgrades run", reason)
 
+    def test_score_task_from_status_prioritizes_disabled_auto_update_timers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "infra-status.md"
+            artifact.write_text(
+                "0 pending updates\n"
+                "INFO: auto-updates enabled (APT::Periodic::Update-Package-Lists=1, "
+                "APT::Periodic::Unattended-Upgrade=1)\n"
+                "RISK: auto-update timers not enabled at boot: apt-daily.timer=disabled (/lib/systemd/system/apt-daily.timer)\n",
+                encoding="utf-8",
+            )
+
+            score, reason = infra_autopilot.score_task_from_status(
+                "Check for system updates daily and report count.",
+                artifact,
+            )
+
+        self.assertEqual(75, score)
+        self.assertIn("auto-update timers are not enabled at boot", reason)
+
     def test_score_task_from_status_prioritizes_stalled_unattended_updates_more_strongly(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             artifact = Path(tmpdir) / "infra-status.md"

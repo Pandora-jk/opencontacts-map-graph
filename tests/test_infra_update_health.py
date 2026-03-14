@@ -16,6 +16,54 @@ SPEC.loader.exec_module(infra_update_health)
 
 
 class InfraUpdateHealthTests(unittest.TestCase):
+    def test_load_systemd_unit_enablement_reports_enabled_disabled_masked_and_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            systemd_etc = root / "etc" / "systemd" / "system"
+            unit_dir = root / "lib" / "systemd" / "system"
+            wants_dir = systemd_etc / "timers.target.wants"
+            wants_dir.mkdir(parents=True)
+            unit_dir.mkdir(parents=True)
+
+            enabled_unit = unit_dir / "apt-daily.timer"
+            enabled_unit.write_text("[Timer]\n", encoding="utf-8")
+            (wants_dir / "apt-daily.timer").symlink_to(enabled_unit)
+
+            disabled_unit = unit_dir / "apt-daily-upgrade.timer"
+            disabled_unit.write_text("[Timer]\n", encoding="utf-8")
+
+            (systemd_etc / "apt-custom.timer").symlink_to("/dev/null")
+
+            enabled = infra_update_health.load_systemd_unit_enablement(
+                "apt-daily.timer",
+                systemd_etc_dir=systemd_etc,
+                unit_dirs=(unit_dir,),
+            )
+            disabled = infra_update_health.load_systemd_unit_enablement(
+                "apt-daily-upgrade.timer",
+                systemd_etc_dir=systemd_etc,
+                unit_dirs=(unit_dir,),
+            )
+            masked = infra_update_health.load_systemd_unit_enablement(
+                "apt-custom.timer",
+                systemd_etc_dir=systemd_etc,
+                unit_dirs=(unit_dir,),
+            )
+            missing = infra_update_health.load_systemd_unit_enablement(
+                "apt-missing.timer",
+                systemd_etc_dir=systemd_etc,
+                unit_dirs=(unit_dir,),
+            )
+
+        self.assertEqual("enabled", enabled["status"])
+        self.assertEqual(enabled_unit, enabled["unit_path"])
+        self.assertEqual("disabled", disabled["status"])
+        self.assertEqual(disabled_unit, disabled["unit_path"])
+        self.assertEqual("masked", masked["status"])
+        self.assertEqual(systemd_etc / "apt-custom.timer", masked["unit_path"])
+        self.assertEqual("missing", missing["status"])
+        self.assertIsNone(missing["unit_path"])
+
     def test_load_periodic_stamp_times_reads_known_stamp_mtimes(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             periodic_dir = Path(tmpdir)
@@ -119,6 +167,10 @@ class InfraUpdateHealthTests(unittest.TestCase):
             now=now,
             config=config,
             latest_run=latest_run,
+            timer_statuses={
+                "apt-daily.timer": {"unit": "apt-daily.timer", "status": "enabled"},
+                "apt-daily-upgrade.timer": {"unit": "apt-daily-upgrade.timer", "status": "enabled"},
+            },
             periodic_stamps={
                 "update": None,
                 "update_success": None,
@@ -131,6 +183,7 @@ class InfraUpdateHealthTests(unittest.TestCase):
 
         self.assertIn("4 pending updates", result)
         self.assertIn("INFO: auto-updates enabled", result)
+        self.assertIn("INFO: auto-update timers enabled at boot", result)
         self.assertIn("WARN: unattended-upgrades last started at 2026-03-12 14:35 UTC", result)
         self.assertIn(
             "RISK: unattended-upgrades appears stalled; last start was 2026-03-12 14:35 UTC",
@@ -166,6 +219,10 @@ class InfraUpdateHealthTests(unittest.TestCase):
             config=config,
             latest_run=latest_run,
             latest_history=latest_history,
+            timer_statuses={
+                "apt-daily.timer": {"unit": "apt-daily.timer", "status": "enabled"},
+                "apt-daily-upgrade.timer": {"unit": "apt-daily-upgrade.timer", "status": "enabled"},
+            },
             package_manager_processes=[],
         )
 
@@ -200,6 +257,10 @@ class InfraUpdateHealthTests(unittest.TestCase):
                 "commandline": "",
                 "started_at": None,
                 "completed_at": None,
+            },
+            timer_statuses={
+                "apt-daily.timer": {"unit": "apt-daily.timer", "status": "enabled"},
+                "apt-daily-upgrade.timer": {"unit": "apt-daily-upgrade.timer", "status": "enabled"},
             },
             periodic_stamps={
                 "update": dt.datetime(2026, 3, 14, 13, 6, tzinfo=dt.UTC),
@@ -238,6 +299,10 @@ class InfraUpdateHealthTests(unittest.TestCase):
             now=now,
             config=config,
             latest_run=latest_run,
+            timer_statuses={
+                "apt-daily.timer": {"unit": "apt-daily.timer", "status": "enabled"},
+                "apt-daily-upgrade.timer": {"unit": "apt-daily-upgrade.timer", "status": "enabled"},
+            },
             periodic_stamps={
                 "update": None,
                 "update_success": None,
@@ -260,6 +325,46 @@ class InfraUpdateHealthTests(unittest.TestCase):
         self.assertIn("INFO: package-manager activity: unattended-upgrade(pid=812, runtime=20m)", result)
         self.assertIn("RISK: pending updates remain after an incomplete unattended-upgrades run", result)
         self.assertNotIn("RISK: unattended-upgrades appears stalled;", result)
+
+    def test_render_auto_update_health_flags_disabled_apt_timers_when_config_is_enabled(self) -> None:
+        now = dt.datetime(2026, 3, 14, 16, 30, tzinfo=dt.UTC)
+        config = {
+            "enabled": True,
+            "settings": {
+                "APT::Periodic::Update-Package-Lists": "1",
+                "APT::Periodic::Unattended-Upgrade": "1",
+            },
+        }
+        latest_run = {
+            "status": "completed",
+            "started_at": dt.datetime(2026, 3, 14, 13, 6, 5, tzinfo=dt.UTC),
+            "completed_at": dt.datetime(2026, 3, 14, 13, 10, 15, tzinfo=dt.UTC),
+            "completion_line": "All upgrades installed",
+        }
+
+        result = infra_update_health.render_auto_update_health(
+            0,
+            now=now,
+            config=config,
+            latest_run=latest_run,
+            timer_statuses={
+                "apt-daily.timer": {
+                    "unit": "apt-daily.timer",
+                    "status": "disabled",
+                    "unit_path": Path("/lib/systemd/system/apt-daily.timer"),
+                },
+                "apt-daily-upgrade.timer": {
+                    "unit": "apt-daily-upgrade.timer",
+                    "status": "masked",
+                    "unit_path": Path("/etc/systemd/system/apt-daily-upgrade.timer"),
+                },
+            },
+        )
+
+        self.assertIn(
+            "RISK: auto-update timers not enabled at boot: apt-daily.timer=disabled (/lib/systemd/system/apt-daily.timer); apt-daily-upgrade.timer=masked (/etc/systemd/system/apt-daily-upgrade.timer)",
+            result,
+        )
 
     def test_render_auto_update_health_reports_periodic_stamp_gap_for_incomplete_run(self) -> None:
         now = dt.datetime(2026, 3, 14, 17, 30, tzinfo=dt.UTC)
@@ -286,6 +391,10 @@ class InfraUpdateHealthTests(unittest.TestCase):
                 "commandline": "",
                 "started_at": None,
                 "completed_at": None,
+            },
+            timer_statuses={
+                "apt-daily.timer": {"unit": "apt-daily.timer", "status": "enabled"},
+                "apt-daily-upgrade.timer": {"unit": "apt-daily-upgrade.timer", "status": "enabled"},
             },
             periodic_stamps={
                 "update": dt.datetime(2026, 3, 14, 13, 6, tzinfo=dt.UTC),
@@ -325,6 +434,10 @@ class InfraUpdateHealthTests(unittest.TestCase):
             now=now,
             config=config,
             latest_run=latest_run,
+            timer_statuses={
+                "apt-daily.timer": {"unit": "apt-daily.timer", "status": "enabled"},
+                "apt-daily-upgrade.timer": {"unit": "apt-daily-upgrade.timer", "status": "enabled"},
+            },
             package_lines=[
                 "linux-image-aws/noble-updates,noble-security 6.17.0-1009.9~24.04.2 amd64 [upgradable from: 6.17.0-1007.7~24.04.1]",
                 "linux-libc-dev/noble-updates,noble-security 6.8.0-106.106 amd64 [upgradable from: 6.8.0-101.101]",
@@ -358,6 +471,10 @@ class InfraUpdateHealthTests(unittest.TestCase):
             now=now,
             config=config,
             latest_run=latest_run,
+            timer_statuses={
+                "apt-daily.timer": {"unit": "apt-daily.timer", "status": "enabled"},
+                "apt-daily-upgrade.timer": {"unit": "apt-daily-upgrade.timer", "status": "enabled"},
+            },
             reboot_required=True,
         )
 
@@ -385,6 +502,10 @@ class InfraUpdateHealthTests(unittest.TestCase):
             now=now,
             config=config,
             latest_run=latest_run,
+            timer_statuses={
+                "apt-daily.timer": {"unit": "apt-daily.timer", "status": "enabled"},
+                "apt-daily-upgrade.timer": {"unit": "apt-daily-upgrade.timer", "status": "enabled"},
+            },
         )
 
         self.assertIn("2 pending updates", result)
@@ -413,6 +534,10 @@ class InfraUpdateHealthTests(unittest.TestCase):
             now=now,
             config=config,
             latest_run=latest_run,
+            timer_statuses={
+                "apt-daily.timer": {"unit": "apt-daily.timer", "status": "enabled"},
+                "apt-daily-upgrade.timer": {"unit": "apt-daily-upgrade.timer", "status": "enabled"},
+            },
             periodic_stamps={
                 "update": None,
                 "update_success": None,

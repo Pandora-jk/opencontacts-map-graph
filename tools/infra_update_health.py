@@ -42,6 +42,16 @@ APT_PERIODIC_STAMP_FILES = {
     'upgrade': 'upgrade-stamp',
 }
 PACKAGE_MANAGER_COMMAND = ['ps', '-eo', 'pid=,etimes=,comm=,args=']
+SYSTEMD_ETC_DIR = Path('/etc/systemd/system')
+SYSTEMD_UNIT_DIRS = (
+    SYSTEMD_ETC_DIR,
+    Path('/lib/systemd/system'),
+    Path('/usr/lib/systemd/system'),
+)
+APT_TIMER_UNITS = (
+    'apt-daily.timer',
+    'apt-daily-upgrade.timer',
+)
 SECURITY_SENSITIVE_PACKAGE_GROUPS = (
     ('kernel', re.compile(r'^linux-(?:aws|base|headers|image|libc|modules|tools)\b')),
     ('ssh', re.compile(r'^(?:openssh|ssh)\b')),
@@ -221,6 +231,89 @@ def load_periodic_stamp_times(periodic_dir: Path = APT_PERIODIC_DIR) -> dict[str
     return stamps
 
 
+def load_systemd_unit_enablement(
+    unit_name: str,
+    *,
+    systemd_etc_dir: Path = SYSTEMD_ETC_DIR,
+    unit_dirs: tuple[Path, ...] = SYSTEMD_UNIT_DIRS,
+) -> dict[str, object]:
+    wants_link = systemd_etc_dir / 'timers.target.wants' / unit_name
+    local_override = systemd_etc_dir / unit_name
+    masked = False
+    unit_path: Path | None = None
+
+    if local_override.exists():
+        unit_path = local_override
+        if local_override.is_symlink() and local_override.resolve(strict=False) == Path('/dev/null'):
+            masked = True
+
+    if unit_path is None:
+        for base in unit_dirs:
+            candidate = base / unit_name
+            if candidate.exists():
+                unit_path = candidate
+                break
+
+    if masked:
+        status = 'masked'
+    elif wants_link.exists():
+        status = 'enabled'
+    elif unit_path is not None:
+        status = 'disabled'
+    else:
+        status = 'missing'
+
+    return {
+        'unit': unit_name,
+        'status': status,
+        'wants_link': wants_link,
+        'unit_path': unit_path,
+    }
+
+
+def load_apt_timer_statuses(
+    *,
+    systemd_etc_dir: Path = SYSTEMD_ETC_DIR,
+    unit_dirs: tuple[Path, ...] = SYSTEMD_UNIT_DIRS,
+    timer_units: tuple[str, ...] = APT_TIMER_UNITS,
+) -> dict[str, dict[str, object]]:
+    return {
+        unit_name: load_systemd_unit_enablement(
+            unit_name,
+            systemd_etc_dir=systemd_etc_dir,
+            unit_dirs=unit_dirs,
+        )
+        for unit_name in timer_units
+    }
+
+
+def summarize_apt_timer_statuses(timer_statuses: dict[str, dict[str, object]]) -> str:
+    expected = [timer_statuses.get(unit) for unit in APT_TIMER_UNITS]
+    active_statuses = [status for status in expected if status]
+    if active_statuses and all(status.get('status') == 'enabled' for status in active_statuses):
+        joined = ', '.join(str(status.get('unit', 'timer')) for status in active_statuses)
+        return f'INFO: auto-update timers enabled at boot ({joined})'
+
+    details: list[str] = []
+    for unit_name in APT_TIMER_UNITS:
+        status = timer_statuses.get(unit_name)
+        if not status:
+            details.append(f'{unit_name}=unknown')
+            continue
+        unit_state = str(status.get('status', 'unknown'))
+        if unit_state == 'enabled':
+            continue
+        detail = f'{unit_name}={unit_state}'
+        unit_path = status.get('unit_path')
+        if isinstance(unit_path, Path):
+            detail += f' ({unit_path})'
+        details.append(detail)
+
+    if not details:
+        return 'INFO: auto-update timer visibility unavailable'
+    return 'RISK: auto-update timers not enabled at boot: ' + '; '.join(details)
+
+
 def parse_upgradable_packages(package_lines: list[str]) -> list[str]:
     packages: list[str] = []
     for raw in package_lines:
@@ -347,6 +440,7 @@ def render_auto_update_health(
     latest_run: dict[str, object] | None = None,
     latest_history: dict[str, object] | None = None,
     periodic_stamps: dict[str, object] | None = None,
+    timer_statuses: dict[str, dict[str, object]] | None = None,
     package_lines: list[str] | None = None,
     reboot_required: bool | None = None,
     reboot_required_path: Path = REBOOT_REQUIRED,
@@ -357,6 +451,7 @@ def render_auto_update_health(
     current_run = latest_run if latest_run is not None else load_latest_unattended_run()
     current_history = latest_history if latest_history is not None else load_latest_unattended_history_transaction()
     current_periodic_stamps = periodic_stamps if periodic_stamps is not None else load_periodic_stamp_times()
+    current_timer_statuses = timer_statuses if timer_statuses is not None else load_apt_timer_statuses()
     package_names = parse_upgradable_packages(package_lines or [])
     sensitive_packages = summarize_security_sensitive_packages(package_names)
     reboot_required_now = reboot_required if reboot_required is not None else reboot_required_path.exists()
@@ -372,6 +467,7 @@ def render_auto_update_health(
             f'(APT::Periodic::Update-Package-Lists={update_value}, '
             f'APT::Periodic::Unattended-Upgrade={unattended_value})'
         )
+        lines.append(summarize_apt_timer_statuses(current_timer_statuses))
     else:
         reasons: list[str] = []
         missing_required = current_config.get('missing_required', {})
