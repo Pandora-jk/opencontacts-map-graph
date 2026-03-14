@@ -27,7 +27,7 @@ The Android Contacts App is ready for Obtanium integration. Follow this checklis
 
 ### 1. GitHub Repository Setup (PRIORITY: HIGH)
 
-**Current State**: No remote repository configured
+**Current State**: Remote configured at `https://github.com/Pandora-jk/android-ecosystem.git`
 
 **Actions Required**:
 ```bash
@@ -39,7 +39,7 @@ git remote add origin https://github.com/YOUR_USERNAME/android-ecosystem.git
 git push -u origin initial-commit:main
 ```
 
-**Status**: ⏳ Waiting for GitHub repo creation
+**Status**: ✅ Remote is live; next step is pushing the active feature branch and tags
 
 ---
 
@@ -114,14 +114,14 @@ keytool -genkey -v \
 
 ### 4. CI/CD Automation (PRIORITY: MEDIUM)
 
-**Current State**: Manual builds only
+**Current State**: GitHub Actions workflow added for debug pushes and tagged release builds
 
 **Actions Required**:
-1. Create `.github/workflows/android-release.yml`
-2. Configure GitHub Secrets for signing
-3. Test automated builds
+1. Configure GitHub Secrets for signing
+2. Push the active feature branch to verify debug APK CI
+3. Push a `v*` tag to verify signed release automation
 
-**Status**: ⏳ Not started
+**Status**: ⏳ Workflow committed, pending first CI run
 
 ---
 

@@ -45,9 +45,17 @@ apps/contacts/build/outputs/apk/debug/contacts-debug.apk
 apps/contacts/build/outputs/apk/release/contacts-release.apk
 ```
 
+## CI and Releases
+
+- `.github/workflows/contacts-android.yml` builds the debug APK on pushes and pull requests.
+- Pushing a tag like `v1.0.0` builds a signed release APK and publishes it to GitHub Releases.
+- Signed releases use `keystore.properties` locally and GitHub Actions secrets in CI.
+- `docs/release-process.md` documents the required secrets and tag flow.
+
 ## Notes
 
 - The live app code for the first working build is under `apps/contacts/src/main`.
 - The legacy migrated prototype under `apps/contacts/main` is not part of the active build.
 - `settings.gradle.kts` declares the monorepo module structure.
 - Release signing is loaded from a local `keystore.properties` file at the repo root.
+- Local Gradle execution is sandbox-limited here; GitHub Actions is the reliable APK verification path from this environment.

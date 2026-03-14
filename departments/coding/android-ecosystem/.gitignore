@@ -1,5 +1,11 @@
 .gradle/
 **/build/
+
+# Legacy nested repos retained locally during migration.
+contacts-app/
+core-sdk/
+gallery-app/
+
 *.keystore
 *.jks
 keystore.properties
