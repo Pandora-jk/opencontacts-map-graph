@@ -23,6 +23,12 @@ Build the debug APK:
 ./gradlew :apps:contacts:assembleDebug
 ```
 
+Build the signed release APK:
+
+```bash
+./gradlew :apps:contacts:assembleRelease
+```
+
 If your environment cannot write to `~/.gradle`, use a local Gradle cache:
 
 ```bash
@@ -35,8 +41,13 @@ APK output:
 apps/contacts/build/outputs/apk/debug/contacts-debug.apk
 ```
 
+```text
+apps/contacts/build/outputs/apk/release/contacts-release.apk
+```
+
 ## Notes
 
 - The live app code for the first working build is under `apps/contacts/src/main`.
 - The legacy migrated prototype under `apps/contacts/main` is not part of the active build.
 - `settings.gradle.kts` declares the monorepo module structure.
+- Release signing is loaded from a local `keystore.properties` file at the repo root.
