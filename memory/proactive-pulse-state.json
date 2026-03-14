@@ -1,10 +1,10 @@
 {
-  "last_checked_at": "2026-03-13T23:58:36Z",
+  "last_checked_at": "2026-03-14T00:19:50Z",
   "last_candidate": "cron_failure",
   "last_candidate_fingerprint": "cron:Coding Day Loop|Night Coding Delegation",
   "last_fingerprint": "cron:Coding Day Loop|Night Coding Delegation",
   "last_kind": "cron_failure",
-  "last_sent_at": "2026-03-13T21:25:02Z",
+  "last_sent_at": "2026-03-14T00:19:46Z",
   "last_message": "IMPORTANT: Decision needed\nTODO: decide whether to keep browser control enabled.\nBrowser control is still enabled for main.",
   "last_candidate_kinds": [],
   "last_slot_key": null,

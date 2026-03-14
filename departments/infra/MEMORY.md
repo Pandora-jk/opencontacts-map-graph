@@ -7,6 +7,20 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-14 00:19 UTC:**
+  - Cleared the remaining live host drift that the repo-side infra audit had been flagging:
+    - installed the managed SSH drop-in to `/etc/ssh/sshd_config.d/99-openclaw-hardening.conf`
+    - reloaded `ssh`
+    - installed the managed fail2ban jail to `/etc/fail2ban/jail.d/99-openclaw-sshd.local`
+    - restarted `fail2ban`
+  - Direct host verification passed:
+    - `python3 tools/infra_sshd_hardening.py --validate-live` => `LIVE_VALIDATION_DONE`
+    - `python3 tools/infra_ssh_ban_hardening.py --validate-live` => `LIVE_VALIDATION_DONE`
+    - `sudo systemctl is-active ssh` => `active`
+    - `sudo systemctl is-active fail2ban` => `active`
+    - `sudo fail2ban-client status sshd` showed the jail active with 2 currently banned IPs
+    - `sudo ufw status verbose` confirmed `Status: active`, default inbound deny, `22/tcp`, `18789/tcp`, `80/tcp`, `443/tcp` allowed, and `5353/udp` denied
+  - Fresh repo-side artifact `20260314T001539Z-r244-run-security-audit-check-for-open-ports-ssh-config-faile.md` now shows SSH/fail2ban live configs installed and effective policy matched; the remaining UFW note in the artifact is a restricted-shell visibility limitation, not a host drift issue.
 - **2026-03-13 13:02 UTC:**
   - Reconfirmed from `departments/infra/TODO.md`, fresh status, and recent auth findings that `Run security audit` remains the top infra task because blocked `ufw` visibility and recurring SSH probes still need host-side follow-up.
   - Hardened the repo-side SSH ban workflow so it fails closed on real drift instead of reporting a false green:
