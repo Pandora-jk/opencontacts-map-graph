@@ -1,0 +1,219 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.opencontacts.contacts"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="34" />
+10
+11    <uses-permission android:name="android.permission.READ_CONTACTS" />
+11-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:4:5-72
+11-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:4:22-69
+12    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
+12-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:5:5-77
+12-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:5:22-74
+13    <uses-permission android:name="android.permission.READ_SMS" />
+13-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:6:5-67
+13-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:6:22-64
+14    <!-- Include required permissions for Google Maps API to run. -->
+15    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+15-->[com.google.android.gms:play-services-maps:18.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/d1311f184c79d06cbf9a76701cfecedd/transformed/jetified-play-services-maps-18.2.0/AndroidManifest.xml:23:5-79
+15-->[com.google.android.gms:play-services-maps:18.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/d1311f184c79d06cbf9a76701cfecedd/transformed/jetified-play-services-maps-18.2.0/AndroidManifest.xml:23:22-76
+16    <uses-permission android:name="android.permission.INTERNET" />
+16-->[com.google.android.gms:play-services-maps:18.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/d1311f184c79d06cbf9a76701cfecedd/transformed/jetified-play-services-maps-18.2.0/AndroidManifest.xml:24:5-67
+16-->[com.google.android.gms:play-services-maps:18.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/d1311f184c79d06cbf9a76701cfecedd/transformed/jetified-play-services-maps-18.2.0/AndroidManifest.xml:24:22-64
+17
+18    <uses-feature
+18-->[com.google.android.gms:play-services-maps:18.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/d1311f184c79d06cbf9a76701cfecedd/transformed/jetified-play-services-maps-18.2.0/AndroidManifest.xml:26:5-28:35
+19        android:glEsVersion="0x00020000"
+19-->[com.google.android.gms:play-services-maps:18.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/d1311f184c79d06cbf9a76701cfecedd/transformed/jetified-play-services-maps-18.2.0/AndroidManifest.xml:27:9-41
+20        android:required="true" />
+20-->[com.google.android.gms:play-services-maps:18.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/d1311f184c79d06cbf9a76701cfecedd/transformed/jetified-play-services-maps-18.2.0/AndroidManifest.xml:28:9-32
+21
+22    <queries>
+22-->[com.google.android.gms:play-services-maps:18.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/d1311f184c79d06cbf9a76701cfecedd/transformed/jetified-play-services-maps-18.2.0/AndroidManifest.xml:30:5-34:15
+23
+24        <!-- Needs to be explicitly declared on Android R+ -->
+25        <package android:name="com.google.android.apps.maps" />
+25-->[com.google.android.gms:play-services-maps:18.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/d1311f184c79d06cbf9a76701cfecedd/transformed/jetified-play-services-maps-18.2.0/AndroidManifest.xml:33:9-64
+25-->[com.google.android.gms:play-services-maps:18.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/d1311f184c79d06cbf9a76701cfecedd/transformed/jetified-play-services-maps-18.2.0/AndroidManifest.xml:33:18-61
+26    </queries>
+27
+28    <permission
+28-->[androidx.core:core:1.12.0] /tmp/gradle-android-ecosystem/caches/transforms-4/896a60156f8ecaa22f625913c693b84f/transformed/core-1.12.0/AndroidManifest.xml:22:5-24:47
+29        android:name="com.opencontacts.contacts.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+29-->[androidx.core:core:1.12.0] /tmp/gradle-android-ecosystem/caches/transforms-4/896a60156f8ecaa22f625913c693b84f/transformed/core-1.12.0/AndroidManifest.xml:23:9-81
+30        android:protectionLevel="signature" />
+30-->[androidx.core:core:1.12.0] /tmp/gradle-android-ecosystem/caches/transforms-4/896a60156f8ecaa22f625913c693b84f/transformed/core-1.12.0/AndroidManifest.xml:24:9-44
+31
+32    <uses-permission android:name="com.opencontacts.contacts.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+32-->[androidx.core:core:1.12.0] /tmp/gradle-android-ecosystem/caches/transforms-4/896a60156f8ecaa22f625913c693b84f/transformed/core-1.12.0/AndroidManifest.xml:26:5-97
+32-->[androidx.core:core:1.12.0] /tmp/gradle-android-ecosystem/caches/transforms-4/896a60156f8ecaa22f625913c693b84f/transformed/core-1.12.0/AndroidManifest.xml:26:22-94
+33
+34    <application
+34-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:8:5-42:19
+35        android:name="com.opencontacts.androidecosystem.contacts.ContactsApplication"
+35-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:9:9-44
+36        android:allowBackup="true"
+36-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:10:9-35
+37        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+37-->[androidx.core:core:1.12.0] /tmp/gradle-android-ecosystem/caches/transforms-4/896a60156f8ecaa22f625913c693b84f/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
+38        android:debuggable="true"
+39        android:extractNativeLibs="false"
+40        android:icon="@android:drawable/sym_def_app_icon"
+40-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:11:9-58
+41        android:label="Contacts App"
+41-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:12:9-37
+42        android:supportsRtl="true"
+42-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:14:9-35
+43        android:theme="@style/Theme.ContactsMap" >
+43-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:13:9-49
+44        <activity
+44-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:16:9-23:20
+45            android:name="com.opencontacts.androidecosystem.contacts.MainActivity"
+45-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:17:13-41
+46            android:exported="true" >
+46-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:18:13-36
+47            <intent-filter>
+47-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:19:13-22:29
+48                <action android:name="android.intent.action.MAIN" />
+48-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:20:17-69
+48-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:20:25-66
+49
+50                <category android:name="android.intent.category.LAUNCHER" />
+50-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:21:17-77
+50-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:21:27-74
+51            </intent-filter>
+52        </activity>
+53        <activity
+53-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:25:9-29:58
+54            android:name="com.opencontacts.androidecosystem.contacts.ContactDetailsActivity"
+54-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:26:13-51
+55            android:exported="false"
+55-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:27:13-37
+56            android:parentActivityName="com.opencontacts.androidecosystem.contacts.MainActivity"
+56-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:29:13-55
+57            android:theme="@style/Theme.ContactsMap" />
+57-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:28:13-53
+58        <activity
+58-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:31:9-35:58
+59            android:name="com.opencontacts.androidecosystem.contacts.GroupContactsActivity"
+59-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:32:13-50
+60            android:exported="false"
+60-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:33:13-37
+61            android:parentActivityName="com.opencontacts.androidecosystem.contacts.MainActivity"
+61-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:35:13-55
+62            android:theme="@style/Theme.ContactsMap" />
+62-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:34:13-53
+63        <activity
+63-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:37:9-41:58
+64            android:name="com.opencontacts.androidecosystem.contacts.EditContactActivity"
+64-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:38:13-48
+65            android:exported="false"
+65-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:39:13-37
+66            android:parentActivityName="com.opencontacts.androidecosystem.contacts.MainActivity"
+66-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:41:13-55
+67            android:theme="@style/Theme.ContactsMap" />
+67-->/home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/apps/contacts/src/main/AndroidManifest.xml:40:13-53
+68
+69        <provider
+69-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/0fc299513cedb79d849e3a2355b287c4/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+70            android:name="androidx.startup.InitializationProvider"
+70-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/0fc299513cedb79d849e3a2355b287c4/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
+71            android:authorities="com.opencontacts.contacts.androidx-startup"
+71-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/0fc299513cedb79d849e3a2355b287c4/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
+72            android:exported="false" >
+72-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/0fc299513cedb79d849e3a2355b287c4/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
+73            <meta-data
+73-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/0fc299513cedb79d849e3a2355b287c4/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+74                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+74-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/0fc299513cedb79d849e3a2355b287c4/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
+75                android:value="androidx.startup" />
+75-->[androidx.emoji2:emoji2:1.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/0fc299513cedb79d849e3a2355b287c4/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
+76            <meta-data
+76-->[androidx.lifecycle:lifecycle-process:2.7.0] /tmp/gradle-android-ecosystem/caches/transforms-4/2be0314cc9af03ffa0934655b4c1a8bd/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:29:13-31:52
+77                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+77-->[androidx.lifecycle:lifecycle-process:2.7.0] /tmp/gradle-android-ecosystem/caches/transforms-4/2be0314cc9af03ffa0934655b4c1a8bd/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:30:17-78
+78                android:value="androidx.startup" />
+78-->[androidx.lifecycle:lifecycle-process:2.7.0] /tmp/gradle-android-ecosystem/caches/transforms-4/2be0314cc9af03ffa0934655b4c1a8bd/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:31:17-49
+79            <meta-data
+79-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:29:13-31:52
+80                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+80-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:30:17-85
+81                android:value="androidx.startup" />
+81-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:31:17-49
+82        </provider> <!-- Needs to be explicitly declared on P+ -->
+83        <uses-library
+83-->[com.google.android.gms:play-services-maps:18.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/d1311f184c79d06cbf9a76701cfecedd/transformed/jetified-play-services-maps-18.2.0/AndroidManifest.xml:39:9-41:40
+84            android:name="org.apache.http.legacy"
+84-->[com.google.android.gms:play-services-maps:18.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/d1311f184c79d06cbf9a76701cfecedd/transformed/jetified-play-services-maps-18.2.0/AndroidManifest.xml:40:13-50
+85            android:required="false" />
+85-->[com.google.android.gms:play-services-maps:18.2.0] /tmp/gradle-android-ecosystem/caches/transforms-4/d1311f184c79d06cbf9a76701cfecedd/transformed/jetified-play-services-maps-18.2.0/AndroidManifest.xml:41:13-37
+86
+87        <activity
+87-->[com.google.android.gms:play-services-base:18.1.0] /tmp/gradle-android-ecosystem/caches/transforms-4/552d872d573974af7e75ffe489b12e14/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:20:9-22:45
+88            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+88-->[com.google.android.gms:play-services-base:18.1.0] /tmp/gradle-android-ecosystem/caches/transforms-4/552d872d573974af7e75ffe489b12e14/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:20:19-85
+89            android:exported="false"
+89-->[com.google.android.gms:play-services-base:18.1.0] /tmp/gradle-android-ecosystem/caches/transforms-4/552d872d573974af7e75ffe489b12e14/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:22:19-43
+90            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+90-->[com.google.android.gms:play-services-base:18.1.0] /tmp/gradle-android-ecosystem/caches/transforms-4/552d872d573974af7e75ffe489b12e14/transformed/jetified-play-services-base-18.1.0/AndroidManifest.xml:21:19-78
+91
+92        <meta-data
+92-->[com.google.android.gms:play-services-basement:18.1.0] /tmp/gradle-android-ecosystem/caches/transforms-4/2b4d2d753e591180e910ce2329688349/transformed/jetified-play-services-basement-18.1.0/AndroidManifest.xml:21:9-23:69
+93            android:name="com.google.android.gms.version"
+93-->[com.google.android.gms:play-services-basement:18.1.0] /tmp/gradle-android-ecosystem/caches/transforms-4/2b4d2d753e591180e910ce2329688349/transformed/jetified-play-services-basement-18.1.0/AndroidManifest.xml:22:13-58
+94            android:value="@integer/google_play_services_version" />
+94-->[com.google.android.gms:play-services-basement:18.1.0] /tmp/gradle-android-ecosystem/caches/transforms-4/2b4d2d753e591180e910ce2329688349/transformed/jetified-play-services-basement-18.1.0/AndroidManifest.xml:23:13-66
+95
+96        <service
+96-->[androidx.room:room-runtime:2.6.1] /tmp/gradle-android-ecosystem/caches/transforms-4/9ce11b0e6b151cf273f6963c54464663/transformed/room-runtime-2.6.1/AndroidManifest.xml:24:9-28:63
+97            android:name="androidx.room.MultiInstanceInvalidationService"
+97-->[androidx.room:room-runtime:2.6.1] /tmp/gradle-android-ecosystem/caches/transforms-4/9ce11b0e6b151cf273f6963c54464663/transformed/room-runtime-2.6.1/AndroidManifest.xml:25:13-74
+98            android:directBootAware="true"
+98-->[androidx.room:room-runtime:2.6.1] /tmp/gradle-android-ecosystem/caches/transforms-4/9ce11b0e6b151cf273f6963c54464663/transformed/room-runtime-2.6.1/AndroidManifest.xml:26:13-43
+99            android:exported="false" />
+99-->[androidx.room:room-runtime:2.6.1] /tmp/gradle-android-ecosystem/caches/transforms-4/9ce11b0e6b151cf273f6963c54464663/transformed/room-runtime-2.6.1/AndroidManifest.xml:27:13-37
+100
+101        <receiver
+101-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:34:9-52:20
+102            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+102-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:35:13-76
+103            android:directBootAware="false"
+103-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:36:13-44
+104            android:enabled="true"
+104-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:37:13-35
+105            android:exported="true"
+105-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:38:13-36
+106            android:permission="android.permission.DUMP" >
+106-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:39:13-57
+107            <intent-filter>
+107-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:40:13-42:29
+108                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+108-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:41:17-91
+108-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:41:25-88
+109            </intent-filter>
+110            <intent-filter>
+110-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:43:13-45:29
+111                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+111-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:44:17-85
+111-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:44:25-82
+112            </intent-filter>
+113            <intent-filter>
+113-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:46:13-48:29
+114                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+114-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:47:17-88
+114-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:47:25-85
+115            </intent-filter>
+116            <intent-filter>
+116-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:49:13-51:29
+117                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+117-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:50:17-95
+117-->[androidx.profileinstaller:profileinstaller:1.3.0] /tmp/gradle-android-ecosystem/caches/transforms-4/245738248a75a4cd25fd4c75d95d947b/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:50:25-92
+118            </intent-filter>
+119        </receiver>
+120    </application>
+121
+122</manifest>

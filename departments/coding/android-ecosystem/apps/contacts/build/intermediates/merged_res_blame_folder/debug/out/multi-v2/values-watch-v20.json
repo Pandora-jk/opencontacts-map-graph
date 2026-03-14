@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.opencontacts.androidecosystem.contacts-mergeDebugResources-2:/values-watch-v20/values-watch-v20.xml",
+            "map": [
+                {
+                    "source": "/tmp/gradle-android-ecosystem/caches/transforms-4/489d4f10bd575ece0bdb4a12cb9bc7e2/transformed/appcompat-1.6.1/res/values-watch-v20/values-watch-v20.xml",
+                    "from": {
+                        "startLines": "2,5,8",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,214,385",
+                        "endLines": "4,7,10",
+                        "endColumns": "12,12,12",
+                        "endOffsets": "209,380,553"
+                    }
+                }
+            ]
+        }
+    ]
+}

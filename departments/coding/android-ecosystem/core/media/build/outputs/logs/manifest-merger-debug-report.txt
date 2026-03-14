@@ -1,0 +1,16 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/core/media/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11308989800742951285.xml:2:13-83
+INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/core/media/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11308989800742951285.xml:2:13-83
+	package
+		INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/core/media/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11308989800742951285.xml
+	xmlns:android
+		ADDED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/core/media/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11308989800742951285.xml:2:23-81
+uses-sdk
+INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/core/media/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11308989800742951285.xml reason: use-sdk injection requested
+INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/core/media/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11308989800742951285.xml
+INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/core/media/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11308989800742951285.xml
+	android:targetSdkVersion
+		INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/core/media/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11308989800742951285.xml
+	android:minSdkVersion
+		INJECTED from /home/ubuntu/.openclaw/workspace/departments/coding/android-ecosystem/core/media/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11308989800742951285.xml

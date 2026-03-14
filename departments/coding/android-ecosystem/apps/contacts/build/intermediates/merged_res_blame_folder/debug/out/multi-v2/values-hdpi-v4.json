@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.opencontacts.androidecosystem.contacts-mergeDebugResources-2:/values-hdpi-v4/values-hdpi-v4.xml",
+            "map": [
+                {
+                    "source": "/tmp/gradle-android-ecosystem/caches/transforms-4/489d4f10bd575ece0bdb4a12cb9bc7e2/transformed/appcompat-1.6.1/res/values-hdpi-v4/values-hdpi-v4.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "6",
+                        "endColumns": "13",
+                        "endOffsets": "327"
+                    }
+                }
+            ]
+        }
+    ]
+}

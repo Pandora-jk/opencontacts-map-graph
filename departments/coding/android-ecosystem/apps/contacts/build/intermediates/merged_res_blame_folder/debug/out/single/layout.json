@@ -1,0 +1,34 @@
+[
+    {
+        "merged": "com.opencontacts.androidecosystem.contacts-mergeDebugResources-3:/layout/activity_main.xml",
+        "source": "com.opencontacts.androidecosystem.contacts-main-6:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.opencontacts.androidecosystem.contacts-mergeDebugResources-3:/layout/fragment_contact_map.xml",
+        "source": "com.opencontacts.androidecosystem.contacts-main-6:/layout/fragment_contact_map.xml"
+    },
+    {
+        "merged": "com.opencontacts.androidecosystem.contacts-mergeDebugResources-3:/layout/activity_contacts_map.xml",
+        "source": "com.opencontacts.androidecosystem.contacts-main-6:/layout/activity_contacts_map.xml"
+    },
+    {
+        "merged": "com.opencontacts.androidecosystem.contacts-mergeDebugResources-3:/layout/activity_contact_details.xml",
+        "source": "com.opencontacts.androidecosystem.contacts-main-6:/layout/activity_contact_details.xml"
+    },
+    {
+        "merged": "com.opencontacts.androidecosystem.contacts-mergeDebugResources-3:/layout/fragment_contact_list.xml",
+        "source": "com.opencontacts.androidecosystem.contacts-main-6:/layout/fragment_contact_list.xml"
+    },
+    {
+        "merged": "com.opencontacts.androidecosystem.contacts-mergeDebugResources-3:/layout/activity_edit_contact.xml",
+        "source": "com.opencontacts.androidecosystem.contacts-main-6:/layout/activity_edit_contact.xml"
+    },
+    {
+        "merged": "com.opencontacts.androidecosystem.contacts-mergeDebugResources-3:/layout/fragment_contact_groups.xml",
+        "source": "com.opencontacts.androidecosystem.contacts-main-6:/layout/fragment_contact_groups.xml"
+    },
+    {
+        "merged": "com.opencontacts.androidecosystem.contacts-mergeDebugResources-3:/layout/activity_group_contacts.xml",
+        "source": "com.opencontacts.androidecosystem.contacts-main-6:/layout/activity_group_contacts.xml"
+    }
+]
