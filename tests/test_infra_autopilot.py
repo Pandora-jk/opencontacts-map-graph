@@ -156,6 +156,30 @@ class InfraAutopilotTests(unittest.TestCase):
         self.assertEqual(60, score)
         self.assertEqual("ALERT: Unexpected externally exposed listeners (1): udp/58627", reason)
 
+    def test_score_task_from_artifact_ignores_hardened_ufw_observability_gap_warning(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "security.md"
+            artifact.write_text(
+                "\n".join(
+                    [
+                        "WARN: ufw installed but status visibility is blocked by current privileges",
+                        "INFO: ufw boot config ENABLED=yes (/etc/ufw/ufw.conf)",
+                        "INFO: ufw defaults input=DROP output=ACCEPT forward=DROP ipv6=yes manage_builtins=no (/etc/default/ufw)",
+                        "INFO: ufw service enabled at boot (/etc/systemd/system/multi-user.target.wants/ufw.service -> /usr/lib/systemd/system/ufw.service)",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            score, reason = infra_autopilot.score_task_from_artifact(
+                "Run security audit: Check for open ports, SSH config, failed logins.",
+                artifact,
+            )
+
+        self.assertEqual(0, score)
+        self.assertEqual("latest artifact security.md has no active risk markers", reason)
+
     def test_score_task_from_status_counts_partial_ssh_hardening_visibility_for_security(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             artifact = Path(tmpdir) / "infra-status.md"
@@ -211,6 +235,30 @@ class InfraAutopilotTests(unittest.TestCase):
 
         self.assertEqual(40, score)
         self.assertIn("latest infra-status shows blocked ufw visibility", reason)
+
+    def test_score_task_from_status_ignores_hardened_ufw_observability_gap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "infra-status.md"
+            artifact.write_text(
+                "\n".join(
+                    [
+                        "WARN: ufw installed but status visibility is blocked by current privileges",
+                        "INFO: ufw boot config ENABLED=yes (/etc/ufw/ufw.conf)",
+                        "INFO: ufw defaults input=DROP output=ACCEPT forward=DROP ipv6=yes manage_builtins=no (/etc/default/ufw)",
+                        "INFO: ufw service enabled at boot (/etc/systemd/system/multi-user.target.wants/ufw.service -> /usr/lib/systemd/system/ufw.service)",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            score, reason = infra_autopilot.score_task_from_status(
+                "Run security audit: Check for open ports, SSH config, failed logins.",
+                artifact,
+            )
+
+        self.assertEqual(0, score)
+        self.assertEqual("latest infra-status infra-status.md has no active markers for security", reason)
 
     def test_score_task_from_status_counts_live_fail2ban_drift_for_security(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

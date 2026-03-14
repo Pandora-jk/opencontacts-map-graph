@@ -1,0 +1,77 @@
+# Infra Check (Run 258)
+
+- Task: **Run security audit:** Check for open ports, SSH config, failed logins.
+- UTC: 2026-03-14T12:31:34.225592Z
+
+## Open Ports
+tcp *:22
+tcp 0.0.0.0:22
+tcp 127.0.0.1:18789
+tcp 127.0.0.1:18791
+tcp 127.0.0.1:18792
+tcp 127.0.0.53:53
+tcp 127.0.0.54:53
+tcp [::1]:18789
+udp 127.0.0.1:323
+udp 127.0.0.53:53
+udp 127.0.0.54:53
+udp 172.31.34.63:68
+udp [::1]:323
+
+## External Listener Assessment
+Externally exposed listeners match allowlist (2): tcp/22, udp/68
+
+## Unexpected Listener Details
+No unexpected listener details to inspect
+
+## Multicast DNS Exposure
+No external mDNS listener detected
+
+## Firewall Status
+WARN: ufw installed but status visibility is blocked by current privileges
+ufw: sudo: The "no new privileges" flag is set, which prevents sudo from running as root. sudo: If sudo is running in a container, you may need to adjust the container configuration to…
+INFO: ufw boot config ENABLED=yes (/etc/ufw/ufw.conf)
+HARDENING: verify `sudo ufw status verbose` from an unrestricted host shell
+Note: upstream cloud firewalls/security groups are not visible from this host check
+
+## SSH Config Snapshot
+sshd_config:X11Forwarding no
+sshd_config.d/60-cloudimg-settings.conf:PasswordAuthentication no
+sshd_config.d/99-openclaw-hardening.conf:PasswordAuthentication no
+sshd_config.d/99-openclaw-hardening.conf:PermitRootLogin prohibit-password
+sshd_config.d/99-openclaw-hardening.conf:PermitEmptyPasswords no
+sshd_config.d/99-openclaw-hardening.conf:X11Forwarding no
+sshd_config.d/99-openclaw-hardening.conf:AllowTcpForwarding no
+sshd_config.d/99-openclaw-hardening.conf:AllowAgentForwarding no
+sshd_config.d/99-openclaw-hardening.conf:AllowStreamLocalForwarding no
+sshd_config.d/99-openclaw-hardening.conf:PermitTunnel no
+sshd_config.d/99-openclaw-hardening.conf:MaxAuthTries 3
+sshd_config.d/99-openclaw-hardening.conf:LoginGraceTime 30
+sshd_config.d/99-openclaw-hardening.conf:MaxStartups 10:30:60
+
+## SSH Hardening Validation
+managed config ready: /home/ubuntu/.openclaw/workspace/ssh/99-openclaw-hardening.conf (mode 0644)
+live config installed: /etc/ssh/sshd_config.d/99-openclaw-hardening.conf (mode 0644)
+INFO: effective sshd policy matches the managed hardening
+
+## Recent SSH/Auth Findings
+2026-03-13T22:08:29.100213+00:00 ip-172-31-34-63 sshd[223548]: Invalid user  from 14.103.205.40 port 54848
+2026-03-13T22:08:36.428852+00:00 ip-172-31-34-63 sshd[223548]: Connection closed by invalid user  14.103.205.40 port 54848 [preauth]
+2026-03-13T22:15:52.024406+00:00 ip-172-31-34-63 sshd[223893]: Accepted publickey for ubuntu from 1.145.76.187 port 1516 ssh2: ED25519 SHA256:qwy43PraEAaWyIZ2IMWXEUP9DC0xybOtqZAULFykJso
+2026-03-13T22:47:30.007368+00:00 ip-172-31-34-63 sshd[226979]: Accepted publickey for ubuntu from 1.145.99.166 port 4148 ssh2: ED25519 SHA256:qwy43PraEAaWyIZ2IMWXEUP9DC0xybOtqZAULFykJso
+2026-03-13T23:00:17.206680+00:00 ip-172-31-34-63 sshd[227776]: Invalid user admin from 185.156.73.233 port 60352
+2026-03-13T23:00:17.609910+00:00 ip-172-31-34-63 sshd[227776]: Connection closed by invalid user admin 185.156.73.233 port 60352 [preauth]
+
+## Auth Risk Assessment
+4 suspicious auth lines found in sampled logs (auth.log)
+
+## Auth Source Summary
+INFO: Auth event sources in sampled logs (4 events / 2 source(s)): 14.103.205.40 x2; 185.156.73.233 x2 (users: admin)
+
+## SSH Ban Hardening
+managed config ready: /home/ubuntu/.openclaw/workspace/fail2ban/99-openclaw-sshd.local (mode 0644)
+live config installed: /etc/fail2ban/jail.d/99-openclaw-sshd.local (mode 0644)
+INFO: managed fail2ban sshd jail policy: maxretry=3, findtime=10m, bantime=4h
+fail2ban-client: /usr/bin/fail2ban-client
+INFO: fail2ban service state not visible from current shell; socket present: /var/run/fail2ban/fail2ban.sock (mode 0700, owner root:root)
+INFO: fail2ban sshd jail status requires root; socket present: /var/run/fail2ban/fail2ban.sock (mode 0700, owner root:root)

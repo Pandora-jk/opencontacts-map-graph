@@ -87,7 +87,18 @@ class InfraAuditCommonTests(unittest.TestCase):
     def test_check_firewall_status_reports_ufw_boot_config_when_live_status_blocked(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             ufw_conf = Path(tmpdir) / "ufw.conf"
+            ufw_defaults = Path(tmpdir) / "default.ufw"
+            wants_dir = Path(tmpdir) / "multi-user.target.wants"
+            wants_dir.mkdir()
+            ufw_unit = Path(tmpdir) / "ufw.service"
+            ufw_unit.write_text("[Unit]\nDescription=ufw\n", encoding="utf-8")
+            wants_link = wants_dir / "ufw.service"
+            wants_link.symlink_to(ufw_unit)
             ufw_conf.write_text("ENABLED=yes\n", encoding="utf-8")
+            ufw_defaults.write_text(
+                'DEFAULT_INPUT_POLICY="DROP"\nDEFAULT_OUTPUT_POLICY="ACCEPT"\nDEFAULT_FORWARD_POLICY="DROP"\nIPV6=yes\nMANAGE_BUILTINS=no\n',
+                encoding="utf-8",
+            )
 
             def fake_run_cmd(cmd: list[str], max_chars: int = 800) -> str:
                 shell_cmd = cmd[-1]
@@ -101,9 +112,29 @@ class InfraAuditCommonTests(unittest.TestCase):
                 fake_run_cmd,
                 which=lambda _: None,
                 ufw_config_path=ufw_conf,
+                ufw_defaults_path=ufw_defaults,
+                ufw_service_wants_path=wants_link,
             )
 
         self.assertIn(f'INFO: ufw boot config ENABLED=yes ({ufw_conf})', result)
+        self.assertIn(
+            f'INFO: ufw defaults input=DROP output=ACCEPT forward=DROP ipv6=yes manage_builtins=no ({ufw_defaults})',
+            result,
+        )
+        self.assertIn(f'INFO: ufw service enabled at boot ({wants_link} -> {ufw_unit})', result)
+        self.assertTrue(infra_audit_common.firewall_observability_gap_is_hardened(result))
+
+    def test_firewall_observability_gap_is_not_hardened_without_restrictive_defaults(self) -> None:
+        result = "\n".join(
+            [
+                "WARN: ufw installed but status visibility is blocked by current privileges",
+                "INFO: ufw boot config ENABLED=yes (/etc/ufw/ufw.conf)",
+                "INFO: ufw defaults input=ACCEPT output=ACCEPT forward=DROP ipv6=yes manage_builtins=no (/etc/default/ufw)",
+                "INFO: ufw service enabled at boot (/etc/systemd/system/multi-user.target.wants/ufw.service -> /usr/lib/systemd/system/ufw.service)",
+            ]
+        )
+
+        self.assertFalse(infra_audit_common.firewall_observability_gap_is_hardened(result))
 
     def test_inspect_unexpected_listeners_reuses_recent_artifact_attribution_when_owner_hidden(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

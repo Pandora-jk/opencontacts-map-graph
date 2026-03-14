@@ -39,6 +39,7 @@ from infra_audit_common import (
     AUTH_SUSPICIOUS_PATTERN,
     auth_log_tail_command,
     check_firewall_status as common_check_firewall_status,
+    firewall_observability_gap_is_hardened as common_firewall_observability_gap_is_hardened,
     filtered_auth_lines as common_filtered_auth_lines,
     inspect_unexpected_listeners as common_inspect_unexpected_listeners,
     is_self_generated_auth_audit_line as common_is_self_generated_auth_audit_line,
@@ -261,6 +262,11 @@ def score_task_from_artifact(task: str, artifact: Path | None) -> tuple[int, str
         clean = clean_text(line)
         if clean.startswith('ALERT: Detailed inspection for unexpected listeners'):
             continue
+        if (
+            line.startswith('WARN: ufw installed but status visibility is blocked by current privileges')
+            and common_firewall_observability_gap_is_hardened(text)
+        ):
+            continue
         if line.startswith('CRITICAL:'):
             score += 100
             reasons.append(clean)
@@ -347,7 +353,9 @@ def score_task_from_status(task: str, artifact: Path | None) -> tuple[int, str]:
         if 'ufw unavailable on host' in text:
             score += 40
             reasons.append('latest infra-status shows missing ufw visibility')
-        elif 'WARN: ufw installed but status visibility is blocked by current privileges' in text:
+        elif 'WARN: ufw installed but status visibility is blocked by current privileges' in text and not common_firewall_observability_gap_is_hardened(
+            text
+        ):
             score += 40
             reasons.append('latest infra-status shows blocked ufw visibility')
         if 'RISK: PermitRootLogin enabled' in text:

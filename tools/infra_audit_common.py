@@ -23,6 +23,10 @@ LOCAL_LISTENER_PREFIXES = (
     '[::ffff:127.',
 )
 AUTH_SUSPICIOUS_PATTERN = re.compile(r'(failed|invalid user|authentication failure|error: pam)', re.IGNORECASE)
+UFW_POLICY_LINE_RE = re.compile(
+    r'^INFO: ufw defaults input=(\S+) output=(\S+) forward=(\S+) ipv6=(\S+) manage_builtins=(\S+) \((.+)\)$',
+    re.MULTILINE,
+)
 AUTH_SOURCE_PATTERNS = (
     re.compile(r'\bfrom\s+([0-9A-Fa-f:.]+)\b'),
     re.compile(
@@ -64,6 +68,62 @@ def ufw_boot_config_status(ufw_config_path: Path = Path('/etc/ufw/ufw.conf')) ->
             return None
         return f'INFO: ufw boot config ENABLED={enabled} ({ufw_config_path})'
     return None
+
+
+def ufw_default_policy_status(ufw_defaults_path: Path = Path('/etc/default/ufw')) -> str | None:
+    try:
+        text = ufw_defaults_path.read_text(encoding='utf-8', errors='ignore')
+    except OSError:
+        return None
+
+    values: dict[str, str] = {}
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        key, value = line.split('=', 1)
+        values[key.strip().upper()] = value.strip().strip('"\'')
+
+    input_policy = values.get('DEFAULT_INPUT_POLICY')
+    output_policy = values.get('DEFAULT_OUTPUT_POLICY')
+    forward_policy = values.get('DEFAULT_FORWARD_POLICY')
+    if not input_policy or not output_policy or not forward_policy:
+        return None
+
+    ipv6 = values.get('IPV6', 'unknown')
+    manage_builtins = values.get('MANAGE_BUILTINS', 'unknown')
+    return (
+        f'INFO: ufw defaults input={input_policy} output={output_policy} '
+        f'forward={forward_policy} ipv6={ipv6} manage_builtins={manage_builtins} '
+        f'({ufw_defaults_path})'
+    )
+
+
+def ufw_service_enablement_status(
+    wants_link_path: Path = Path('/etc/systemd/system/multi-user.target.wants/ufw.service'),
+) -> str | None:
+    if not wants_link_path.exists():
+        return None
+
+    resolved = wants_link_path.resolve(strict=False)
+    return f'INFO: ufw service enabled at boot ({wants_link_path} -> {resolved})'
+
+
+def firewall_observability_gap_is_hardened(status_text: str) -> bool:
+    if 'WARN: ufw installed but status visibility is blocked by current privileges' not in status_text:
+        return False
+    if not re.search(r'INFO: ufw boot config ENABLED=yes\b', status_text, re.IGNORECASE):
+        return False
+    if 'INFO: ufw service enabled at boot' not in status_text:
+        return False
+
+    match = UFW_POLICY_LINE_RE.search(status_text)
+    if not match:
+        return False
+
+    input_policy, _, forward_policy, _, _, _ = match.groups()
+    restrictive = {'drop', 'reject'}
+    return input_policy.lower() in restrictive and forward_policy.lower() in restrictive
 
 
 def auth_log_tail_command(limit: int = AUTH_LOG_SAMPLE_LIMIT) -> list[str]:
@@ -464,6 +524,8 @@ def check_firewall_status(
     which: Callable[[str], str | None],
     render_one_line: Callable[[str, int], str] = one_line,
     ufw_config_path: Path = Path('/etc/ufw/ufw.conf'),
+    ufw_defaults_path: Path = Path('/etc/default/ufw'),
+    ufw_service_wants_path: Path = Path('/etc/systemd/system/multi-user.target.wants/ufw.service'),
 ) -> str:
     lines: list[str] = []
     ufw_lookup = run_cmd(
@@ -491,6 +553,12 @@ def check_firewall_status(
             boot_config = ufw_boot_config_status(ufw_config_path)
             if boot_config:
                 lines.append(boot_config)
+            default_policy = ufw_default_policy_status(ufw_defaults_path)
+            if default_policy:
+                lines.append(default_policy)
+            service_enabled = ufw_service_enablement_status(ufw_service_wants_path)
+            if service_enabled:
+                lines.append(service_enabled)
             lines.append('HARDENING: verify `sudo ufw status verbose` from an unrestricted host shell')
         else:
             lines.append(f'ufw: {render_one_line(status, 180)}')

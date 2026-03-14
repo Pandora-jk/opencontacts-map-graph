@@ -17,6 +17,7 @@ import tempfile
 from pathlib import Path
 
 from infra_audit_common import check_firewall_status as common_check_firewall_status
+from infra_audit_common import firewall_observability_gap_is_hardened as common_firewall_observability_gap_is_hardened
 from infra_audit_common import filtered_auth_lines as common_filtered_auth_lines
 from infra_audit_common import inspect_unexpected_listeners as common_inspect_unexpected_listeners
 from infra_audit_common import is_self_generated_auth_audit_line as common_is_self_generated_auth_audit_line
@@ -598,7 +599,9 @@ def generate_report() -> tuple[str, list[str]]:
         risk_summary.append(f'RISK: {first_signal_line(mdns_result)}')
 
     firewall_result = findings['checks']['firewall_status']['result']
-    if re.search(r'^(ALERT|RISK|WARN):', firewall_result, re.MULTILINE):
+    if re.search(r'^(ALERT|RISK|WARN):', firewall_result, re.MULTILINE) and not common_firewall_observability_gap_is_hardened(
+        firewall_result
+    ):
         risk_summary.append(f'RISK: {first_signal_line(firewall_result)}')
 
     failed_result = findings['checks']['failed_logins']['result']
