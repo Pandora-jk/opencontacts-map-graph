@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-14T20:10:45Z
-- Run count: 397
-- Primary task: Write the one-line sales promise for the core service offer
-- Primary task progress count: 25
-- Last artifact: departments/finance/artifacts/offers/core-service-offer-20260314-r397.md
+- Last run (UTC): 2026-03-14T20:50:27Z
+- Run count: 399
+- Primary task: Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes
+- Primary task progress count: 26
+- Last artifact: departments/finance/artifacts/pipeline/founder-led-agencies-first-20-20260314-r399.csv
 - Blocking items: 0
 - Autonomous queue items: 14
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Write the one-line sales promise for the core service offer
+Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes
 
 ## Blocking
 - None
