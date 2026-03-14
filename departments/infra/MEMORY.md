@@ -7,6 +7,17 @@
 - **Security Status:** Alert (unexpected external listeners on high ports, `ufw` unavailable from host checks, no pending package updates)
 
 ## Recent Activity
+- **2026-03-14 17:35 UTC:**
+  - Reconfirmed from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh owned runs 278-279 that `Check for system updates` remains the top infra reliability/security task because unattended-upgrades started at `2026-03-14 13:06 UTC`, never logged completion, and 5 kernel/security updates are still pending.
+  - Hardened the repo-side update-health evidence path so it uses APT periodic stamp files in addition to unattended logs and `apt` history:
+    - `tools/infra_update_health.py` now reads `/var/lib/apt/periodic/*-stamp`, treats newer `upgrade`/`unattended-upgrades` stamps as completion corroboration when logs are incomplete, and reports when fresh update discovery has no matching newer completion stamp
+    - `tests/test_infra_update_health.py` now covers periodic stamp parsing, false-stall suppression from newer completion stamps, and the live-style stale completion gap warning
+  - Live verification passed:
+    - `python3 -m unittest tests.test_infra_update_health tests.test_infra_status tests.test_infra_autopilot -v`
+    - `python3 -m py_compile tools/infra_update_health.py tools/infra-status.py tools/infra-autopilot.py tests/test_infra_update_health.py tests/test_infra_status.py tests/test_infra_autopilot.py`
+    - `python3 tools/infra-status.py` now reports `WARN: apt periodic stamps recorded fresh update discovery at 2026-03-14 13:06 UTC but no newer unattended-upgrades/upgrade completion stamp was written (latest completion stamp: 2026-03-14 06:26 UTC)` while keeping the stronger stalled-run risk summary
+    - `python3 tools/department-commands.py run infra` kept `Check for system updates` selected with the stronger stalled unattended-upgrades reason
+  - Fresh artifacts: `20260314T173526Z-infra-status.md` and `20260314T173526Z-r279-check-for-system-updates-daily-and-report-count.md`.
 - **2026-03-14 13:36 UTC:**
   - Reconfirmed from `departments/infra/TODO.md`, `logs/infra-activity.log`, and fresh owned runs 264-265 that `Check for system updates` is the current top infra reliability task because unattended-upgrades started at `2026-03-14 13:06 UTC` but did not log completion while 5 kernel/security updates remain pending.
   - Hardened the repo-side update-health path so the task output reflects impact instead of only a count:

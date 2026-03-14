@@ -1,6 +1,8 @@
 import datetime as dt
 import importlib.util
+import os
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -14,6 +16,22 @@ SPEC.loader.exec_module(infra_update_health)
 
 
 class InfraUpdateHealthTests(unittest.TestCase):
+    def test_load_periodic_stamp_times_reads_known_stamp_mtimes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            periodic_dir = Path(tmpdir)
+            update_stamp = periodic_dir / "update-stamp"
+            upgrade_stamp = periodic_dir / "upgrade-stamp"
+            update_stamp.touch()
+            upgrade_stamp.touch()
+            os.utime(update_stamp, (1710411900, 1710411900))
+            os.utime(upgrade_stamp, (1710412200, 1710412200))
+
+            stamps = infra_update_health.load_periodic_stamp_times(periodic_dir)
+
+        self.assertEqual(dt.datetime.fromtimestamp(1710411900, tz=dt.UTC), stamps["update"])
+        self.assertEqual(dt.datetime.fromtimestamp(1710412200, tz=dt.UTC), stamps["upgrade"])
+        self.assertIsNone(stamps["unattended_upgrades"])
+
     def test_parse_apt_history_transactions_extracts_timestamps_and_commandline(self) -> None:
         transactions = infra_update_health.parse_apt_history_transactions(
             "\n".join(
@@ -101,6 +119,13 @@ class InfraUpdateHealthTests(unittest.TestCase):
             now=now,
             config=config,
             latest_run=latest_run,
+            periodic_stamps={
+                "update": None,
+                "update_success": None,
+                "download_upgradeable": None,
+                "unattended_upgrades": None,
+                "upgrade": None,
+            },
             package_manager_processes=[],
         )
 
@@ -150,6 +175,48 @@ class InfraUpdateHealthTests(unittest.TestCase):
         self.assertNotIn("RISK: unattended-upgrades appears stalled;", result)
         self.assertNotIn("RISK: pending updates remain after an incomplete unattended-upgrades run", result)
 
+    def test_render_auto_update_health_uses_periodic_completion_stamp_to_suppress_false_stalled_risk(self) -> None:
+        now = dt.datetime(2026, 3, 14, 16, 30, tzinfo=dt.UTC)
+        config = {
+            "enabled": True,
+            "settings": {
+                "APT::Periodic::Update-Package-Lists": "1",
+                "APT::Periodic::Unattended-Upgrade": "1",
+            },
+        }
+        latest_run = {
+            "status": "incomplete",
+            "started_at": dt.datetime(2026, 3, 14, 13, 6, 5, tzinfo=dt.UTC),
+            "completed_at": None,
+            "completion_line": "",
+        }
+
+        result = infra_update_health.render_auto_update_health(
+            2,
+            now=now,
+            config=config,
+            latest_run=latest_run,
+            latest_history={
+                "commandline": "",
+                "started_at": None,
+                "completed_at": None,
+            },
+            periodic_stamps={
+                "update": dt.datetime(2026, 3, 14, 13, 6, tzinfo=dt.UTC),
+                "update_success": dt.datetime(2026, 3, 14, 13, 5, tzinfo=dt.UTC),
+                "download_upgradeable": dt.datetime(2026, 3, 14, 13, 6, tzinfo=dt.UTC),
+                "unattended_upgrades": dt.datetime(2026, 3, 14, 13, 10, tzinfo=dt.UTC),
+                "upgrade": dt.datetime(2026, 3, 14, 13, 10, tzinfo=dt.UTC),
+            },
+            package_manager_processes=[],
+        )
+
+        self.assertIn("INFO: unattended-upgrades last completed at 2026-03-14 13:10 UTC", result)
+        self.assertIn("apt periodic stamps recorded a newer unattended-upgrades/upgrade completion", result)
+        self.assertIn("INFO: pending updates should clear on the next successful unattended-upgrades run", result)
+        self.assertNotIn("RISK: unattended-upgrades appears stalled;", result)
+        self.assertNotIn("WARN: apt periodic stamps recorded fresh update discovery", result)
+
     def test_render_auto_update_health_keeps_incomplete_run_non_stalled_when_worker_is_active(self) -> None:
         now = dt.datetime(2026, 3, 13, 2, 30, tzinfo=dt.UTC)
         config = {
@@ -171,6 +238,13 @@ class InfraUpdateHealthTests(unittest.TestCase):
             now=now,
             config=config,
             latest_run=latest_run,
+            periodic_stamps={
+                "update": None,
+                "update_success": None,
+                "download_upgradeable": None,
+                "unattended_upgrades": None,
+                "upgrade": None,
+            },
             package_manager_processes=[
                 {
                     "pid": 812,
@@ -186,6 +260,49 @@ class InfraUpdateHealthTests(unittest.TestCase):
         self.assertIn("INFO: package-manager activity: unattended-upgrade(pid=812, runtime=20m)", result)
         self.assertIn("RISK: pending updates remain after an incomplete unattended-upgrades run", result)
         self.assertNotIn("RISK: unattended-upgrades appears stalled;", result)
+
+    def test_render_auto_update_health_reports_periodic_stamp_gap_for_incomplete_run(self) -> None:
+        now = dt.datetime(2026, 3, 14, 17, 30, tzinfo=dt.UTC)
+        config = {
+            "enabled": True,
+            "settings": {
+                "APT::Periodic::Update-Package-Lists": "1",
+                "APT::Periodic::Unattended-Upgrade": "1",
+            },
+        }
+        latest_run = {
+            "status": "incomplete",
+            "started_at": dt.datetime(2026, 3, 14, 13, 6, 5, tzinfo=dt.UTC),
+            "completed_at": None,
+            "completion_line": "",
+        }
+
+        result = infra_update_health.render_auto_update_health(
+            5,
+            now=now,
+            config=config,
+            latest_run=latest_run,
+            latest_history={
+                "commandline": "",
+                "started_at": None,
+                "completed_at": None,
+            },
+            periodic_stamps={
+                "update": dt.datetime(2026, 3, 14, 13, 6, tzinfo=dt.UTC),
+                "update_success": dt.datetime(2026, 3, 14, 13, 5, tzinfo=dt.UTC),
+                "download_upgradeable": dt.datetime(2026, 3, 14, 13, 6, tzinfo=dt.UTC),
+                "unattended_upgrades": dt.datetime(2026, 3, 14, 6, 26, tzinfo=dt.UTC),
+                "upgrade": dt.datetime(2026, 3, 14, 6, 26, tzinfo=dt.UTC),
+            },
+            package_manager_processes=[],
+        )
+
+        self.assertIn(
+            "WARN: apt periodic stamps recorded fresh update discovery at 2026-03-14 13:06 UTC but no newer unattended-upgrades/upgrade completion stamp was written",
+            result,
+        )
+        self.assertIn("latest completion stamp: 2026-03-14 06:26 UTC", result)
+        self.assertIn("RISK: unattended-upgrades appears stalled; last start was 2026-03-14 13:06 UTC", result)
 
     def test_render_auto_update_health_flags_security_sensitive_kernel_updates(self) -> None:
         now = dt.datetime(2026, 3, 13, 2, 30, tzinfo=dt.UTC)
@@ -296,6 +413,13 @@ class InfraUpdateHealthTests(unittest.TestCase):
             now=now,
             config=config,
             latest_run=latest_run,
+            periodic_stamps={
+                "update": None,
+                "update_success": None,
+                "download_upgradeable": None,
+                "unattended_upgrades": None,
+                "upgrade": None,
+            },
             package_manager_processes=[],
         )
 

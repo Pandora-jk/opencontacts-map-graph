@@ -14,9 +14,11 @@ AUTO_UPGRADES_CONFIG = Path('/etc/apt/apt.conf.d/20auto-upgrades')
 UNATTENDED_UPGRADES_CONFIG = Path('/etc/apt/apt.conf.d/50unattended-upgrades')
 UNATTENDED_UPGRADES_LOG = Path('/var/log/unattended-upgrades/unattended-upgrades.log')
 APT_HISTORY_LOG = Path('/var/log/apt/history.log')
+APT_PERIODIC_DIR = Path('/var/lib/apt/periodic')
 REBOOT_REQUIRED = Path('/var/run/reboot-required')
 AUTO_UPDATE_STALE_AFTER = dt.timedelta(hours=18)
 AUTO_UPDATE_STALLED_AFTER = dt.timedelta(minutes=30)
+AUTO_UPDATE_PERIODIC_STAMP_SKEW = dt.timedelta(minutes=5)
 AUTO_UPGRADES_REQUIRED_KEYS = {
     'APT::Periodic::Update-Package-Lists': '1',
     'APT::Periodic::Unattended-Upgrade': '1',
@@ -32,6 +34,13 @@ _RUN_COMPLETE_PATTERNS = (
     'All upgrades installed',
     'No packages found that can be upgraded unattended and no pending auto-removals',
 )
+APT_PERIODIC_STAMP_FILES = {
+    'update': 'update-stamp',
+    'update_success': 'update-success-stamp',
+    'download_upgradeable': 'download-upgradeable-stamp',
+    'unattended_upgrades': 'unattended-upgrades-stamp',
+    'upgrade': 'upgrade-stamp',
+}
 PACKAGE_MANAGER_COMMAND = ['ps', '-eo', 'pid=,etimes=,comm=,args=']
 SECURITY_SENSITIVE_PACKAGE_GROUPS = (
     ('kernel', re.compile(r'^linux-(?:aws|base|headers|image|libc|modules|tools)\b')),
@@ -47,6 +56,13 @@ def _read_text(path: Path) -> str:
         return path.read_text(encoding='utf-8', errors='ignore')
     except OSError:
         return ''
+
+
+def _read_mtime(path: Path) -> dt.datetime | None:
+    try:
+        return dt.datetime.fromtimestamp(path.stat().st_mtime, tz=dt.UTC)
+    except OSError:
+        return None
 
 
 def parse_auto_upgrade_settings(text: str) -> dict[str, str]:
@@ -198,6 +214,13 @@ def load_latest_unattended_history_transaction(log_path: Path = APT_HISTORY_LOG)
     return latest
 
 
+def load_periodic_stamp_times(periodic_dir: Path = APT_PERIODIC_DIR) -> dict[str, object]:
+    stamps: dict[str, object] = {'periodic_dir': periodic_dir}
+    for key, filename in APT_PERIODIC_STAMP_FILES.items():
+        stamps[key] = _read_mtime(periodic_dir / filename)
+    return stamps
+
+
 def parse_upgradable_packages(package_lines: list[str]) -> list[str]:
     packages: list[str] = []
     for raw in package_lines:
@@ -307,6 +330,15 @@ def summarize_active_package_manager_processes(processes: list[dict[str, object]
     return 'INFO: package-manager activity: ' + '; '.join(parts)
 
 
+def _latest_timestamp(*timestamps: object) -> dt.datetime | None:
+    parsed = [value for value in timestamps if isinstance(value, dt.datetime)]
+    return max(parsed) if parsed else None
+
+
+def _format_timestamp(value: dt.datetime) -> str:
+    return value.strftime('%Y-%m-%d %H:%M UTC')
+
+
 def render_auto_update_health(
     pending_count: int,
     *,
@@ -314,15 +346,17 @@ def render_auto_update_health(
     config: dict[str, object] | None = None,
     latest_run: dict[str, object] | None = None,
     latest_history: dict[str, object] | None = None,
+    periodic_stamps: dict[str, object] | None = None,
     package_lines: list[str] | None = None,
     reboot_required: bool | None = None,
     reboot_required_path: Path = REBOOT_REQUIRED,
     package_manager_processes: list[dict[str, object]] | None = None,
 ) -> str:
     reference_now = now or dt.datetime.now(dt.UTC)
-    current_config = config or load_auto_update_config()
-    current_run = latest_run or load_latest_unattended_run()
-    current_history = latest_history or load_latest_unattended_history_transaction()
+    current_config = config if config is not None else load_auto_update_config()
+    current_run = latest_run if latest_run is not None else load_latest_unattended_run()
+    current_history = latest_history if latest_history is not None else load_latest_unattended_history_transaction()
+    current_periodic_stamps = periodic_stamps if periodic_stamps is not None else load_periodic_stamp_times()
     package_names = parse_upgradable_packages(package_lines or [])
     sensitive_packages = summarize_security_sensitive_packages(package_names)
     reboot_required_now = reboot_required if reboot_required is not None else reboot_required_path.exists()
@@ -358,6 +392,15 @@ def render_auto_update_health(
     history_started_at = current_history.get('started_at')
     history_completed_at = current_history.get('completed_at')
     history_commandline = str(current_history.get('commandline', '')).strip()
+    periodic_update_at = _latest_timestamp(
+        current_periodic_stamps.get('update'),
+        current_periodic_stamps.get('update_success'),
+        current_periodic_stamps.get('download_upgradeable'),
+    )
+    periodic_completion_at = _latest_timestamp(
+        current_periodic_stamps.get('unattended_upgrades'),
+        current_periodic_stamps.get('upgrade'),
+    )
     history_confirms_completion = (
         status == 'incomplete'
         and isinstance(started_at, dt.datetime)
@@ -365,17 +408,27 @@ def render_auto_update_health(
         and history_completed_at >= started_at
         and 'unattended-upgrade' in history_commandline
     )
+    periodic_confirms_completion = (
+        status == 'incomplete'
+        and isinstance(started_at, dt.datetime)
+        and isinstance(periodic_completion_at, dt.datetime)
+        and periodic_completion_at >= started_at
+    )
     if history_confirms_completion:
         completed_at = history_completed_at
         status = 'completed'
         completion_line = 'apt history recorded a completed unattended-upgrade transaction'
+    elif periodic_confirms_completion:
+        completed_at = periodic_completion_at
+        status = 'completed'
+        completion_line = 'apt periodic stamps recorded a newer unattended-upgrades/upgrade completion'
 
     if status == 'completed' and isinstance(completed_at, dt.datetime):
         age = reference_now - completed_at
         age_hours = max(0, int(age.total_seconds() // 3600))
         lines.append(
             'INFO: unattended-upgrades last completed at '
-            f'{completed_at.strftime("%Y-%m-%d %H:%M UTC")} ({age_hours}h ago): {completion_line}'
+            f'{_format_timestamp(completed_at)} ({age_hours}h ago): {completion_line}'
         )
     elif status == 'incomplete' and isinstance(started_at, dt.datetime):
         age = reference_now - started_at
@@ -390,13 +443,32 @@ def render_auto_update_health(
         )
         lines.append(
             f'{severity}: unattended-upgrades last started at '
-            f'{started_at.strftime("%Y-%m-%d %H:%M UTC")} ({age_hours}h ago) {suffix}'
+            f'{_format_timestamp(started_at)} ({age_hours}h ago) {suffix}'
         )
         lines.append(summarize_active_package_manager_processes(processes))
+        if (
+            pending_count > 0
+            and isinstance(periodic_update_at, dt.datetime)
+            and periodic_update_at >= started_at - AUTO_UPDATE_PERIODIC_STAMP_SKEW
+            and (
+                not isinstance(periodic_completion_at, dt.datetime)
+                or periodic_completion_at < started_at
+            )
+        ):
+            completion_desc = (
+                _format_timestamp(periodic_completion_at)
+                if isinstance(periodic_completion_at, dt.datetime)
+                else 'none recorded'
+            )
+            lines.append(
+                'WARN: apt periodic stamps recorded fresh update discovery at '
+                f'{_format_timestamp(periodic_update_at)} but no newer unattended-upgrades/upgrade completion '
+                f'stamp was written (latest completion stamp: {completion_desc})'
+            )
         if pending_count > 0 and not active_processes and age >= AUTO_UPDATE_STALLED_AFTER:
             lines.append(
                 'RISK: unattended-upgrades appears stalled; '
-                f'last start was {started_at.strftime("%Y-%m-%d %H:%M UTC")} and '
+                f'last start was {_format_timestamp(started_at)} and '
                 'no active package-manager process is visible'
             )
     else:

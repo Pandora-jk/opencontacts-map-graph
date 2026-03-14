@@ -41,17 +41,23 @@ Project scope: Android Contacts App with Material You dynamic colors, system the
   - status: ⏳ **READY TO START** - See OBTANIUM_READY_CHECKLIST.md
   - next_action: Create GitHub repo and generate signing key
 
-- [ ] **Verify Material You dynamic colors on device**
-  - branch: `feature/material-you-verification`
-  - tests: Android 12+ wallpaper colors, light/dark theme switching
-  - acceptance: colors adapt to system wallpaper and theme
-
 - [ ] **Fix test compilation errors**
   - branch: `bugfix/test-compilation-errors`
   - tests: all unit tests compile and pass
   - acceptance: ContactListItemTest, ContactMapViewModelTest, etc. compile successfully
 
 ## In Progress
+- [ ] **Verify Material You dynamic colors on device**
+  - branch: `feature/material-you-verification-report`
+  - status: verification helper shipped locally; on-device screenshot pass still pending
+  - implementation:
+    - compare the current theme snapshot against the previous app launch
+    - expose a copyable verification report for screenshots / bug reports
+  - verification:
+    - `git -C /tmp/material-you-verification-sprint diff --check`
+    - `java -cp '/opt/gradle/gradle-8.7/lib/*' org.jetbrains.kotlin.cli.jvm.K2JVMCompiler -no-stdlib -no-reflect -d /tmp/material-you-verification-tests -classpath '/opt/gradle/gradle-8.7/lib/junit-4.13.2.jar:/opt/gradle/gradle-8.7/lib/hamcrest-core-1.3.jar:/opt/gradle/gradle-8.7/lib/kotlin-stdlib-1.9.22.jar' /tmp/material-you-verification-sprint/apps/contacts/src/main/kotlin/com/opencontacts/androidecosystem/contacts/ThemeVerificationSummary.kt /tmp/material-you-verification-sprint/apps/contacts/src/test/kotlin/com/opencontacts/androidecosystem/contacts/ThemeVerificationSummaryTest.kt`
+    - `java -cp '/tmp/material-you-verification-tests:/opt/gradle/gradle-8.7/lib/junit-4.13.2.jar:/opt/gradle/gradle-8.7/lib/hamcrest-core-1.3.jar:/opt/gradle/gradle-8.7/lib/kotlin-stdlib-1.9.22.jar' org.junit.runner.JUnitCore com.opencontacts.androidecosystem.contacts.ThemeVerificationSummaryTest`
+
 - [x] **Enable Material You dynamic colors and system theme**
   - branch: `feature/material-you-dynamic-colors`
   - status: ✅ **COMPLETED** - APK built successfully
