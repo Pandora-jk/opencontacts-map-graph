@@ -1,9 +1,9 @@
 # Travel Status
 
-- Last run (UTC): 2026-03-13T22:20:18Z
-- Run count: 90
-- Active task: **Find surf schools:** Beginner-friendly in Byron Bay, Noosa (compare prices, availability).
+- Last run (UTC): 2026-03-13T23:59:05Z
+- Run count: 91
+- Active task: **Research dive operators:** Cairns certification courses (PADI Open Water ~3-4 days).
 - Task progress count: 12
-- Last artifact: departments/travel/artifacts/plans/20260313T222018Z-r90-find-surf-schools-beginner-friendly-in-byron-bay-noosa-c.md
+- Last artifact: departments/travel/artifacts/plans/20260313T235905Z-r91-research-dive-operators-cairns-certification-courses-pad.md
 - Autonomous open queue: 8
 
