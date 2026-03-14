@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-13T23:58:53Z
-- Run count: 351
-- Primary task: Verify email footer includes address + unsubscribe link
+- Last run (UTC): 2026-03-14T00:29:37Z
+- Run count: 353
+- Primary task: Confirm suppression list is operational
 - Primary task progress count: 23
-- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260313-r351.md
+- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260314-r353.md
 - Blocking items: 0
 - Autonomous queue items: 14
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Verify email footer includes address + unsubscribe link
+Confirm suppression list is operational
 
 ## Blocking
 - None
