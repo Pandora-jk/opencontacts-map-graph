@@ -299,3 +299,6 @@
 [2026-03-13 23:58:53 UTC] run=351 primary='Verify email footer includes address + unsubscribe link' artifact='departments/finance/artifacts/compliance/compliance-check-20260313-r351.md' blocking=0 queue=14
 [2026-03-14 00:28:43 UTC] run=352 primary='Test unsubscribe flow end-to-end' artifact='departments/finance/artifacts/compliance/compliance-check-20260314-r352.md' blocking=0 queue=14
 [2026-03-14 00:29:37 UTC] run=353 primary='Confirm suppression list is operational' artifact='departments/finance/artifacts/compliance/compliance-check-20260314-r353.md' blocking=0 queue=14
+[2026-03-14 01:06:05 UTC] run=354 primary='Document approved public B2B data sources' artifact='departments/finance/artifacts/compliance/compliance-check-20260314-r354.md' blocking=0 queue=14
+[2026-03-14 01:39:33 UTC] run=355 primary='Write the one-line sales promise for the core service offer' artifact='departments/finance/artifacts/offers/core-service-offer-20260314-r355.md' blocking=0 queue=14
+[2026-03-14 02:09:09 UTC] run=356 primary='Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md' artifact='departments/finance/artifacts/pipeline/founder-led-agencies-first-20-20260314-r356.csv' blocking=0 queue=14
