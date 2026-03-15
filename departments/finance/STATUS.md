@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-15T02:56:20Z
-- Run count: 411
-- Primary task: Write the one-line sales promise for the core service offer
-- Primary task progress count: 26
-- Last artifact: departments/finance/artifacts/offers/core-service-offer-20260315-r411.md
+- Last run (UTC): 2026-03-15T03:26:10Z
+- Run count: 412
+- Primary task: Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md
+- Primary task progress count: 27
+- Last artifact: departments/finance/artifacts/pipeline/founder-led-agencies-first-20-20260315-r412.csv
 - Blocking items: 0
 - Autonomous queue items: 14
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Write the one-line sales promise for the core service offer
+Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md
 
 ## Blocking
 - None
