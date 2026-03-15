@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-15T03:26:10Z
-- Run count: 412
-- Primary task: Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md
+- Last run (UTC): 2026-03-15T04:06:26Z
+- Run count: 413
+- Primary task: Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes
 - Primary task progress count: 27
-- Last artifact: departments/finance/artifacts/pipeline/founder-led-agencies-first-20-20260315-r412.csv
+- Last artifact: departments/finance/artifacts/pipeline/founder-led-agencies-first-20-20260315-r413.csv
 - Blocking items: 0
 - Autonomous queue items: 14
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Build the first 100-company target list for the chosen ICP, starting with a 20-company tranche that meets the hard filters in CORE-OFFER.md
+Extract company name, website, segment, decision-maker, title, work email or verified contact path, LinkedIn URL, and fit notes
 
 ## Blocking
 - None
