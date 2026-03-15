@@ -1,10 +1,10 @@
 # Finance Status
 
-- Last run (UTC): 2026-03-15T01:31:45Z
-- Run count: 408
-- Primary task: Test unsubscribe flow end-to-end
+- Last run (UTC): 2026-03-15T02:12:26Z
+- Run count: 409
+- Primary task: Confirm suppression list is operational
 - Primary task progress count: 27
-- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260315-r408.md
+- Last artifact: departments/finance/artifacts/compliance/compliance-check-20260315-r409.md
 - Blocking items: 0
 - Autonomous queue items: 14
 
@@ -15,7 +15,7 @@
 - Paused: crypto, data brokerage, generic products
 
 ## Next Action
-Test unsubscribe flow end-to-end
+Confirm suppression list is operational
 
 ## Blocking
 - None
